@@ -57,16 +57,20 @@ export function ProductCard({
   const [isAdding, setIsAdding] = useState(false);
 
   // Fetch active coupons matching this product's seller or global/sitewide coupons
+  // Filter out coupons whose minimum purchase requirement exceeds the product's price
   useEffect(() => {
     if (seller) {
       fetchAllActiveCouponsCached().then((allCoupons) => {
         const matched = allCoupons.filter(
-          (c: any) => c.is_active && (c.seller === seller || !c.seller)
+          (c: any) =>
+            c.is_active &&
+            (c.seller === seller || !c.seller) &&
+            parseFloat(c.min_purchase || "0") <= price
         );
         setAvailableCoupons(matched);
       });
     }
-  }, [seller]);
+  }, [seller, price]);
 
   // Parse tags for floating badges
   const badgeList = tags

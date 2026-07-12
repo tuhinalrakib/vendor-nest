@@ -16,6 +16,7 @@ export default function CartDrawer() {
     setIsCartOpen,
     updateCartQuantity,
     removeFromCart,
+    isLoading,
   } = useCart();
 
   const [couponInput, setCouponInput] = useState("");
@@ -191,7 +192,17 @@ export default function CartDrawer() {
         </div>
 
         {/* Cart Items List */}
-        <div className="flex-1 overflow-y-auto p-5 divide-y divide-zinc-100 min-h-0">
+        <div className="flex-1 overflow-y-auto p-5 divide-y divide-zinc-100 min-h-0 relative">
+          {/* Glassmorphic Loading Overlay */}
+          {isLoading && (
+            <div className="absolute inset-0 bg-white/70 backdrop-blur-[1.5px] flex items-center justify-center z-25 transition-all duration-200">
+              <div className="flex flex-col items-center gap-3">
+                <div className="w-8 h-8 border-3 border-indigo-650 border-t-transparent rounded-full animate-spin"></div>
+                <span className="text-[11px] font-bold text-zinc-650 tracking-wide uppercase font-sans">Updating Cart...</span>
+              </div>
+            </div>
+          )}
+
           {cartItems.length === 0 ? (
             <div className="h-full flex flex-col items-center justify-center text-center p-8">
               <div className="w-16 h-16 rounded-full bg-indigo-50 flex items-center justify-center text-indigo-600 mb-4">
@@ -206,7 +217,8 @@ export default function CartDrawer() {
                   setIsCartOpen(false);
                   router.push("/products");
                 }}
-                className="mt-5 h-9 px-6 rounded-full bg-indigo-600 text-white font-bold text-xs hover:bg-indigo-500 shadow-sm active:scale-95 transition-all cursor-pointer"
+                disabled={isLoading}
+                className="mt-5 h-9 px-6 rounded-full bg-indigo-600 text-white font-bold text-xs hover:bg-indigo-500 shadow-sm active:scale-95 transition-all cursor-pointer disabled:opacity-40"
               >
                 Start Shopping
               </button>
@@ -251,7 +263,7 @@ export default function CartDrawer() {
                       <button
                         onClick={() => updateCartQuantity(item.product_id, item.quantity - 1)}
                         className="w-6.5 h-6.5 flex items-center justify-center text-zinc-500 hover:bg-zinc-100 active:bg-zinc-200 transition-colors font-bold text-xs cursor-pointer disabled:opacity-40"
-                        disabled={item.quantity <= 1}
+                        disabled={item.quantity <= 1 || isLoading}
                       >
                         -
                       </button>
@@ -260,7 +272,8 @@ export default function CartDrawer() {
                       </span>
                       <button
                         onClick={() => updateCartQuantity(item.product_id, item.quantity + 1)}
-                        className="w-6.5 h-6.5 flex items-center justify-center text-zinc-500 hover:bg-zinc-100 active:bg-zinc-200 transition-colors font-bold text-xs cursor-pointer"
+                        className="w-6.5 h-6.5 flex items-center justify-center text-zinc-500 hover:bg-zinc-100 active:bg-zinc-200 transition-colors font-bold text-xs cursor-pointer disabled:opacity-40"
+                        disabled={isLoading}
                       >
                         +
                       </button>
@@ -268,7 +281,8 @@ export default function CartDrawer() {
 
                     <button
                       onClick={() => removeFromCart(item.product_id)}
-                      className="p-1 rounded-lg hover:bg-red-50 text-zinc-400 hover:text-red-500 transition-colors cursor-pointer"
+                      disabled={isLoading}
+                      className="p-1 rounded-lg hover:bg-red-50 text-zinc-400 hover:text-red-500 transition-colors cursor-pointer disabled:opacity-40"
                       aria-label="Remove item"
                     >
                       <TrashIcon className="w-4 h-4" />
@@ -383,13 +397,15 @@ export default function CartDrawer() {
                   setIsCartOpen(false);
                   router.push("/checkout");
                 }}
-                className="w-full h-10 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white hover:text-white font-bold text-xs transition-all active:scale-[0.98] shadow-md shadow-indigo-600/10 cursor-pointer flex items-center justify-center"
+                disabled={isLoading}
+                className="w-full h-10 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white hover:text-white font-bold text-xs transition-all active:scale-[0.98] shadow-md shadow-indigo-600/10 cursor-pointer flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Proceed to Checkout
               </button>
               <button
                 onClick={() => setIsCartOpen(false)}
-                className="w-full h-9 rounded-xl border border-zinc-200 bg-white hover:bg-zinc-50 text-zinc-650 font-bold text-[10px] transition-all cursor-pointer"
+                disabled={isLoading}
+                className="w-full h-9 rounded-xl border border-zinc-200 bg-white hover:bg-zinc-50 text-zinc-650 font-bold text-[10px] transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Continue Shopping
               </button>

@@ -24,11 +24,11 @@ function OrderSuccessContent() {
             </span>
           </div>
         );
-      case "shurjopay":
+      case "sslcommerz":
         return (
           <div className="bg-emerald-50/50 border border-emerald-250 p-4 rounded-xl text-center">
             <span className="text-xs font-bold text-emerald-800 leading-relaxed block">
-              📱 Payment successfully completed via <span className="font-extrabold">Shurjopay Mobile Wallet / Card</span>.
+              📱 Payment successfully completed via <span className="font-extrabold">SSLCommerz Sandbox Gateway</span>.
             </span>
           </div>
         );

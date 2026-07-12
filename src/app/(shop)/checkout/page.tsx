@@ -99,14 +99,6 @@ const SpinnerIcon = ({ className = "w-4 h-4" }: { className?: string }) => (
   </svg>
 );
 
-/* ─── Shurjopay Provider Branding ─── */
-const providerBranding: Record<string, { bg: string; activeBg: string; activeBorder: string; text: string; activeText: string; label: string }> = {
-  bkash: { bg: "bg-pink-50", activeBg: "bg-pink-600", activeBorder: "border-pink-600", text: "text-pink-700", activeText: "text-white", label: "bKash" },
-  nagad: { bg: "bg-orange-50", activeBg: "bg-orange-500", activeBorder: "border-orange-500", text: "text-orange-700", activeText: "text-white", label: "Nagad" },
-  rocket: { bg: "bg-purple-50", activeBg: "bg-purple-600", activeBorder: "border-purple-600", text: "text-purple-700", activeText: "text-white", label: "Rocket" },
-  card: { bg: "bg-sky-50", activeBg: "bg-sky-600", activeBorder: "border-sky-600", text: "text-sky-700", activeText: "text-white", label: "Card" },
-};
-
 /* ─── Checkout Stepper ─── */
 const steps = [
   { label: "Cart", icon: CartBagIcon },
@@ -126,8 +118,7 @@ export default function CheckoutPage() {
   const [zipCode, setZipCode] = useState("");
 
   // Payment states
-  const [paymentMethod, setPaymentMethod] = useState<"stripe" | "shurjopay" | "cod">("stripe");
-  const [shurjopayProvider, setShurjopayProvider] = useState<"bkash" | "nagad" | "rocket" | "card">("bkash");
+  const [paymentMethod, setPaymentMethod] = useState<"stripe" | "sslcommerz" | "cod">("stripe");
 
   // Stripe Card Inputs (Simulation)
   const [cardNumber, setCardNumber] = useState("");
@@ -228,7 +219,7 @@ export default function CheckoutPage() {
         if (paymentStatus === "cancel") {
           Swal.fire({
             title: "Payment Cancelled",
-            text: "Your Shurjopay transaction was cancelled. You can try checkout again.",
+            text: "Your SSLCommerz transaction was cancelled. You can try checkout again.",
             icon: "info",
             confirmButtonColor: "#4f46e5"
           });
@@ -285,14 +276,14 @@ export default function CheckoutPage() {
         // Redirect user to Stripe Checkout page (hosted by Stripe or sandbox callback)
         window.location.href = sessionRes.data.checkout_url;
 
-      } else if (paymentMethod === "shurjopay") {
-        // Initiate Shurjopay redirection
-        const spRes = await api.post("/api/payments/shurjopay/initiate/", {
+      } else if (paymentMethod === "sslcommerz") {
+        // Initiate SSLCommerz redirection
+        const sslRes = await api.post("/api/payments/sslcommerz/initiate/", {
           order_id: orderId,
         });
         
-        // Redirect user to the Shurjopay callback URL simulation
-        window.location.href = spRes.data.checkout_url;
+        // Redirect user to the SSLCommerz gateway URL
+        window.location.href = sslRes.data.checkout_url;
 
       } else {
         // Cash on Delivery
@@ -550,16 +541,16 @@ export default function CheckoutPage() {
                     <span className="text-[10px] font-semibold text-zinc-400">Visa, MasterCard, Amex</span>
                   </div>
 
-                  {/* Shurjopay Card */}
+                  {/* SSLCommerz Card */}
                   <div
-                    onClick={() => setPaymentMethod("shurjopay")}
+                    onClick={() => setPaymentMethod("sslcommerz")}
                     className={`relative border-2 rounded-xl p-4 cursor-pointer flex flex-col justify-between h-[100px] transition-all duration-200 group ${
-                      paymentMethod === "shurjopay"
+                      paymentMethod === "sslcommerz"
                         ? "border-indigo-500 bg-indigo-50/40 shadow-md shadow-indigo-500/10"
                         : "border-zinc-200 hover:border-zinc-300 hover:bg-zinc-50/50 hover:shadow-sm hover:-translate-y-0.5"
                     }`}
                   >
-                    {paymentMethod === "shurjopay" && (
+                    {paymentMethod === "sslcommerz" && (
                       <div className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-indigo-600 rounded-full flex items-center justify-center shadow-md">
                         <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
                           <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
@@ -568,13 +559,13 @@ export default function CheckoutPage() {
                     )}
                     <div className="flex items-center gap-2.5">
                       <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors ${
-                        paymentMethod === "shurjopay" ? "bg-indigo-100" : "bg-zinc-100 group-hover:bg-zinc-150"
+                        paymentMethod === "sslcommerz" ? "bg-indigo-100" : "bg-zinc-100 group-hover:bg-zinc-150"
                       }`}>
-                        <WalletIcon className={`w-4 h-4 ${paymentMethod === "shurjopay" ? "text-indigo-600" : "text-zinc-500"}`} />
+                        <WalletIcon className={`w-4 h-4 ${paymentMethod === "sslcommerz" ? "text-indigo-600" : "text-zinc-500"}`} />
                       </div>
-                      <span className="text-xs font-extrabold text-zinc-900">Shurjopay</span>
+                      <span className="text-xs font-extrabold text-zinc-900">SSLCommerz</span>
                     </div>
-                    <span className="text-[10px] font-semibold text-zinc-400">bKash, Nagad, Local Cards</span>
+                    <span className="text-[10px] font-semibold text-zinc-400">bKash, Nagad, Cards, Net Banking</span>
                   </div>
 
                   {/* Cash on Delivery Card */}
@@ -617,30 +608,14 @@ export default function CheckoutPage() {
                   </div>
                 )}
 
-                {paymentMethod === "shurjopay" && (
-                  <div className="bg-linear-to-r from-violet-50/50 to-pink-50/30 border border-violet-100 p-5 rounded-xl space-y-4 animate-in fade-in slide-in-from-top-2 duration-200">
+                {paymentMethod === "sslcommerz" && (
+                  <div className="bg-linear-to-r from-violet-50/50 to-pink-50/30 border border-violet-100 p-5 rounded-xl space-y-2 animate-in fade-in slide-in-from-top-2 duration-200">
                     <span className="text-[10px] font-extrabold text-zinc-500 uppercase tracking-widest block">
-                      Select Mobile Financial Service
+                      Pay securely with SSLCOMMERZ gateway
                     </span>
-                    <div className="grid grid-cols-4 gap-2.5">
-                      {(["bkash", "nagad", "rocket", "card"] as const).map((prov) => {
-                        const brand = providerBranding[prov];
-                        const isActive = shurjopayProvider === prov;
-                        return (
-                          <div
-                            key={prov}
-                            onClick={() => setShurjopayProvider(prov)}
-                            className={`h-11 border-2 rounded-xl flex items-center justify-center font-bold text-xs cursor-pointer transition-all duration-200 ${
-                              isActive
-                                ? `${brand.activeBg} ${brand.activeBorder} ${brand.activeText} shadow-md`
-                                : `${brand.bg} border-transparent ${brand.text} hover:border-zinc-200`
-                            }`}
-                          >
-                            {brand.label}
-                          </div>
-                        );
-                      })}
-                    </div>
+                    <p className="text-xs font-semibold text-zinc-650 leading-relaxed">
+                      You will be redirected to the <span className="font-bold text-zinc-900">SSLCOMMERZ Sandbox Gateway</span> where you can complete your payment using bKash, Nagad, Rocket, Visa, Mastercard, or Net Banking.
+                    </p>
                   </div>
                 )}
 
