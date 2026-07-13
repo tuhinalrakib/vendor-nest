@@ -172,21 +172,61 @@ export default function UserOrdersPage() {
                 {/* Items in order */}
                 <div className="p-5 sm:px-6 divide-y divide-zinc-100">
                   {order.items?.map((item) => (
-                    <div key={item.id} className="py-3.5 first:pt-0 last:pb-0 flex justify-between items-center gap-4 text-xs font-bold">
-                      <div className="space-y-0.5">
-                        <h4 className="text-zinc-850 text-xs font-extrabold">
-                          {productMap[item.product] || "General Catalog Product"}
-                        </h4>
-                        <span className="text-[10px] text-zinc-400 font-semibold">
-                          Price per unit: ${parseFloat(item.price).toFixed(2)}
-                        </span>
-                      </div>
+                    <div key={item.id} className="py-4 first:pt-0 last:pb-0 flex items-start gap-4 text-xs font-bold">
+                      <div className="space-y-1.5 flex-1">
+                        <div className="flex justify-between items-start gap-4">
+                          <div className="space-y-0.5 text-left">
+                            <h4 className="text-zinc-850 text-xs font-extrabold flex items-center gap-2">
+                              {productMap[item.product] || item.product_name || "General Catalog Product"}
+                              {(item as any).is_digital && (
+                                <span className="px-2 py-0.5 bg-blue-50 text-blue-700 text-[8px] rounded uppercase font-bold border border-blue-200">
+                                  Digital
+                                </span>
+                              )}
+                            </h4>
+                            <span className="text-[10px] text-zinc-400 font-semibold">
+                              Price per unit: ${parseFloat(item.price).toFixed(2)}
+                            </span>
+                          </div>
 
-                      <div className="flex items-center gap-6">
-                        <span className="text-zinc-500">Qty: {item.quantity}</span>
-                        <span className="text-zinc-950 font-extrabold min-w-16 text-right">
-                          ${(parseFloat(item.price) * item.quantity).toFixed(2)}
-                        </span>
+                          <div className="flex items-center gap-6 shrink-0">
+                            <span className="text-zinc-500">Qty: {item.quantity}</span>
+                            <span className="text-zinc-955 font-extrabold min-w-16 text-right">
+                              ${(parseFloat(item.price) * item.quantity).toFixed(2)}
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Digital Delivery Box */}
+                        {(item as any).is_digital && (order.status === "paid" || order.status === "delivered" || order.status === "cod_confirmed") && (
+                          <div className="mt-3 p-3.5 bg-zinc-50 border border-zinc-150 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-left">
+                            <div className="space-y-1">
+                              {(item as any).license_key ? (
+                                <div className="text-[10px] font-bold text-zinc-700">
+                                  🗝️ License Key: <span className="font-mono text-xs font-black text-indigo-700 bg-indigo-50 border border-indigo-150 px-2 py-0.5 rounded select-all tracking-wider">{(item as any).license_key}</span>
+                                </div>
+                              ) : (
+                                <div className="text-[9px] font-bold text-zinc-450">
+                                  🗝️ License Key: <span className="italic">Generating or not required</span>
+                                </div>
+                              )}
+                            </div>
+
+                            {(item as any).digital_file_url && (
+                              <a
+                                href={(item as any).digital_file_url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="h-8 px-4 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-[10px] font-extrabold flex items-center justify-center gap-1.5 cursor-pointer shadow-sm uppercase tracking-wider transition-colors shrink-0"
+                              >
+                                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                                  <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                                </svg>
+                                Download Product
+                              </a>
+                            )}
+                          </div>
+                        )}
                       </div>
                     </div>
                   ))}

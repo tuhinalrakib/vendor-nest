@@ -137,7 +137,6 @@ export default function LoginForm() {
         return;
       }
 
-      // Standard Login Flow
       Swal.fire({
         title: "Login Successful!",
         text: `Welcome back, ${result.full_name || (result.role === 'admin' ? 'Admin' : (result.role === 'seller' ? 'Seller' : 'User'))}!`,

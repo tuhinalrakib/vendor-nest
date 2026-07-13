@@ -135,7 +135,11 @@ export default function AdminProducts() {
         sellerShop: p.seller_shop || "Platform Direct (Admin)",
         price: parseFloat(p.price) || 0,
         stock: p.stock || 0,
-        status: "Approved" as ModerationProduct["status"],
+        status: p.approval_status === "approved" 
+          ? "Approved" 
+          : p.approval_status === "rejected" 
+            ? "Flagged" 
+            : "Pending Moderation" as ModerationProduct["status"],
         image: p.image || undefined,
         description: p.description || "",
         compareAtPrice: p.compare_at_price ? parseFloat(p.compare_at_price) : undefined,
@@ -360,27 +364,35 @@ export default function AdminProducts() {
     }
   };
 
-  const handleToggleStatus = (id: string, currentStatus: ModerationProduct["status"]) => {
-    const nextStatus = currentStatus === "Approved" ? "Flagged" : "Approved";
+  const handleToggleStatus = async (id: string, currentStatus: ModerationProduct["status"]) => {
+    const nextAction = currentStatus === "Approved" ? "reject" : "approve";
+    const actionLabel = nextAction === "reject" ? "Reject/Flag" : "Approve";
+    
     Swal.fire({
-      title: `${nextStatus} Product?`,
-      text: `Change product verification status to ${nextStatus}? (UI simulation)`,
+      title: `${actionLabel} Product?`,
+      text: `Are you sure you want to set this product listing to ${nextAction === "reject" ? "Rejected" : "Approved"}?`,
       icon: "warning",
       showCancelButton: true,
-      confirmButtonColor: nextStatus === "Flagged" ? "#ef4444" : "#10b981",
+      confirmButtonColor: nextAction === "reject" ? "#ef4444" : "#10b981",
       cancelButtonColor: "#6b7280",
-      confirmButtonText: `Yes, ${nextStatus}`,
-    }).then((result) => {
+      confirmButtonText: `Yes, ${actionLabel}`,
+    }).then(async (result) => {
       if (result.isConfirmed) {
-        setProducts((prev) =>
-          prev.map((p) => (p.id === id ? { ...p, status: nextStatus } : p))
-        );
-        Swal.fire({
-          title: "Status Changed",
-          text: `Product status is now set to ${nextStatus} locally.`,
-          icon: "success",
-          confirmButtonColor: "#4f46e5",
-        });
+        try {
+          Swal.fire({
+            title: 'Updating status...',
+            allowOutsideClick: false,
+            didOpen: () => { Swal.showLoading(); }
+          });
+          await api.post(`/api/products/${id}/${nextAction}/`);
+          Swal.close();
+          Swal.fire("Updated", `Product verification status is now set to ${nextAction === "reject" ? "Rejected" : "Approved"}.`, "success");
+          fetchProducts();
+        } catch (err) {
+          Swal.close();
+          console.error("Status toggle failed:", err);
+          Swal.fire("Error", "Could not update approval status.", "error");
+        }
       }
     });
   };

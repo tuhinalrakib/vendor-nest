@@ -289,18 +289,20 @@ export default function SellerSettings() {
 
               {/* Subdomain */}
               <div className="space-y-1.5">
-                <label htmlFor="subdomain" className="text-xs font-bold text-zinc-600">
+                <label htmlFor="subdomain" className="text-xs font-bold text-zinc-650">
                   Subdomain Namespace
                 </label>
-                <div className="flex rounded-xl bg-zinc-50 border border-zinc-200 overflow-hidden focus-within:border-indigo-650 focus-within:bg-white">
+                <div className="flex rounded-xl bg-zinc-50 border border-zinc-200 overflow-hidden focus-within:border-indigo-650 focus-within:bg-white disabled:bg-zinc-150">
                   <input
                     id="subdomain"
                     name="subdomain"
                     type="text"
                     value={storeInfo.subdomain}
                     onChange={handleInputChange}
-                    className="flex-1 h-11 px-4 bg-transparent outline-none text-sm font-semibold border-none"
+                    disabled={currentPlan === "starter"}
+                    className="flex-1 h-11 px-4 bg-transparent outline-none text-sm font-semibold border-none disabled:bg-zinc-100/60 disabled:text-zinc-400 disabled:cursor-not-allowed"
                     required
+                    title={currentPlan === "starter" ? "Custom subdomains require a Growth or Enterprise plan." : ""}
                   />
                   <span className="h-11 px-3 bg-zinc-100 flex items-center border-l border-zinc-200 text-xs font-bold text-zinc-400">
                     .vendornest.com
@@ -440,12 +442,11 @@ export default function SellerSettings() {
             </div>
           </div>
         </div>
-
         {/* Right Settings */}
         <div className="space-y-6">
-          {/* Subscription Plan Card */}
+          {/* Active Subscription Summary */}
           <div className="bg-white border border-zinc-200 rounded-2xl p-6 text-left space-y-5">
-            <h3 className="text-sm font-bold text-zinc-950">SaaS Plan Subscription</h3>
+            <h3 className="text-sm font-bold text-zinc-950">Subscription Summary</h3>
             <div className="p-4 bg-indigo-50/50 border border-indigo-100 rounded-xl space-y-2">
               <div className="flex justify-between text-xs font-bold text-indigo-900">
                 <span>Active Tier:</span>
@@ -457,26 +458,6 @@ export default function SellerSettings() {
                   {currentPlan === "starter" ? "5%" : currentPlan === "growth" ? "2%" : "0.5%"}
                 </span>
               </div>
-            </div>
-
-            {/* Upgrade Plan Selection */}
-            <div className="space-y-1.5">
-              <label htmlFor="planSelect" className="text-xs font-bold text-zinc-600">
-                Change Subscription Tier
-              </label>
-              <select
-                id="planSelect"
-                value={currentPlan}
-                onChange={(e) => {
-                  const nextPlan = e.target.value as "starter" | "growth" | "enterprise";
-                  setCurrentPlan(nextPlan);
-                }}
-                className="w-full h-11 px-4 bg-zinc-50 border border-zinc-200 focus:border-indigo-650 focus:bg-white rounded-xl text-sm font-semibold outline-none cursor-pointer"
-              >
-                <option value="starter">Starter Plan (Free - 15 products max)</option>
-                <option value="growth">Growth Plan ($29/mo - Unlimited)</option>
-                <option value="enterprise">Scale Enterprise Plan ($79/mo - Custom Domain)</option>
-              </select>
             </div>
           </div>
 
@@ -494,6 +475,318 @@ export default function SellerSettings() {
           </button>
         </div>
       </form>
+
+      {/* Subscription Plan Tier Cards (Premium View) */}
+      <div className="bg-white border border-zinc-200 rounded-3xl p-6 text-left space-y-6">
+        <div>
+          <h3 className="text-base font-extrabold text-zinc-950">Subscription Plan Tier</h3>
+          <p className="text-xs text-zinc-400 font-semibold mt-1">
+            Choose the subscription plan that fits your business scale. Commission rates are applied dynamically on checkout.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {/* Card 1: Starter */}
+          <div className={`rounded-2xl border p-5 space-y-5 flex flex-col justify-between transition-all ${
+            currentPlan === "starter" 
+              ? "bg-zinc-50/50 border-zinc-300 ring-2 ring-zinc-500/20" 
+              : "bg-white border-zinc-200 hover:border-zinc-300"
+          }`}>
+            <div className="space-y-4">
+              <div className="space-y-1">
+                <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Plan Option</span>
+                <h4 className="text-base font-black text-zinc-950">Starter</h4>
+                <p className="text-[10px] font-semibold text-zinc-450 leading-relaxed">
+                  Perfect for new merchants looking to list their first products.
+                </p>
+              </div>
+
+              <div className="space-y-1">
+                <div className="text-3xl font-black text-zinc-950">$0</div>
+                <span className="inline-block px-2.5 py-1 bg-emerald-50 border border-emerald-250 text-emerald-700 rounded-lg text-[10px] font-bold">
+                  5% platform commission
+                </span>
+              </div>
+
+              <div className="border-t border-zinc-100 pt-4 space-y-2 text-[10px] font-semibold text-zinc-500">
+                <div className="flex items-center gap-2">
+                  <span className="text-emerald-500 font-bold">✓</span>
+                  <span>Up to 15 Product Listings</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-emerald-500 font-bold">✓</span>
+                  <span>Basic Shop Customization</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-emerald-500 font-bold">✓</span>
+                  <span>Stripe Connect Integration</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-emerald-500 font-bold">✓</span>
+                  <span>Standard Email Support (24h)</span>
+                </div>
+                <div className="flex items-center gap-2 opacity-40 line-through">
+                  <span>✗</span>
+                  <span>Custom Subdomain (shop.vendornest.com)</span>
+                </div>
+                <div className="flex items-center gap-2 opacity-40 line-through">
+                  <span>✗</span>
+                  <span>Advanced Sales Analytics</span>
+                </div>
+                <div className="flex items-center gap-2 opacity-40 line-through">
+                  <span>✗</span>
+                  <span>AI Description & SEO Generator</span>
+                </div>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              disabled={currentPlan === "starter" || currentPlan === "enterprise"}
+              onClick={() => {
+                Swal.fire({
+                  title: "Switch to Starter?",
+                  text: "You can downgrade back to Starter plan if you have fewer than 15 products.",
+                  icon: "info",
+                  showCancelButton: true,
+                  confirmButtonColor: "#4f46e5",
+                  confirmButtonText: "Confirm Downgrade",
+                }).then(async (res) => {
+                  if (res.isConfirmed) {
+                    try {
+                      await api.put(API_ENDPOINTS.SELLER_PROFILE, {
+                        shop_name: storeInfo.storeName,
+                        subdomain: null, // Subdomain is cleared on Starter
+                        support_email: storeInfo.supportEmail || null,
+                        shop_description: storeInfo.storeDescription,
+                        tax_id: storeInfo.taxId,
+                        business_license: storeInfo.businessLicense || null,
+                        stripe_connected: isStripeConnected,
+                        stripe_account_id: stripeAccountId || null,
+                        plan: "starter"
+                      });
+                      setCurrentPlan("starter");
+                      setStoreInfo(prev => ({ ...prev, subdomain: "" }));
+                      Swal.fire("Plan Updated", "You are now on Starter plan.", "success");
+                    } catch (e: any) {
+                      Swal.fire("Error", e.response?.data?.detail || "Failed to switch plan.", "error");
+                    }
+                  }
+                });
+              }}
+              className={`w-full h-10 rounded-xl text-[10px] font-bold transition-all cursor-pointer border flex items-center justify-center ${
+                currentPlan === "starter"
+                  ? "bg-zinc-150 text-zinc-500 border-zinc-200 cursor-not-allowed font-extrabold"
+                  : currentPlan === "enterprise"
+                  ? "bg-zinc-100 text-zinc-400 border-zinc-200 cursor-not-allowed"
+                  : "bg-white border-zinc-200 hover:bg-zinc-50 text-zinc-800"
+              }`}
+            >
+              {currentPlan === "starter" ? "Active Plan" : "Start Selling Free"}
+            </button>
+          </div>
+
+          {/* Card 2: Growth */}
+          <div className={`rounded-2xl border p-5 space-y-5 flex flex-col justify-between transition-all relative ${
+            currentPlan === "growth" 
+              ? "bg-indigo-50/10 border-indigo-300 ring-2 ring-indigo-500/20" 
+              : "bg-white border-zinc-200 hover:border-zinc-300"
+          }`}>
+            <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-indigo-650 text-white text-[9px] font-extrabold uppercase px-3 py-1 rounded-full shadow-sm">
+              MOST POPULAR
+            </span>
+
+            <div className="space-y-4 pt-1">
+              <div className="space-y-1">
+                <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Plan Option</span>
+                <h4 className="text-base font-black text-indigo-950">Growth</h4>
+                <p className="text-[10px] font-semibold text-zinc-400 leading-relaxed">
+                  Designed for scaling sellers who want premium platform benefits.
+                </p>
+              </div>
+
+              <div className="space-y-1">
+                <div className="text-3xl font-black text-zinc-950">$24 <span className="text-[10px] font-bold text-zinc-400">/mo, billed annually</span></div>
+                <span className="inline-block px-2.5 py-1 bg-emerald-50 border border-emerald-250 text-emerald-700 rounded-lg text-[10px] font-bold">
+                  2% platform commission
+                </span>
+              </div>
+
+              <div className="border-t border-zinc-100 pt-4 space-y-2 text-[10px] font-semibold text-zinc-500">
+                <div className="flex items-center gap-2 text-indigo-900 font-bold">
+                  <span className="text-emerald-500">✓</span>
+                  <span>Unlimited Product Listings</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-emerald-500 font-bold">✓</span>
+                  <span>Advanced Shop Customization</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-emerald-500 font-bold">✓</span>
+                  <span>Stripe Connect Integration</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-emerald-500 font-bold">✓</span>
+                  <span>Priority Support (under 4h)</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-emerald-500 font-bold">✓</span>
+                  <span>Custom Subdomain (shop.vendornest.com)</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-emerald-500 font-bold">✓</span>
+                  <span>Advanced Sales Analytics</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-emerald-500 font-bold">✓</span>
+                  <span>50 AI Generator Credits / month</span>
+                </div>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              disabled={currentPlan === "growth" || currentPlan === "enterprise"}
+              onClick={() => {
+                Swal.fire({
+                  title: "Upgrade to Growth?",
+                  text: "Upgrade subscription to Growth plan ($24/month, billed annually)?",
+                  icon: "question",
+                  showCancelButton: true,
+                  confirmButtonColor: "#4f46e5",
+                  confirmButtonText: "Upgrade Now",
+                }).then(async (res) => {
+                  if (res.isConfirmed) {
+                    try {
+                      await api.put(API_ENDPOINTS.SELLER_PROFILE, {
+                        shop_name: storeInfo.storeName,
+                        subdomain: storeInfo.subdomain || `${storeInfo.storeName.toLowerCase().replace(/\s+/g, "-")}`,
+                        support_email: storeInfo.supportEmail || null,
+                        shop_description: storeInfo.storeDescription,
+                        tax_id: storeInfo.taxId,
+                        business_license: storeInfo.businessLicense || null,
+                        stripe_connected: isStripeConnected,
+                        stripe_account_id: stripeAccountId || null,
+                        plan: "growth"
+                      });
+                      setCurrentPlan("growth");
+                      Swal.fire("Upgraded!", "You are now on the Growth plan.", "success");
+                    } catch (e: any) {
+                      Swal.fire("Error", e.response?.data?.detail || "Failed to switch plan.", "error");
+                    }
+                  }
+                });
+              }}
+              className={`w-full h-10 rounded-xl text-[10px] font-bold transition-all cursor-pointer border flex items-center justify-center ${
+                currentPlan === "growth"
+                  ? "bg-zinc-150 text-zinc-500 border-zinc-200 cursor-not-allowed font-extrabold"
+                  : currentPlan === "enterprise"
+                  ? "bg-zinc-100 text-zinc-400 border-zinc-200 cursor-not-allowed opacity-50"
+                  : "bg-indigo-600 hover:bg-indigo-700 text-white border-indigo-650"
+              }`}
+            >
+              {currentPlan === "growth" ? "Active Plan" : currentPlan === "enterprise" ? "Downgrade Restricted" : "Upgrade to Growth"}
+            </button>
+          </div>
+
+          {/* Card 3: Scale Enterprise */}
+          <div className={`rounded-2xl border p-5 space-y-5 flex flex-col justify-between transition-all ${
+            currentPlan === "enterprise" 
+              ? "bg-zinc-950 border-zinc-800 ring-2 ring-zinc-700/20" 
+              : "bg-zinc-900 border-zinc-850 hover:bg-zinc-950"
+          }`}>
+            <div className="space-y-4 pt-1">
+              <div className="space-y-1">
+                <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider">Plan Option</span>
+                <h4 className="text-base font-black text-white">Scale Enterprise</h4>
+                <p className="text-[10px] font-semibold text-zinc-450 leading-relaxed">
+                  For high-volume merchants demanding ultimate performance.
+                </p>
+              </div>
+
+              <div className="space-y-1">
+                <div className="text-3xl font-black text-white">$65 <span className="text-[10px] font-bold text-zinc-500">/mo, billed annually</span></div>
+                <span className="inline-block px-2.5 py-1 bg-white/10 border border-white/5 text-emerald-400 rounded-lg text-[10px] font-bold">
+                  0.5% platform commission
+                </span>
+              </div>
+
+              <div className="border-t border-zinc-800 pt-4 space-y-2 text-[10px] font-semibold text-zinc-400">
+                <div className="flex items-center gap-2 text-zinc-100 font-bold">
+                  <span className="text-emerald-400">✓</span>
+                  <span>Unlimited Product Listings</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-emerald-400 font-bold">✓</span>
+                  <span>Full Custom Branding & CSS</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-emerald-400 font-bold">✓</span>
+                  <span>Stripe Connect + Custom Payouts</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-emerald-400 font-bold">✓</span>
+                  <span>Dedicated Success Manager</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-emerald-400 font-bold">✓</span>
+                  <span>Custom Domain Support (e.g. yourshop.com)</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-emerald-400 font-bold">✓</span>
+                  <span>Real-time Advanced Dashboard</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-emerald-400 font-bold">✓</span>
+                  <span>Unlimited AI Generator Credits</span>
+                </div>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              disabled={currentPlan === "enterprise"}
+              onClick={() => {
+                Swal.fire({
+                  title: "Upgrade to Enterprise?",
+                  text: "Confirm upgrade to Scale Enterprise ($65/month, billed annually)? Downgrade option will be locked.",
+                  icon: "question",
+                  showCancelButton: true,
+                  confirmButtonColor: "#10b981",
+                  confirmButtonText: "Upgrade Now",
+                }).then(async (res) => {
+                  if (res.isConfirmed) {
+                    try {
+                      await api.put(API_ENDPOINTS.SELLER_PROFILE, {
+                        shop_name: storeInfo.storeName,
+                        subdomain: storeInfo.subdomain || `${storeInfo.storeName.toLowerCase().replace(/\s+/g, "-")}`,
+                        support_email: storeInfo.supportEmail || null,
+                        shop_description: storeInfo.storeDescription,
+                        tax_id: storeInfo.taxId,
+                        business_license: storeInfo.businessLicense || null,
+                        stripe_connected: isStripeConnected,
+                        stripe_account_id: stripeAccountId || null,
+                        plan: "enterprise"
+                      });
+                      setCurrentPlan("enterprise");
+                      Swal.fire("Upgraded!", "You are now on the Scale Enterprise plan.", "success");
+                    } catch (e: any) {
+                      Swal.fire("Error", e.response?.data?.detail || "Failed to switch plan.", "error");
+                    }
+                  }
+                });
+              }}
+              className={`w-full h-10 rounded-xl text-[10px] font-bold transition-all cursor-pointer flex items-center justify-center border ${
+                currentPlan === "enterprise"
+                  ? "bg-zinc-800 text-zinc-400 border-zinc-700 cursor-not-allowed font-extrabold"
+                  : "bg-white text-zinc-950 hover:bg-zinc-50 border-white/10"
+              }`}
+            >
+              {currentPlan === "enterprise" ? "Active Plan" : "Upgrade to Enterprise"}
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

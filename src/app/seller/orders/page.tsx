@@ -5,6 +5,7 @@ import Table from "@/components/tables";
 import api from "@/lib/api";
 import Swal from "sweetalert2";
 import DynamicLoading from "@/components/dynamicLoading/DynamicLoading";
+import { useAuth } from "@/lib/AuthContext";
 
 interface OrderItem {
   name: string;
@@ -27,6 +28,7 @@ interface Order {
 }
 
 export default function SellerOrders() {
+  const { maintenanceMode } = useAuth();
   const [orders, setOrders] = useState<Order[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [activeFilter, setActiveFilter] = useState<"All" | "pending" | "cod_confirmed" | "paid" | "shipped" | "delivered" | "cancelled">("All");
@@ -98,6 +100,10 @@ export default function SellerOrders() {
 
   const handleSaveTracking = async () => {
     if (!selectedOrder) return;
+    if (maintenanceMode) {
+      Swal.fire("Maintenance Mode Active", "Cannot update orders during platform maintenance.", "warning");
+      return;
+    }
 
     setIsUpdating(true);
     try {
@@ -414,6 +420,19 @@ export default function SellerOrders() {
                   ))}
                 </div>
               </div>
+
+              {/* Maintenance Mode Alert inside Drawer */}
+              {maintenanceMode && (
+                <div className="p-4 bg-amber-50 border border-amber-200 text-amber-850 rounded-xl text-xs font-bold text-left flex items-start gap-2.5 animate-in fade-in slide-in-from-top-3 duration-250 mb-4">
+                  <span className="text-sm shrink-0">⚠️</span>
+                  <div>
+                    <div className="font-extrabold text-amber-900">Order Updates Disabled</div>
+                    <div className="font-semibold text-amber-750 mt-0.5 leading-relaxed">
+                      You cannot update shipment status or tracking details during platform maintenance. Write operations are temporarily locked.
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Total Footer */}
@@ -436,11 +455,13 @@ export default function SellerOrders() {
                 <button
                   type="button"
                   onClick={handleSaveTracking}
-                  disabled={isUpdating}
+                  disabled={isUpdating || maintenanceMode}
                   className="flex-1 h-11 bg-indigo-600 hover:bg-indigo-700 disabled:bg-zinc-300 text-white rounded-xl text-xs font-bold shadow-md shadow-indigo-500/10 flex items-center justify-center transition-all cursor-pointer"
                 >
                   {isUpdating ? (
                     <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  ) : maintenanceMode ? (
+                    "Locked"
                   ) : (
                     "Save Updates"
                   )}

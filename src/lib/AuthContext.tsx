@@ -36,6 +36,8 @@ interface AuthContextType {
   googleLogin: (credential: string, role?: string) => Promise<User>;
   refreshUser: () => Promise<void>;
   verifyAdminOtp: (temp_token: string, otp: string) => Promise<User>;
+  maintenanceMode: boolean;
+  fetchMaintenanceMode: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -43,6 +45,22 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [maintenanceMode, setMaintenanceMode] = useState(false);
+
+  const fetchMaintenanceMode = async () => {
+    try {
+      const response = await api.get("/api/dashboard/settings/");
+      setMaintenanceMode(response.data.maintenance_mode || false);
+    } catch (e) {
+      console.error("Failed to fetch maintenance mode settings:", e);
+    }
+  };
+
+  useEffect(() => {
+    fetchMaintenanceMode();
+    const interval = setInterval(fetchMaintenanceMode, 30000);
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     const initializeAuth = async () => {
@@ -217,7 +235,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <AuthContext.Provider
-      value={{ user, isAuthenticated: !!user, isLoading, login, register, logout, googleLogin, refreshUser, verifyAdminOtp }}
+      value={{ user, isAuthenticated: !!user, isLoading, login, register, logout, googleLogin, refreshUser, verifyAdminOtp, maintenanceMode, fetchMaintenanceMode }}
     >
       {children}
     </AuthContext.Provider>

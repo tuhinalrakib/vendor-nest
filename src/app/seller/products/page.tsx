@@ -9,6 +9,7 @@ import api from "@/lib/api";
 import Loading from "@/app/loading";
 import { uploadImageToCloudinary } from "@/lib/cloudinary";
 import DynamicLoading from "@/components/dynamicLoading/DynamicLoading";
+import { useAuth } from "@/lib/AuthContext";
 
 interface Product {
   id: string;
@@ -31,10 +32,33 @@ interface Product {
 
 export default function SellerProducts() {
   const router = useRouter();
+  const { maintenanceMode, user } = useAuth();
+  const plan = user?.seller_profile?.plan || "starter";
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<"All" | "Active" | "Out of Stock" | "Draft">("All");
+
+  const handleAddProductClick = () => {
+    if (plan === "starter" && products.length >= 15) {
+      Swal.fire({
+        title: "Product Limit Reached",
+        text: "You have reached the maximum limit of 15 products allowed on the Starter plan. Please upgrade to Growth or Scale Enterprise to add more products.",
+        icon: "warning",
+        confirmButtonText: "Upgrade Subscription Plan",
+        showCancelButton: true,
+        cancelButtonText: "Close",
+        confirmButtonColor: "#4f46e5",
+        cancelButtonColor: "#6b7280",
+      }).then((result) => {
+        if (result.isConfirmed) {
+          router.push("/seller/settings");
+        }
+      });
+      return;
+    }
+    router.push("/seller/add-product");
+  };
 
   // Edit Product Modal state
   const [showEditModal, setShowEditModal] = useState(false);
@@ -42,6 +66,11 @@ export default function SellerProducts() {
   const [categories, setCategories] = useState<{ id: string; name: string }[]>([]);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
+
+  // Version Control History Modal state
+  const [showHistoryModal, setShowHistoryModal] = useState(false);
+  const [historyLogs, setHistoryLogs] = useState<any[]>([]);
+  const [historyProduct, setHistoryProduct] = useState<Product | null>(null);
   
   const [editProductForm, setEditProductForm] = useState({
     name: "",
@@ -56,6 +85,12 @@ export default function SellerProducts() {
     seoTitle: "",
     seoDescription: "",
     tags: "",
+    is_digital: false,
+    digital_file_url: "",
+    license_keys: "",
+    publish_at: "",
+    name_bn: "",
+    description_bn: "",
   });
 
   const [isGeneratingDesc, setIsGeneratingDesc] = useState(false);
@@ -92,6 +127,13 @@ export default function SellerProducts() {
         seoTitle: p.seo_title || "",
         seoDescription: p.seo_description || "",
         tags: p.tags || "",
+        is_digital: p.is_digital || false,
+        digital_file_url: p.digital_file_url || "",
+        license_keys: p.license_keys || "",
+        publish_at: p.publish_at || "",
+        name_bn: p.name_bn || "",
+        description_bn: p.description_bn || "",
+        approval_status: p.approval_status || "approved",
       }));
       setProducts(mappedProducts);
     } catch (err: any) {
@@ -104,6 +146,90 @@ export default function SellerProducts() {
       });
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleExportCSV = async () => {
+    try {
+      Swal.fire({
+        title: 'Exporting Catalog...',
+        text: 'Generating CSV file...',
+        allowOutsideClick: false,
+        didOpen: () => { Swal.showLoading(); }
+      });
+      const response = await api.get("/api/products/bulk-export/", {
+        responseType: 'blob'
+      });
+      Swal.close();
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', 'vendornest_products_export.csv');
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch (err) {
+      Swal.close();
+      console.error("CSV Export failed:", err);
+      Swal.fire("Export Failed", "Could not export products to CSV.", "error");
+    }
+  };
+
+  const handleImportCSV = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      const formData = new FormData();
+      formData.append("file", file);
+      
+      Swal.fire({
+        title: 'Importing Products...',
+        text: 'Parsing CSV details...',
+        allowOutsideClick: false,
+        didOpen: () => {
+          Swal.showLoading();
+        }
+      });
+      
+      try {
+        const res = await api.post("/api/products/bulk-import/", formData, {
+          headers: {
+            "Content-Type": "multipart/form-data"
+          }
+        });
+        Swal.close();
+        if (res.data.errors && res.data.errors.length > 0) {
+          Swal.fire({
+            title: "Import Finished with Warnings",
+            html: `<div class="text-left"><p>Successfully created <strong>${res.data.created}</strong> products.</p><p>Skipped <strong>${res.data.skipped}</strong> rows due to errors:</p><pre class="bg-zinc-50 p-2 text-xs text-red-500 rounded border mt-2 max-h-32 overflow-y-auto">${res.data.errors.join('\n')}</pre></div>`,
+            icon: "warning"
+          });
+        } else {
+          Swal.fire("Import Complete", `Successfully imported ${res.data.created} products.`, "success");
+        }
+        fetchData();
+      } catch (err) {
+        Swal.close();
+        console.error("CSV Import failed:", err);
+        Swal.fire("Import Failed", "Ensure your CSV format matches required header fields.", "error");
+      }
+    }
+  };
+
+  const handleViewHistory = async (product: Product) => {
+    setHistoryProduct(product);
+    try {
+      Swal.fire({
+        title: 'Loading History Logs...',
+        allowOutsideClick: false,
+        didOpen: () => { Swal.showLoading(); }
+      });
+      const res = await api.get(`/api/products/${product.id}/versions/`);
+      setHistoryLogs(res.data);
+      Swal.close();
+      setShowHistoryModal(true);
+    } catch (err) {
+      Swal.close();
+      Swal.fire("Error", "Could not fetch version control log.", "error");
     }
   };
 
@@ -259,6 +385,12 @@ export default function SellerProducts() {
       seoTitle: product.seoTitle || "",
       seoDescription: product.seoDescription || "",
       tags: product.tags || "",
+      is_digital: (product as any).is_digital || false,
+      digital_file_url: (product as any).digital_file_url || "",
+      license_keys: (product as any).license_keys || "",
+      publish_at: (product as any).publish_at ? (product as any).publish_at.substring(0, 16) : "",
+      name_bn: (product as any).name_bn || "",
+      description_bn: (product as any).description_bn || "",
     });
     setImagePreview(product.image || null);
     setImageFile(null);
@@ -296,6 +428,17 @@ export default function SellerProducts() {
       if (editProductForm.sizes) data.append("sizes", editProductForm.sizes);
       if (editProductForm.seoTitle) data.append("seo_title", editProductForm.seoTitle);
       if (editProductForm.seoDescription) data.append("seo_description", editProductForm.seoDescription);
+      
+      data.append("is_digital", editProductForm.is_digital ? "true" : "false");
+      data.append("digital_file_url", editProductForm.digital_file_url || "");
+      data.append("license_keys", editProductForm.license_keys || "");
+      if (editProductForm.publish_at) {
+        data.append("publish_at", new Date(editProductForm.publish_at).toISOString());
+      } else {
+        data.append("publish_at", "");
+      }
+      data.append("name_bn", editProductForm.name_bn || "");
+      data.append("description_bn", editProductForm.description_bn || "");
       if (imageUrl) {
         data.append("image", imageUrl);
       } else if (imagePreview) {
@@ -344,6 +487,10 @@ export default function SellerProducts() {
   };
 
   const handleDelete = (id: string) => {
+    if (maintenanceMode) {
+      Swal.fire("Maintenance Mode Active", "Cannot delete products during platform maintenance.", "warning");
+      return;
+    }
     Swal.fire({
       title: "Delete Product?",
       text: "Are you sure you want to delete this product from your catalogue?",
@@ -456,6 +603,15 @@ export default function SellerProducts() {
       render: (product: Product) => (
         <div className="flex items-center gap-2">
           <button
+            onClick={() => handleViewHistory(product)}
+            className="p-1.5 hover:bg-indigo-50 rounded-lg text-zinc-450 hover:text-indigo-600 transition-colors cursor-pointer"
+            title="View Edit History"
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </button>
+          <button
             onClick={() => handleEdit(product)}
             className="p-1.5 hover:bg-zinc-100 rounded-lg text-zinc-500 hover:text-zinc-955 transition-colors cursor-pointer"
             title="Edit Product"
@@ -464,8 +620,9 @@ export default function SellerProducts() {
           </button>
           <button
             onClick={() => handleDelete(product.id)}
-            className="p-1.5 hover:bg-red-50 rounded-lg text-zinc-450 hover:text-red-655 transition-colors cursor-pointer"
-            title="Delete Product"
+            disabled={maintenanceMode}
+            className="p-1.5 hover:bg-red-50 rounded-lg text-zinc-450 hover:text-red-655 transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+            title={maintenanceMode ? "Delete Disabled (Maintenance)" : "Delete Product"}
           >
             <TrashIcon className="w-4 h-4" />
           </button>
@@ -481,18 +638,41 @@ export default function SellerProducts() {
       {/* Title Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="text-left">
-          <h1 className="text-2xl font-extrabold tracking-tight text-zinc-950">Store Products</h1>
+          <h1 className="text-2xl font-extrabold tracking-tight text-zinc-955">Store Products</h1>
           <p className="text-xs font-semibold text-zinc-400 mt-1">
             Displaying all items currently configured on your storefront catalog.
           </p>
         </div>
-        <button
-          onClick={() => router.push("/seller/add-product")}
-          className="h-11 px-5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow-md shadow-indigo-500/10 flex items-center justify-center gap-2 transition-all duration-200 cursor-pointer"
-        >
-          <AddIcon className="w-4.5 h-4.5" />
-          Add Product
-        </button>
+        <div className="flex flex-wrap items-center gap-2">
+          {/* CSV Import Trigger */}
+          <label className={`h-11 px-4 border border-zinc-200 bg-white text-zinc-700 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer shadow-xs select-none ${maintenanceMode ? "opacity-50 pointer-events-none" : "hover:bg-zinc-50"}`}>
+            <svg className="w-4 h-4 text-zinc-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+            </svg>
+            Import CSV
+            <input type="file" accept=".csv" onChange={handleImportCSV} className="hidden" disabled={maintenanceMode} />
+          </label>
+
+          {/* CSV Export Trigger */}
+          <button
+            onClick={handleExportCSV}
+            className="h-11 px-4 border border-zinc-200 bg-white hover:bg-zinc-50 text-zinc-700 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer shadow-xs"
+          >
+            <svg className="w-4 h-4 text-zinc-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+            </svg>
+            Export CSV
+          </button>
+
+          <button
+            onClick={handleAddProductClick}
+            disabled={maintenanceMode}
+            className="h-11 px-5 bg-indigo-600 hover:bg-indigo-700 disabled:bg-zinc-300 disabled:text-zinc-500 disabled:cursor-not-allowed text-white rounded-xl text-xs font-bold shadow-md shadow-indigo-500/10 flex items-center justify-center gap-2 transition-all duration-200 cursor-pointer"
+          >
+            <AddIcon className="w-4.5 h-4.5" />
+            Add Product
+          </button>
+        </div>
       </div>
 
       {/* Filtering Actions */}
@@ -825,6 +1005,117 @@ export default function SellerProducts() {
                 </div>
               </div>
 
+              {/* Extra Enterprise Options */}
+              <div className="border-t border-zinc-100 pt-4 space-y-4">
+                <h4 className="text-xs font-bold text-zinc-950 uppercase tracking-wider text-left">Digital & Translation Settings</h4>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* Digital Toggle */}
+                  <div className="space-y-1.5 flex flex-col justify-center">
+                    <label className="flex items-center gap-2.5 text-xs font-bold text-zinc-700 cursor-pointer select-none">
+                      <input
+                        type="checkbox"
+                        checked={editProductForm.is_digital}
+                        onChange={(e) => setEditProductForm((prev) => ({ ...prev, is_digital: e.target.checked }))}
+                        className="w-4.5 h-4.5 rounded border-zinc-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+                      />
+                      Is Digital Product
+                    </label>
+                  </div>
+
+                  {/* Scheduled Publish */}
+                  <div className="space-y-1.5">
+                    <label htmlFor="edit_publish_at" className="text-xs font-bold text-zinc-500">
+                      Scheduled Publishing
+                    </label>
+                    <input
+                      id="edit_publish_at"
+                      type="datetime-local"
+                      value={editProductForm.publish_at}
+                      onChange={(e) => setEditProductForm((prev) => ({ ...prev, publish_at: e.target.value }))}
+                      className="w-full h-11 px-4 bg-zinc-50 border border-zinc-200 focus:border-indigo-650 focus:bg-white rounded-xl text-sm font-semibold outline-none transition-all cursor-pointer"
+                    />
+                  </div>
+                </div>
+
+                {editProductForm.is_digital && (
+                  <div className="space-y-4 pt-2 border-t border-zinc-100 animate-in fade-in duration-200">
+                    <div className="space-y-1.5">
+                      <label htmlFor="edit_digital_file_url" className="text-xs font-bold text-zinc-500">
+                        Digital Product URL
+                      </label>
+                      <input
+                        id="edit_digital_file_url"
+                        type="url"
+                        placeholder="https://example.com/file.zip"
+                        value={editProductForm.digital_file_url}
+                        onChange={(e) => setEditProductForm((prev) => ({ ...prev, digital_file_url: e.target.value }))}
+                        className="w-full h-11 px-4 bg-zinc-50 border border-zinc-200 focus:border-indigo-650 focus:bg-white rounded-xl text-sm font-semibold outline-none"
+                      />
+                    </div>
+                    
+                    <div className="space-y-1.5">
+                      <label htmlFor="edit_license_keys" className="text-xs font-bold text-zinc-500">
+                        Pre-generated License Keys (One per line)
+                      </label>
+                      <textarea
+                        id="edit_license_keys"
+                        rows={3}
+                        placeholder="LIC-XXXX-XXXX"
+                        value={editProductForm.license_keys}
+                        onChange={(e) => setEditProductForm((prev) => ({ ...prev, license_keys: e.target.value }))}
+                        className="w-full p-4 bg-zinc-50 border border-zinc-200 focus:border-indigo-650 focus:bg-white rounded-xl text-sm font-semibold outline-none resize-none"
+                      />
+                    </div>
+                  </div>
+                )}
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+                  {/* Bengali Title */}
+                  <div className="space-y-1.5">
+                    <label htmlFor="edit_name_bn" className="text-xs font-bold text-zinc-500">
+                      Product Title (Bengali)
+                    </label>
+                    <input
+                      id="edit_name_bn"
+                      type="text"
+                      placeholder="বাংলা টাইটেল"
+                      value={editProductForm.name_bn}
+                      onChange={(e) => setEditProductForm((prev) => ({ ...prev, name_bn: e.target.value }))}
+                      className="w-full h-11 px-4 bg-zinc-50 border border-zinc-200 focus:border-indigo-650 focus:bg-white rounded-xl text-sm font-semibold outline-none"
+                    />
+                  </div>
+
+                  {/* Bengali Description */}
+                  <div className="space-y-1.5">
+                    <label htmlFor="edit_description_bn" className="text-xs font-bold text-zinc-500">
+                      Product Description (Bengali)
+                    </label>
+                    <textarea
+                      id="edit_description_bn"
+                      rows={2}
+                      placeholder="বাংলা বিবরণ"
+                      value={editProductForm.description_bn}
+                      onChange={(e) => setEditProductForm((prev) => ({ ...prev, description_bn: e.target.value }))}
+                      className="w-full px-4 py-2 bg-zinc-50 border border-zinc-200 focus:border-indigo-650 focus:bg-white rounded-xl text-sm font-semibold outline-none resize-none"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Maintenance Mode Alert inside Edit Modal */}
+              {maintenanceMode && (
+                <div className="p-4 bg-amber-50 border border-amber-200 text-amber-850 rounded-xl text-xs font-bold text-left flex items-start gap-2.5 animate-in fade-in slide-in-from-top-3 duration-250 mt-6">
+                  <span className="text-sm shrink-0">⚠️</span>
+                  <div>
+                    <div className="font-extrabold text-amber-900">Product Updates Disabled</div>
+                    <div className="font-semibold text-amber-750 mt-0.5 leading-relaxed">
+                      You cannot update product details during platform maintenance. Write operations are temporarily locked.
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {/* Actions Footer */}
               <div className="flex justify-end gap-3 border-t border-zinc-100 pt-5 mt-6">
                 <button
@@ -837,13 +1128,91 @@ export default function SellerProducts() {
                 </button>
                 <button
                   type="submit"
-                  disabled={isSubmitting}
+                  disabled={isSubmitting || maintenanceMode}
                   className="px-6 h-11 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition-colors disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer shadow-md shadow-indigo-600/10"
                 >
-                  {isSubmitting ? "Saving Changes..." : "Save Product Details"}
+                  {isSubmitting ? "Saving Changes..." : maintenanceMode ? "Locked (Maintenance Mode)" : "Save Product Details"}
                 </button>
               </div>
             </form>
+          </div>
+        </>
+      )}
+
+      {/* Version History Modal */}
+      {showHistoryModal && (
+        <>
+          <div
+            onClick={() => setShowHistoryModal(false)}
+            className="fixed inset-0 bg-black/40 backdrop-blur-xs z-40 transition-opacity"
+          />
+
+          <div className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-xl bg-white border border-zinc-200 rounded-3xl p-6 shadow-2xl z-50 animate-in zoom-in-95 duration-200 max-h-[80vh] overflow-y-auto">
+            <div className="flex items-center justify-between border-b border-zinc-100 pb-4 mb-5">
+              <div className="text-left">
+                <h3 className="text-base font-extrabold text-zinc-955">
+                  Product Version History
+                </h3>
+                <span className="text-[10px] font-bold text-zinc-400">
+                  Logs for "{historyProduct?.name}"
+                </span>
+              </div>
+              <button
+                onClick={() => setShowHistoryModal(false)}
+                className="p-1 hover:bg-zinc-50 rounded-lg text-zinc-400 hover:text-zinc-700 transition-colors cursor-pointer"
+              >
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            {historyLogs.length === 0 ? (
+              <div className="text-center py-8">
+                <p className="text-xs font-semibold text-zinc-550">No edit history recorded for this product.</p>
+              </div>
+            ) : (
+              <div className="space-y-4 text-left">
+                {historyLogs.map((log: any) => (
+                  <div key={log.id} className="p-4 bg-zinc-50 rounded-2xl border border-zinc-150 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="px-2.5 py-0.5 bg-indigo-50 text-indigo-700 rounded-full text-[10px] font-extrabold border border-indigo-100">
+                        Version {log.version_number}
+                      </span>
+                      <span className="text-[10px] font-bold text-zinc-400">{log.created_at}</span>
+                    </div>
+                    <div className="text-xs font-bold text-zinc-700">
+                      Modified by: <span className="text-zinc-955">{log.changed_by_name || "System/Merchant"}</span>
+                    </div>
+                    <div className="pt-2 border-t border-zinc-200/50 space-y-1.5">
+                      {Object.keys(log.changes).map((field) => (
+                        <div key={field} className="text-[11px] font-semibold text-zinc-650 flex flex-wrap gap-1 items-center">
+                          <span className="px-1.5 py-0.5 bg-zinc-200 text-zinc-700 rounded text-[9px] uppercase font-bold font-mono">
+                            {field.replace('_', ' ')}
+                          </span>
+                          <span className="line-through text-red-500 font-medium">
+                            "{log.changes[field].old !== null ? String(log.changes[field].old) : 'None'}"
+                          </span>
+                          <span className="text-zinc-400">➔</span>
+                          <span className="text-emerald-600 font-extrabold">
+                            "{log.changes[field].new !== null ? String(log.changes[field].new) : 'None'}"
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+            
+            <div className="flex justify-end pt-4 mt-6 border-t border-zinc-100">
+              <button
+                onClick={() => setShowHistoryModal(false)}
+                className="px-5 h-10 bg-zinc-900 hover:bg-zinc-950 text-white rounded-xl text-xs font-bold transition-all cursor-pointer"
+              >
+                Close History
+              </button>
+            </div>
           </div>
         </>
       )}

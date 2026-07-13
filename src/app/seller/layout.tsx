@@ -22,7 +22,7 @@ import {
 } from "@/components/icons";
 
 export default function SellerLayout({ children }: { children: React.ReactNode }) {
-  const { user, isAuthenticated, isLoading, logout, refreshUser } = useAuth();
+  const { user, isAuthenticated, isLoading, logout, refreshUser, maintenanceMode } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
   const [storeStatus, setStoreStatus] = useState<"active" | "maintenance">("active");
@@ -47,12 +47,18 @@ export default function SellerLayout({ children }: { children: React.ReactNode }
     }
   }, [user]);
 
-  const handleMarkRead = async (id: string, type: string) => {
+  const handleMarkRead = async (id: string, type: string, title?: string) => {
     try {
       await api.post(`/api/notifications/${id}/mark-read/`);
       setNotifications((prev) =>
         prev.map((n) => (n.id === id ? { ...n, is_read: true } : n))
       );
+      
+      if (title === "New Order Received") {
+        router.push("/seller/orders");
+      } else if (title === "Withdrawal Successful" || title === "Withdrawal Failed") {
+        router.push("/seller/dashboard");
+      }
       
       if (type === "general" || type === "seller_application") {
         if (refreshUser) {
@@ -248,7 +254,7 @@ export default function SellerLayout({ children }: { children: React.ReactNode }
                         notifications.map((n) => (
                           <div
                             key={n.id}
-                            onClick={() => handleMarkRead(n.id, n.notification_type)}
+                            onClick={() => handleMarkRead(n.id, n.notification_type, n.title)}
                             className={`p-2.5 rounded-xl border transition-all cursor-pointer text-left ${
                               n.is_read
                                 ? "bg-white border-zinc-100 hover:bg-zinc-50"
@@ -345,6 +351,23 @@ export default function SellerLayout({ children }: { children: React.ReactNode }
 
         {/* Dynamic page contents */}
         <main className="flex-1 p-8 overflow-y-auto max-w-7xl mx-auto w-full space-y-6">
+          {maintenanceMode && (
+            <div className="bg-amber-500 text-white p-5 rounded-2xl shadow-md flex items-start gap-4 animate-in slide-in-from-top-4 duration-500">
+              <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center shrink-0 border border-white/10 shadow-xs animate-pulse">
+                <span className="text-lg">🚧</span>
+              </div>
+              <div className="text-left">
+                <h5 className="text-sm font-extrabold text-white tracking-tight flex items-center gap-2">
+                  Platform Operations Under Scheduled Maintenance
+                </h5>
+                <p className="text-xs font-semibold text-white/90 mt-1 leading-relaxed max-w-3xl">
+                  Platform settings have been set to <span className="font-bold text-white">Read-Only Mode</span> by the administrator. 
+                  Product catalog updates, order tracking processing, coupon configurations, and payouts are temporarily paused. 
+                  All live storefront pages remain active for customer browsing.
+                </p>
+              </div>
+            </div>
+          )}
           {user.seller_profile && user.seller_profile.status !== "approved" && (
             <div className="bg-amber-50 border-l-4 border-amber-500 p-4 rounded-r-xl shadow-xs animate-in slide-in-from-top duration-300">
               <div className="flex items-start gap-3">

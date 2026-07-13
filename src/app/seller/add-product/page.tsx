@@ -7,9 +7,11 @@ import Swal from "sweetalert2";
 import api from "@/lib/api";
 import { API_ENDPOINTS } from "@/constants/apiEnds";
 import { uploadImageToCloudinary } from "@/lib/cloudinary";
+import { useAuth } from "@/lib/AuthContext";
 
 export default function SellerAddProduct() {
   const router = useRouter();
+  const { maintenanceMode } = useAuth();
   const [formData, setFormData] = useState({
     name: "",
     sku: "",
@@ -23,6 +25,12 @@ export default function SellerAddProduct() {
     tags: "",
     color: "",
     sizes: "",
+    is_digital: false,
+    digital_file_url: "",
+    license_keys: "",
+    publish_at: "",
+    name_bn: "",
+    description_bn: "",
   });
 
   const [storeName, setStoreName] = useState("Loading...");
@@ -56,6 +64,35 @@ export default function SellerAddProduct() {
                   router.push("/seller/settings");
                 }
               });
+              return;
+            }
+          }
+
+          // Plan limits enforcement: Starter max 15 products
+          if (data.plan === "starter") {
+            try {
+              const productsResponse = await api.get("/api/products/");
+              const productCount = productsResponse.data.length;
+              if (productCount >= 15) {
+                Swal.fire({
+                  title: "Product Limit Reached",
+                  text: "You have reached the maximum limit of 15 products allowed on the Starter plan. Please upgrade to Growth or Scale Enterprise to add more products.",
+                  icon: "warning",
+                  confirmButtonText: "Upgrade Subscription Plan",
+                  showCancelButton: true,
+                  cancelButtonText: "Go to Catalogue",
+                  confirmButtonColor: "#4f46e5",
+                  cancelButtonColor: "#6b7280",
+                }).then((result) => {
+                  if (result.isConfirmed) {
+                    router.push("/seller/settings");
+                  } else {
+                    router.push("/seller/products");
+                  }
+                });
+              }
+            } catch (err) {
+              console.error("Failed to check product counts:", err);
             }
           }
         } else {
@@ -262,6 +299,15 @@ export default function SellerAddProduct() {
       if (imageUrl) {
         data.append("image", imageUrl);
       }
+      
+      data.append("is_digital", formData.is_digital ? "true" : "false");
+      data.append("digital_file_url", formData.digital_file_url);
+      data.append("license_keys", formData.license_keys);
+      if (formData.publish_at) {
+        data.append("publish_at", new Date(formData.publish_at).toISOString());
+      }
+      data.append("name_bn", formData.name_bn);
+      data.append("description_bn", formData.description_bn);
 
       // Collect product badges into tags
       const badges: string[] = [];
@@ -313,6 +359,12 @@ export default function SellerAddProduct() {
       tags: "",
       color: "",
       sizes: "",
+      is_digital: false,
+      digital_file_url: "",
+      license_keys: "",
+      publish_at: "",
+      name_bn: "",
+      description_bn: "",
     });
     setImagePreview(null);
     setImageFile(null);
@@ -453,6 +505,107 @@ export default function SellerAddProduct() {
                   New Arrival Product
                 </label>
               </div>
+            </div>
+          </div>
+
+          {/* Digital Product Settings */}
+          <div className="bg-white border border-zinc-200 rounded-2xl p-6 space-y-5 text-left">
+            <div className="flex items-center justify-between">
+              <h3 className="text-sm font-bold text-zinc-950">Digital Product Settings</h3>
+              <label className="flex items-center gap-2.5 text-xs font-bold text-zinc-700 cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  checked={formData.is_digital}
+                  onChange={(e) => setFormData(prev => ({ ...prev, is_digital: e.target.checked }))}
+                  className="w-4.5 h-4.5 rounded border-zinc-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+                />
+                Is Digital Product
+              </label>
+            </div>
+            
+            {formData.is_digital && (
+              <div className="space-y-4 pt-2 border-t border-zinc-100 animate-in fade-in duration-200">
+                <div className="space-y-1.5">
+                  <label htmlFor="digital_file_url" className="text-xs font-bold text-zinc-600">
+                    Digital Product Download URL (ZIP, PDF, Software etc.)
+                  </label>
+                  <input
+                    id="digital_file_url"
+                    name="digital_file_url"
+                    type="url"
+                    placeholder="https://example.com/download.zip"
+                    value={formData.digital_file_url}
+                    onChange={handleInputChange}
+                    className="w-full h-11 px-4 bg-zinc-50 border border-zinc-200 focus:border-indigo-600 focus:bg-white rounded-xl text-sm font-semibold outline-none transition-all"
+                  />
+                </div>
+                
+                <div className="space-y-1.5">
+                  <label htmlFor="license_keys" className="text-xs font-bold text-zinc-600">
+                    Pre-generated License Keys (One per line)
+                  </label>
+                  <textarea
+                    id="license_keys"
+                    name="license_keys"
+                    rows={4}
+                    placeholder="LIC-XXXX-XXXX&#10;LIC-YYYY-YYYY"
+                    value={formData.license_keys}
+                    onChange={handleInputChange}
+                    className="w-full p-4 bg-zinc-50 border border-zinc-200 focus:border-indigo-600 focus:bg-white rounded-xl text-sm font-semibold outline-none transition-all resize-none"
+                  />
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Translation & Scheduled Publishing */}
+          <div className="bg-white border border-zinc-200 rounded-2xl p-6 space-y-5 text-left">
+            <h3 className="text-sm font-bold text-zinc-955">Translation & Scheduled Publishing</h3>
+            
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="space-y-1.5">
+                <label htmlFor="name_bn" className="text-xs font-bold text-zinc-600">
+                  Product Title (Bengali / বাংলা)
+                </label>
+                <input
+                  id="name_bn"
+                  name="name_bn"
+                  type="text"
+                  placeholder="যেমন: ওয়্যারলেস হেডফোন প্র"
+                  value={formData.name_bn}
+                  onChange={handleInputChange}
+                  className="w-full h-11 px-4 bg-zinc-50 border border-zinc-200 focus:border-indigo-600 focus:bg-white rounded-xl text-sm font-semibold outline-none transition-all"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label htmlFor="publish_at" className="text-xs font-bold text-zinc-600">
+                  Scheduled Publishing Date & Time
+                </label>
+                <input
+                  id="publish_at"
+                  name="publish_at"
+                  type="datetime-local"
+                  value={formData.publish_at}
+                  onChange={handleInputChange}
+                  className="w-full h-11 px-4 bg-zinc-50 border border-zinc-200 focus:border-indigo-650 focus:bg-white rounded-xl text-sm font-semibold outline-none transition-all cursor-pointer"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <label htmlFor="description_bn" className="text-xs font-bold text-zinc-600">
+                Product Description (Bengali / বাংলা)
+              </label>
+              <textarea
+                id="description_bn"
+                name="description_bn"
+                rows={3}
+                placeholder="বাংলা ভাষায় প্রোডাক্টের বিস্তারিত বিবরণ লিখুন..."
+                value={formData.description_bn}
+                onChange={handleInputChange}
+                className="w-full p-4 bg-zinc-50 border border-zinc-200 focus:border-indigo-600 focus:bg-white rounded-xl text-sm font-semibold outline-none transition-all resize-none"
+              />
             </div>
           </div>
 
@@ -725,6 +878,19 @@ export default function SellerAddProduct() {
             </div>
           </div>
 
+          {/* Maintenance warning */}
+          {maintenanceMode && (
+            <div className="p-4 bg-amber-50 border border-amber-200 text-amber-850 rounded-xl text-xs font-bold text-left flex items-start gap-2.5 animate-in fade-in slide-in-from-top-3 duration-250">
+              <span className="text-sm shrink-0">⚠️</span>
+              <div>
+                <div className="font-extrabold text-amber-900">Product Creation Disabled</div>
+                <div className="font-semibold text-amber-750 mt-0.5 leading-relaxed">
+                  You cannot add or edit products during platform maintenance. Write operations are temporarily locked.
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Form Actions */}
           <div className="flex gap-3">
             <button
@@ -736,13 +902,15 @@ export default function SellerAddProduct() {
             </button>
             <button
               type="submit"
-              disabled={isSubmitting || sellerStatus !== "approved"}
+              disabled={isSubmitting || sellerStatus !== "approved" || maintenanceMode}
               className="flex-1 h-11 bg-indigo-600 hover:bg-indigo-700 disabled:bg-zinc-300 disabled:text-zinc-500 disabled:cursor-not-allowed text-white rounded-xl text-xs font-bold shadow-md shadow-indigo-500/10 flex items-center justify-center transition-all cursor-pointer"
             >
               {isSubmitting ? (
                 <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
               ) : sellerStatus !== "approved" ? (
                 "Locked (Pending Approval)"
+              ) : maintenanceMode ? (
+                "Maintenance Mode Active"
               ) : (
                 "Save Product"
               )}

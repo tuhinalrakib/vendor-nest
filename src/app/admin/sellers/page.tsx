@@ -17,6 +17,7 @@ interface PlatformSeller {
   created_at: string;
   shop_description?: string;
   plan?: "starter" | "growth" | "enterprise";
+  balance?: string | number;
 }
 
 export default function AdminSellers() {
@@ -151,6 +152,14 @@ export default function AdminSellers() {
       ),
     },
     {
+      header: "Owed Balance (Wallet)",
+      render: (s: PlatformSeller) => (
+        <span className="text-indigo-700 font-extrabold text-xs">
+          ${parseFloat(String(s.balance || "0")).toFixed(2)}
+        </span>
+      ),
+    },
+    {
       header: "Verification Status",
       render: (s: PlatformSeller) => {
         const colors = {
@@ -281,6 +290,12 @@ export default function AdminSellers() {
                   <span>Applied On:</span>
                   <span className="text-zinc-900">
                     {selectedSeller.created_at ? new Date(selectedSeller.created_at).toLocaleDateString() : "N/A"}
+                  </span>
+                </div>
+                <div className="flex justify-between text-xs font-bold text-zinc-550 pt-1.5 border-t border-zinc-100 mt-1.5">
+                  <span>Owed Wallet Balance:</span>
+                  <span className="text-indigo-700 font-black">
+                    ${parseFloat(String(selectedSeller.balance || "0")).toFixed(2)}
                   </span>
                 </div>
                 <div className="flex justify-between items-center text-xs font-bold text-zinc-550 pt-1.5 border-t border-zinc-100 mt-1.5">

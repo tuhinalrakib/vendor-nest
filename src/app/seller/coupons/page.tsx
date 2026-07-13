@@ -6,6 +6,7 @@ import { AddIcon, TrashIcon } from "@/components/icons";
 import Swal from "sweetalert2";
 import api from "@/lib/api";
 import DynamicLoading from "@/components/dynamicLoading/DynamicLoading";
+import { useAuth } from "@/lib/AuthContext";
 
 interface Coupon {
   id: string;
@@ -18,6 +19,7 @@ interface Coupon {
 }
 
 export default function SellerCoupons() {
+  const { maintenanceMode } = useAuth();
   const [coupons, setCoupons] = useState<Coupon[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
@@ -55,6 +57,10 @@ export default function SellerCoupons() {
   }, []);
 
   const handleToggleActive = async (couponId: string) => {
+    if (maintenanceMode) {
+      Swal.fire("Maintenance Mode Active", "Cannot toggle coupons during platform maintenance.", "warning");
+      return;
+    }
     const coupon = coupons.find((c) => c.id === couponId);
     if (!coupon) return;
 
@@ -71,6 +77,10 @@ export default function SellerCoupons() {
   };
 
   const handleDelete = (couponId: string) => {
+    if (maintenanceMode) {
+      Swal.fire("Maintenance Mode Active", "Cannot delete coupons during platform maintenance.", "warning");
+      return;
+    }
     Swal.fire({
       title: "Delete Coupon?",
       text: "Are you sure you want to delete this coupon code?",
@@ -193,7 +203,8 @@ export default function SellerCoupons() {
         <div className="flex items-center gap-2">
           <button
             onClick={() => handleToggleActive(coupon.id)}
-            className={`px-3 py-1 rounded-full text-[10px] font-extrabold uppercase transition-all duration-200 cursor-pointer ${
+            disabled={maintenanceMode}
+            className={`px-3 py-1 rounded-full text-[10px] font-extrabold uppercase transition-all duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ${
               coupon.isActive
                 ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
                 : "bg-zinc-100 text-zinc-500 border border-zinc-200"
@@ -209,7 +220,9 @@ export default function SellerCoupons() {
       render: (coupon: Coupon) => (
         <button
           onClick={() => handleDelete(coupon.id)}
-          className="p-2 hover:bg-red-50 rounded-lg text-zinc-400 hover:text-red-600 transition-colors cursor-pointer"
+          disabled={maintenanceMode}
+          className="p-2 hover:bg-red-50 rounded-lg text-zinc-450 hover:text-red-655 transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+          title={maintenanceMode ? "Delete Disabled (Maintenance)" : "Delete Coupon"}
         >
           <TrashIcon className="w-4.5 h-4.5" />
         </button>
@@ -233,7 +246,8 @@ export default function SellerCoupons() {
         </div>
         <button
           onClick={() => setShowAddModal(true)}
-          className="h-11 px-5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow-md shadow-indigo-500/10 flex items-center justify-center gap-2 transition-all duration-200 cursor-pointer"
+          disabled={maintenanceMode}
+          className="h-11 px-5 bg-indigo-600 hover:bg-indigo-700 disabled:bg-zinc-300 disabled:text-zinc-550 disabled:cursor-not-allowed text-white rounded-xl text-xs font-bold shadow-md shadow-indigo-500/10 flex items-center justify-center gap-2 transition-all duration-200 cursor-pointer"
         >
           <AddIcon className="w-4.5 h-4.5" />
           Create Coupon

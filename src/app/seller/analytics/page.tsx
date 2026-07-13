@@ -4,13 +4,60 @@ import React, { useState, useEffect } from "react";
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_HOST || "http://127.0.0.1:8000";
 import { BarChart } from "@/components/charts";
 import { StatsCard } from "@/components/cards";
+import { useAuth } from "@/lib/AuthContext";
 
 export default function SellerAnalytics() {
+  const { user } = useAuth();
+  const plan = user?.seller_profile?.plan || "starter";
   const [timeRange, setTimeRange] = useState<"7days" | "30days" | "12months">("30days");
   const [forecast, setForecast] = useState<{ week: string; predicted_revenue: number }[]>([]);
   const [insights, setInsights] = useState("");
   const [recommendations, setRecommendations] = useState("");
   const [loadingForecast, setLoadingForecast] = useState(false);
+
+  if (plan === "starter") {
+    return (
+      <div className="relative min-h-[500px] flex items-center justify-center bg-zinc-50/50 rounded-3xl border border-zinc-200 overflow-hidden p-8 text-center animate-in fade-in duration-300">
+        <div className="absolute inset-0 bg-white/40 backdrop-blur-xs z-10" />
+        <div className="relative z-20 max-w-md bg-white border border-zinc-200 rounded-3xl p-8 shadow-2xl space-y-6">
+          <div className="w-16 h-16 rounded-full bg-indigo-50 border border-indigo-100 flex items-center justify-center mx-auto text-3xl animate-bounce duration-2000">
+            📊
+          </div>
+          <div className="space-y-2">
+            <h2 className="text-xl font-extrabold text-zinc-950 tracking-tight">Advanced Analytics Locked</h2>
+            <p className="text-xs text-zinc-500 font-semibold leading-relaxed">
+              Detailed sales forecasts, traffic sources distribution, and platform conversion insights are reserved for Growth and Enterprise plans.
+            </p>
+          </div>
+          
+          <div className="p-4 bg-zinc-50 border border-zinc-200 rounded-2xl text-left space-y-2 text-[10px] font-semibold text-zinc-550">
+            <div className="flex items-center gap-2 text-zinc-900 font-bold mb-1">
+              <span>🚀 Upgrading unlocks:</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-emerald-500 font-bold">✓</span>
+              <span>Advanced Sales Analytics & Traffic Sources</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-emerald-500 font-bold">✓</span>
+              <span>AI Revenue Forecasts & Business Insights</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-emerald-500 font-bold">✓</span>
+              <span>Unlimited Product Listings & Custom Subdomains</span>
+            </div>
+          </div>
+          
+          <button
+            onClick={() => window.location.href = "/seller/settings"}
+            className="w-full h-11 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow-md shadow-indigo-500/10 transition-all cursor-pointer"
+          >
+            Upgrade to Growth
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   useEffect(() => {
     const fetchForecast = async () => {

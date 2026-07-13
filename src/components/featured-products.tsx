@@ -269,6 +269,7 @@ export default function FeaturedProducts() {
               return (
                 <ProductCard
                   key={prod.id}
+                  id={prod.id}
                   image={imageUrl}
                   category={getCategoryName(prod.category)}
                   title={prod.name}
@@ -277,6 +278,11 @@ export default function FeaturedProducts() {
                   seller={prod.seller}
                   sellerShop={prod.seller_shop}
                   onAddToCart={() => handleAddToCart(prod)}
+                  is_digital={(prod as any).is_digital}
+                  qr_code_url={(prod as any).qr_code_url}
+                  barcode_url={(prod as any).barcode_url}
+                  name_bn={(prod as any).name_bn}
+                  description_bn={(prod as any).description_bn}
                 />
               );
             })}

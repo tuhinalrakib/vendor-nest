@@ -5,6 +5,7 @@ import { useCart } from "@/lib/CartContext";
 import { useRouter } from "next/navigation";
 import api from "@/lib/api";
 import Swal from "sweetalert2";
+import { useAuth } from "@/lib/AuthContext";
 
 /* ─── SVG Icon Components ─── */
 const LockIcon = ({ className = "w-4 h-4" }: { className?: string }) => (
@@ -109,6 +110,7 @@ const steps = [
 export default function CheckoutPage() {
   const router = useRouter();
   const { cartItems, fetchCart, clearCart } = useCart();
+  const { maintenanceMode } = useAuth();
 
   // Form States
   const [fullName, setFullName] = useState("");
@@ -766,10 +768,21 @@ export default function CheckoutPage() {
                   </div>
                 </div>
 
+                {/* Maintenance Mode Alert */}
+                {maintenanceMode && (
+                  <div className="bg-amber-50 border border-amber-200 p-4 rounded-xl text-left flex items-start gap-2.5 animate-in fade-in slide-in-from-top-3 duration-250 mb-4">
+                    <span className="text-sm shrink-0">⚠️</span>
+                    <div className="text-xs font-semibold text-amber-800">
+                      <div className="font-extrabold text-amber-900 mb-0.5">Purchases Temporarily Paused</div>
+                      The platform is currently undergoing scheduled maintenance. Checkout and payments are temporarily disabled. Please try again later.
+                    </div>
+                  </div>
+                )}
+
                 {/* CTA Button */}
                 <button
                   type="submit"
-                  disabled={isSubmitting || cartItems.length === 0}
+                  disabled={isSubmitting || cartItems.length === 0 || maintenanceMode}
                   onClick={handleCheckoutSubmit}
                   className="w-full h-12 bg-linear-to-r from-indigo-600 via-indigo-600 to-violet-600 hover:from-indigo-700 hover:via-indigo-700 hover:to-violet-700 text-white rounded-xl text-xs font-extrabold shadow-lg shadow-indigo-500/20 transition-all duration-200 active:scale-[0.97] cursor-pointer flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed relative overflow-hidden group"
                 >

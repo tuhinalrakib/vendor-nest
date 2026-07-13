@@ -19,7 +19,7 @@ import {
 } from "@/components/icons";
 
 export default function Navbar() {
-  const { user, logout, isLoading } = useAuth();
+  const { user, logout, isLoading, maintenanceMode } = useAuth();
   const router = useRouter();
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -39,7 +39,14 @@ export default function Navbar() {
   };
 
   return (
-    <nav className="w-full border-b border-zinc-200 bg-white/80 backdrop-blur-md sticky top-0 z-50">
+    <>
+      {maintenanceMode && (
+        <div className="w-full bg-amber-500 text-white text-center py-2 px-4 text-xs font-bold flex items-center justify-center gap-2 animate-in slide-in-from-top duration-300">
+          <span>⚠️</span>
+          <span><strong>System Under Scheduled Maintenance:</strong> We are currently upgrading our platform. Checkout and purchasing are temporarily paused. We'll be back online shortly!</span>
+        </div>
+      )}
+      <nav className="w-full border-b border-zinc-200 bg-white/80 backdrop-blur-md sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between gap-4">
         {/* Brand Logo */}
         <Logo />
@@ -442,5 +449,6 @@ export default function Navbar() {
         </>
       )}
     </nav>
+    </>
   );
 }

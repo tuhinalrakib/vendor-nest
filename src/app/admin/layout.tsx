@@ -155,6 +155,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       isActive: pathname === "/admin/reports",
     },
     {
+      label: "Payouts",
+      href: "/admin/payouts",
+      icon: <span className="w-5 h-5 flex items-center justify-center text-zinc-500 font-bold">💸</span>,
+      isActive: pathname === "/admin/payouts",
+    },
+    {
       label: "Settings",
       href: "/admin/settings",
       icon: <SettingsIcon className="w-5 h-5" />,

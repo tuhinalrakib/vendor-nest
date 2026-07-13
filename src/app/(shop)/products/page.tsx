@@ -360,6 +360,7 @@ export default function ProductsCatalog() {
               return (
                 <ProductCard
                   key={p.id}
+                  id={p.id}
                   image={p.image}
                   category={catName}
                   title={p.name}
@@ -374,6 +375,11 @@ export default function ProductsCatalog() {
                   seller={p.seller}
                   tags={p.tags}
                   onAddToCart={() => handleAddToCart(p)}
+                  is_digital={(p as any).is_digital}
+                  qr_code_url={(p as any).qr_code_url}
+                  barcode_url={(p as any).barcode_url}
+                  name_bn={(p as any).name_bn}
+                  description_bn={(p as any).description_bn}
                 />
               );
             })}

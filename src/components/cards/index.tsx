@@ -20,6 +20,11 @@ interface ProductCardProps {
   tags?: string; // comma-separated tags (featured, popular, new_arrival)
   rating?: number;
   onAddToCart?: () => void;
+  is_digital?: boolean;
+  qr_code_url?: string;
+  barcode_url?: string;
+  name_bn?: string;
+  description_bn?: string;
 }
 
 // Global cached promise to prevent redundant API queries across multiple product cards
@@ -51,10 +56,16 @@ export function ProductCard({
   tags,
   rating,
   onAddToCart,
+  is_digital = false,
+  qr_code_url,
+  barcode_url,
+  name_bn,
+  description_bn,
 }: ProductCardProps) {
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [availableCoupons, setAvailableCoupons] = useState<any[]>([]);
   const [isAdding, setIsAdding] = useState(false);
+  const [lang, setLang] = useState<"en" | "bn">("en");
 
   // Fetch active coupons matching this product's seller or global/sitewide coupons
   // Filter out coupons whose minimum purchase requirement exceeds the product's price
@@ -292,10 +303,31 @@ export function ProductCard({
                   <span className="px-3 py-1 rounded-full bg-indigo-50 text-indigo-700 text-[10px] font-extrabold uppercase tracking-wider">
                     {category || "General"}
                   </span>
-                  <span className="text-xs font-bold font-mono text-zinc-400">SKU: {sku || "N/A"}</span>
+                  <div className="flex items-center gap-3">
+                    {/* Language Switcher */}
+                    {(name_bn || description_bn) && (
+                      <div className="flex items-center border border-zinc-200 rounded-lg overflow-hidden bg-zinc-50 p-0.5 text-[9px] font-extrabold">
+                        <button
+                          onClick={() => setLang("en")}
+                          className={`px-2 py-0.5 rounded transition-all cursor-pointer ${lang === "en" ? "bg-indigo-600 text-white shadow-sm" : "text-zinc-500 hover:text-zinc-800"}`}
+                        >
+                          EN
+                        </button>
+                        <button
+                          onClick={() => setLang("bn")}
+                          className={`px-2 py-0.5 rounded transition-all cursor-pointer ${lang === "bn" ? "bg-indigo-600 text-white shadow-sm" : "text-zinc-500 hover:text-zinc-800"}`}
+                        >
+                          বাংলা
+                        </button>
+                      </div>
+                    )}
+                    <span className="text-xs font-bold font-mono text-zinc-400">SKU: {sku || "N/A"}</span>
+                  </div>
                 </div>
 
-                <h2 className="text-xl md:text-2xl font-black text-zinc-950 leading-tight">{title}</h2>
+                <h2 className="text-xl md:text-2xl font-black text-zinc-955 leading-tight">
+                  {lang === "en" ? title : (name_bn || title)}
+                </h2>
 
                 {/* Rating stars */}
                 <div className="flex items-center gap-1.5">
@@ -318,26 +350,45 @@ export function ProductCard({
 
                 {/* Detailed Description */}
                 <div className="space-y-1.5">
-                  <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Product Information</span>
+                  <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest font-mono">Product Information</span>
                   <p className="text-xs md:text-sm text-zinc-500 font-semibold leading-relaxed max-h-[100px] overflow-y-auto pr-2">
-                    {description || "This premium certified product is designed using top-tier industry standards, offering unmatched longevity and value. Perfect addition to your daily catalog collections."}
+                    {lang === "en" 
+                      ? (description || "No description provided.") 
+                      : (description_bn || description || "কোনো বিবরণ প্রদান করা হয়নি।")}
                   </p>
                 </div>
 
                 {/* Attributes (Colors / Sizes) */}
                 <div className="grid grid-cols-2 gap-4 pt-2">
-                  <div className="space-y-1">
-                    <span className="text-[9px] font-bold text-zinc-400 uppercase tracking-wider block">Available Colors</span>
-                    <span className="text-xs font-bold text-zinc-800 bg-zinc-100 px-3 py-1.5 rounded-lg inline-block">
+                  <div className="space-y-1 text-left">
+                    <span className="text-[9px] font-bold text-zinc-400 uppercase tracking-wider block font-mono">Colors</span>
+                    <span className="text-xs font-bold text-zinc-800 bg-zinc-50 border border-zinc-150 px-3 py-1.5 rounded-lg inline-block">
                       {color || "Default / Multi"}
                     </span>
                   </div>
-                  <div className="space-y-1">
-                    <span className="text-[9px] font-bold text-zinc-400 uppercase tracking-wider block">Available Sizes</span>
-                    <span className="text-xs font-bold text-zinc-800 bg-zinc-100 px-3 py-1.5 rounded-lg inline-block">
+                  <div className="space-y-1 text-left">
+                    <span className="text-[9px] font-bold text-zinc-400 uppercase tracking-wider block font-mono">Sizes</span>
+                    <span className="text-xs font-bold text-zinc-800 bg-zinc-50 border border-zinc-150 px-3 py-1.5 rounded-lg inline-block">
                       {sizes || "Standard O/S"}
                     </span>
                   </div>
+                </div>
+
+                {/* QR and Barcode Indicators */}
+                <div className="flex gap-4 pt-3 border-t border-zinc-100 items-center justify-between">
+                  {qr_code_url && (
+                    <div className="flex flex-col items-center gap-1 border border-zinc-150 p-2 rounded-2xl bg-zinc-50/50">
+                      <span className="text-[8px] font-black text-zinc-450 uppercase font-sans tracking-wide">Scan Details</span>
+                      <img src={qr_code_url} alt="Product QR Code" className="w-16 h-16 object-contain rounded-lg shadow-xs" />
+                    </div>
+                  )}
+                  {barcode_url && (
+                    <div className="flex flex-col items-center gap-1 border border-zinc-150 p-2 rounded-2xl bg-zinc-50/50 flex-1">
+                      <span className="text-[8px] font-black text-zinc-450 uppercase font-sans tracking-wide">Product Barcode</span>
+                      <img src={barcode_url} alt="Product Barcode" className="h-10 w-full object-contain rounded" />
+                      <span className="text-[8px] font-bold font-mono text-zinc-550 mt-0.5">{sku || id?.substring(0, 8)}</span>
+                    </div>
+                  )}
                 </div>
 
                 {/* Amazon Style Coupon Display inside the details modal */}
