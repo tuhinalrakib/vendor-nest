@@ -52,21 +52,21 @@ export default function Testimonials() {
   ];
 
   return (
-    <section className="relative py-24 bg-white border-t border-zinc-200/80 overflow-hidden font-sans">
+    <section className="relative py-24 bg-white dark:bg-zinc-950 border-t border-zinc-200/80 dark:border-zinc-800/60 overflow-hidden font-sans transition-colors duration-300">
       <div className="max-w-7xl mx-auto px-6 sm:px-8 relative z-10">
         
         {/* Title */}
         <div className="text-center max-w-3xl mx-auto space-y-4 mb-16">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 border border-indigo-100 text-xs font-bold text-indigo-700 select-none">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-100 dark:border-indigo-900/40 text-xs font-bold text-indigo-700 dark:text-indigo-400 select-none">
             💬 Success Stories
           </div>
-          <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-zinc-950">
+          <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-zinc-950 dark:text-zinc-50">
             Loved by Merchants Worldwide <br />
             <span className="bg-linear-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
               বিক্রেতা ও ক্রেতাদের রিভিউ
             </span>
           </h2>
-          <p className="text-sm sm:text-base text-zinc-550 max-w-xl mx-auto font-medium">
+          <p className="text-sm sm:text-base text-zinc-500 dark:text-zinc-400 max-w-xl mx-auto font-medium">
             Hear from certified business owners using our AI-driven ecommerce hosting platforms.
           </p>
         </div>
@@ -76,10 +76,10 @@ export default function Testimonials() {
           {testimonials.map((test) => (
             <div
               key={test.id}
-              className="bg-zinc-50 border border-zinc-200/80 hover:border-zinc-300 rounded-3xl p-6 text-left flex flex-col justify-between hover:shadow-lg transition-all duration-300 relative group"
+              className="bg-zinc-50 dark:bg-zinc-900 border border-zinc-200/80 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 rounded-3xl p-6 text-left flex flex-col justify-between hover:shadow-lg transition-all duration-300 relative group hover-neon-glow"
             >
               {/* Quote Mark Decotator SVG */}
-              <div className="absolute top-6 right-6 text-zinc-200 group-hover:text-indigo-100 transition-colors pointer-events-none">
+              <div className="absolute top-6 right-6 text-zinc-200 dark:text-zinc-800 group-hover:text-indigo-100/50 dark:group-hover:text-indigo-950/20 transition-colors pointer-events-none">
                 <svg className="w-10 h-10 fill-current" viewBox="0 0 24 24">
                   <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.154c-2.433.914-3.996 3.635-3.996 5.846h3.999v10h-10z" />
                 </svg>
@@ -97,26 +97,26 @@ export default function Testimonials() {
 
                 {/* Quote Content */}
                 <div className="space-y-3">
-                  <p className="text-xs sm:text-[13px] font-semibold text-zinc-700 leading-relaxed italic">
+                  <p className="text-xs sm:text-[13px] font-semibold text-zinc-700 dark:text-zinc-300 leading-relaxed italic">
                     "{test.quote}"
                   </p>
-                  <p className="text-xs font-bold text-indigo-650 bg-indigo-50/50 border border-indigo-100/50 rounded-2xl p-3 leading-relaxed">
+                  <p className="text-xs font-bold text-indigo-650 dark:text-indigo-400 bg-indigo-50/50 dark:bg-indigo-950/20 border border-indigo-100/50 dark:border-indigo-900/30 rounded-2xl p-3 leading-relaxed">
                     🌟 {test.banglaQuote}
                   </p>
                 </div>
               </div>
 
               {/* Author Info */}
-              <div className="flex items-center gap-3 pt-6 mt-6 border-t border-zinc-200/60 relative z-10">
+              <div className="flex items-center gap-3 pt-6 mt-6 border-t border-zinc-200/60 dark:border-zinc-800/60 relative z-10">
                 <div className={`w-11 h-11 rounded-xl bg-linear-to-tr ${test.avatarGradient} text-white font-extrabold flex items-center justify-center text-sm shadow-md`}>
                   {test.avatarChar}
                 </div>
                 <div className="text-left space-y-0.5">
-                  <h4 className="text-xs sm:text-sm font-extrabold text-zinc-950">
+                  <h4 className="text-xs sm:text-sm font-extrabold text-zinc-950 dark:text-zinc-50">
                     {test.name}
                   </h4>
-                  <p className="text-[10px] font-bold text-zinc-400">
-                    {test.role} &bull; <span className="text-indigo-600">{test.storeName}</span>
+                  <p className="text-[10px] font-bold text-zinc-400 dark:text-zinc-550">
+                    {test.role} &bull; <span className="text-indigo-600 dark:text-indigo-400">{test.storeName}</span>
                   </p>
                 </div>
               </div>

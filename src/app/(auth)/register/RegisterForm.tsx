@@ -17,14 +17,26 @@ export default function RegisterForm() {
   const [role, setRole] = useState<"customer" | "seller">("customer");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const [isSubdomain, setIsSubdomain] = useState(false);
   const { register, login } = useAuth();
 
   useEffect(() => {
     if (typeof window !== "undefined") {
-      const params = new URLSearchParams(window.location.search);
-      const roleParam = params.get("role");
-      if (roleParam === "seller" || roleParam === "customer") {
-        setRole(roleParam);
+      const hostname = window.location.hostname;
+      const isLocalhostSubdomain = hostname.endsWith(".localhost") && hostname !== "localhost";
+      const isProdSubdomain = hostname.split(".").length > 2 && !hostname.startsWith("www.") && !hostname.endsWith(".vercel.app");
+      
+      const isSub = isLocalhostSubdomain || isProdSubdomain;
+      setIsSubdomain(isSub);
+
+      if (isSub) {
+        setRole("customer");
+      } else {
+        const params = new URLSearchParams(window.location.search);
+        const roleParam = params.get("role");
+        if (roleParam === "seller" || roleParam === "customer") {
+          setRole(roleParam);
+        }
       }
     }
   }, []);
@@ -100,30 +112,32 @@ export default function RegisterForm() {
       </div>
 
       {/* Role Selection Toggle */}
-      <div className="grid grid-cols-2 gap-2 p-1 bg-zinc-100 rounded-xl">
-        <button
-          type="button"
-          onClick={() => setRole("customer")}
-          className={`h-9 rounded-lg text-xs font-bold transition-all ${
-            role === "customer"
-              ? "bg-white text-zinc-900 shadow-sm"
-              : "text-zinc-500 hover:text-zinc-900"
-          }`}
-        >
-          Customer
-        </button>
-        <button
-          type="button"
-          onClick={() => setRole("seller")}
-          className={`h-9 rounded-lg text-xs font-bold transition-all ${
-            role === "seller"
-              ? "bg-white text-zinc-900 shadow-sm"
-              : "text-zinc-500 hover:text-zinc-900"
-          }`}
-        >
-          Become a Seller
-        </button>
-      </div>
+      {!isSubdomain && (
+        <div className="grid grid-cols-2 gap-2 p-1 bg-zinc-100 rounded-xl">
+          <button
+            type="button"
+            onClick={() => setRole("customer")}
+            className={`h-9 rounded-lg text-xs font-bold transition-all ${
+              role === "customer"
+                ? "bg-white text-zinc-900 shadow-sm"
+                : "text-zinc-500 hover:text-zinc-900"
+            }`}
+          >
+            Customer
+          </button>
+          <button
+            type="button"
+            onClick={() => setRole("seller")}
+            className={`h-9 rounded-lg text-xs font-bold transition-all ${
+              role === "seller"
+                ? "bg-white text-zinc-900 shadow-sm"
+                : "text-zinc-500 hover:text-zinc-900"
+            }`}
+          >
+            Become a Seller
+          </button>
+        </div>
+      )}
 
       <form onSubmit={handleSubmit} className="space-y-4">
         {error && (

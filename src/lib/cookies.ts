@@ -9,9 +9,9 @@ export function setCookie(name: string, value: string, days?: number) {
   let domain = "";
   if (typeof window !== "undefined") {
     const hostname = window.location.hostname;
-    // Scoping to .localhost for local dev subdomain sharing
+    // Do not set domain attribute for localhost development to ensure browsers accept the cookie as host-only
     if (hostname.endsWith("localhost")) {
-      domain = "; domain=.localhost";
+      domain = "";
     } else if (!hostname.match(/^\d+\.\d+\.\d+\.\d+$/)) {
       // Production domain sharing (e.g. sub.vendornest.com -> .vendornest.com)
       const parts = hostname.split(".");
@@ -45,7 +45,7 @@ export function deleteCookie(name: string) {
   if (typeof window !== "undefined") {
     const hostname = window.location.hostname;
     if (hostname.endsWith("localhost")) {
-      domain = "; domain=.localhost";
+      domain = "";
     } else if (!hostname.match(/^\d+\.\d+\.\d+\.\d+$/)) {
       const parts = hostname.split(".");
       if (parts.length > 2) {

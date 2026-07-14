@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { useAuth } from "@/lib/AuthContext";
+import { useTheme } from "@/lib/ThemeContext";
 import { useRouter } from "next/navigation";
 import { useCart } from "@/lib/CartContext";
 import Link from "next/link";
@@ -19,6 +20,7 @@ import {
 } from "@/components/icons";
 
 export default function Navbar() {
+  const { theme, toggleTheme } = useTheme();
   const { user, logout, isLoading, maintenanceMode } = useAuth();
   const router = useRouter();
   const [showProfileMenu, setShowProfileMenu] = useState(false);
@@ -46,41 +48,41 @@ export default function Navbar() {
           <span><strong>System Under Scheduled Maintenance:</strong> We are currently upgrading our platform. Checkout and purchasing are temporarily paused. We'll be back online shortly!</span>
         </div>
       )}
-      <nav className="w-full border-b border-zinc-200 bg-white/80 backdrop-blur-md sticky top-0 z-50">
+      <nav className="w-full border-b border-zinc-200/50 dark:border-zinc-800/50 bg-white/70 dark:bg-zinc-950/70 backdrop-blur-md sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between gap-4">
         {/* Brand Logo */}
         <Logo />
 
         {/* Navigation links (Desktop) */}
-        <div className="hidden md:flex items-center gap-6 text-sm font-semibold text-zinc-600">
-          <Link href="/shops" className="hover:text-indigo-600 transition-colors">
+        <div className="hidden md:flex items-center gap-6 text-sm font-semibold text-zinc-650 dark:text-zinc-400">
+          <Link href="/shops" className="hover:text-indigo-650 dark:hover:text-indigo-400 transition-colors">
             Shops
           </Link>
-          <Link href="/products" className="hover:text-indigo-600 transition-colors">
+          <Link href="/products" className="hover:text-indigo-650 dark:hover:text-indigo-400 transition-colors">
             Products
           </Link>
-          <Link href="/categories" className="hover:text-indigo-600 transition-colors">
+          <Link href="/categories" className="hover:text-indigo-650 dark:hover:text-indigo-400 transition-colors">
             Categories
           </Link>
-          <Link href="/coupons" className="hover:text-indigo-600 transition-colors">
+          <Link href="/coupons" className="hover:text-indigo-650 dark:hover:text-indigo-400 transition-colors">
             Coupons
           </Link>
 
           {/* Dynamic Action Link depending on User Role */}
           {isLoading ? (
-            <div className="w-28 h-4 bg-zinc-100 animate-pulse rounded-md" />
+            <div className="w-28 h-4 bg-zinc-100 dark:bg-zinc-800 animate-pulse rounded-md" />
           ) : user ? (
             user.role === "admin" ? (
-              <Link href="/admin/dashboard" className="text-indigo-600 hover:text-indigo-700 transition-colors font-bold">
+              <Link href="/admin/dashboard" className="text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-350 transition-colors font-bold">
                 Admin Dashboard
               </Link>
             ) : user.role === "seller" ? (
-              <Link href="/seller/dashboard" className="text-indigo-600 hover:text-indigo-700 transition-colors font-bold">
+              <Link href="/seller/dashboard" className="text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-350 transition-colors font-bold">
                 Seller Dashboard
               </Link>
             ) : null
           ) : (
-            <Link href="/become-seller" className="text-indigo-600 hover:text-indigo-700 transition-colors font-bold">
+            <Link href="/become-seller" className="text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-350 transition-colors font-bold">
               Become a Seller
             </Link>
           )}
@@ -112,15 +114,32 @@ export default function Navbar() {
 
         {/* Actions (Sign In / Register or Dynamic User Profile Menu) */}
         <div className="flex items-center gap-3">
+          {/* Theme Toggle Button */}
+          <button
+            onClick={toggleTheme}
+            className="p-2 text-zinc-500 hover:text-indigo-600 dark:text-zinc-400 dark:hover:text-indigo-400 hover:bg-zinc-50 dark:hover:bg-zinc-900 rounded-xl transition-all duration-200 active:scale-95 cursor-pointer flex items-center justify-center mr-1"
+            aria-label="Toggle Theme"
+          >
+            {theme === "light" ? (
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+              </svg>
+            ) : (
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m12.728 0l-.707-.707M6.343 6.343l-.707-.707m2.828 9.9a5 5 0 117.072-7.072 5 5 0 01-7.072 7.072z" />
+              </svg>
+            )}
+          </button>
+
           {user && (
             <button
               onClick={() => setIsCartOpen(true)}
-              className="relative p-2 text-zinc-500 hover:text-indigo-600 hover:bg-zinc-50 rounded-xl transition-all duration-200 active:scale-95 cursor-pointer mr-1 flex items-center justify-center"
+              className="relative p-2 text-zinc-500 hover:text-indigo-600 dark:text-zinc-400 dark:hover:text-indigo-400 hover:bg-zinc-50 dark:hover:bg-zinc-900 rounded-xl transition-all duration-200 active:scale-95 cursor-pointer mr-1 flex items-center justify-center"
               aria-label="Shopping Cart"
             >
               <CartIcon className="w-5.5 h-5.5" />
               {cartCount > 0 && (
-                <span className="absolute -top-0.5 -right-0.5 min-w-4.5 h-4.5 px-1 rounded-full bg-indigo-600 text-white font-extrabold text-[9px] flex items-center justify-center border-2 border-white shadow-sm z-10">
+                <span className="absolute -top-0.5 -right-0.5 min-w-4.5 h-4.5 px-1 rounded-full bg-indigo-600 text-white font-extrabold text-[9px] flex items-center justify-center border-2 border-white dark:border-zinc-950 shadow-sm z-10">
                   {cartCount}
                 </span>
               )}
@@ -318,7 +337,7 @@ export default function Navbar() {
             onClick={() => setMobileMenuOpen(false)}
             className="fixed inset-0 top-16 bg-zinc-950/20 backdrop-blur-sm z-40 md:hidden animate-fade-in"
           />
-          <div className="absolute top-16 left-0 right-0 bg-white border-b border-zinc-200 p-4 shadow-xl z-50 md:hidden animate-in slide-in-from-top-4 duration-200">
+          <div className="absolute top-16 left-0 right-0 bg-white/95 dark:bg-zinc-950/95 backdrop-blur-md border-b border-zinc-200/50 dark:border-zinc-800/50 p-4 shadow-xl z-50 md:hidden animate-in slide-in-from-top-4 duration-200">
             {/* Search input in mobile menu */}
             <div className="relative mb-4">
               <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-400 pointer-events-none">
@@ -329,7 +348,7 @@ export default function Navbar() {
               <input
                 type="text"
                 placeholder="Search products, brands, shops..."
-                className="w-full h-10 pl-10 pr-4 rounded-full border border-zinc-200 bg-zinc-50 text-sm focus:outline-none focus:border-indigo-500 focus:bg-white transition-all text-zinc-800 placeholder-zinc-400"
+                className="w-full h-10 pl-10 pr-4 rounded-full border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900 text-sm focus:outline-none focus:border-indigo-500 focus:bg-white dark:focus:bg-zinc-950 transition-all text-zinc-800 dark:text-zinc-200 placeholder-zinc-400 dark:placeholder-zinc-550"
               />
             </div>
 
@@ -337,28 +356,28 @@ export default function Navbar() {
               <Link
                 href="/shops"
                 onClick={() => setMobileMenuOpen(false)}
-                className="px-4 py-2.5 rounded-xl text-sm font-semibold text-zinc-700 hover:bg-zinc-50 hover:text-zinc-950 transition-colors"
+                className="px-4 py-2.5 rounded-xl text-sm font-semibold text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-900 hover:text-zinc-950 dark:hover:text-zinc-50 transition-colors"
               >
                 Shops
               </Link>
               <Link
                 href="/products"
                 onClick={() => setMobileMenuOpen(false)}
-                className="px-4 py-2.5 rounded-xl text-sm font-semibold text-zinc-700 hover:bg-zinc-50 hover:text-zinc-950 transition-colors"
+                className="px-4 py-2.5 rounded-xl text-sm font-semibold text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-900 hover:text-zinc-950 dark:hover:text-zinc-50 transition-colors"
               >
                 Products
               </Link>
               <Link
                 href="/categories"
                 onClick={() => setMobileMenuOpen(false)}
-                className="px-4 py-2.5 rounded-xl text-sm font-semibold text-zinc-700 hover:bg-zinc-50 hover:text-zinc-950 transition-colors"
+                className="px-4 py-2.5 rounded-xl text-sm font-semibold text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-900 hover:text-zinc-950 dark:hover:text-zinc-50 transition-colors"
               >
                 Categories
               </Link>
               <Link
                 href="/coupons"
                 onClick={() => setMobileMenuOpen(false)}
-                className="px-4 py-2.5 rounded-xl text-sm font-semibold text-zinc-700 hover:bg-zinc-50 hover:text-zinc-950 transition-colors"
+                className="px-4 py-2.5 rounded-xl text-sm font-semibold text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-900 hover:text-zinc-950 dark:hover:text-zinc-50 transition-colors"
               >
                 Coupons
               </Link>
@@ -366,7 +385,7 @@ export default function Navbar() {
                 <Link
                   href="/orders"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="px-4 py-2.5 rounded-xl text-sm font-semibold text-zinc-700 hover:bg-zinc-50 hover:text-zinc-950 transition-colors"
+                  className="px-4 py-2.5 rounded-xl text-sm font-semibold text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-900 hover:text-zinc-950 dark:hover:text-zinc-50 transition-colors"
                 >
                   My Orders
                 </Link>

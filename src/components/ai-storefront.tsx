@@ -32,33 +32,35 @@ export function AIReviewSummary({ productId }: { productId: string }) {
   };
 
   return (
-    <div className="bg-zinc-900/40 border border-zinc-800/80 rounded-2xl p-6 text-left space-y-4">
-      <div className="flex justify-between items-center border-b border-zinc-800/60 pb-3">
-        <h4 className="text-sm font-bold text-white flex items-center gap-1.5">
+    <div className="bg-white dark:bg-zinc-900/40 border border-zinc-200 dark:border-zinc-800/80 rounded-2xl p-6 text-left space-y-4 shimmer-magic relative">
+      <div className="flex justify-between items-center border-b border-zinc-150 dark:border-zinc-800/60 pb-3 relative z-10">
+        <h4 className="text-sm font-bold text-zinc-900 dark:text-white flex items-center gap-1.5">
           <span>✨</span> AI Review Analysis Summary
         </h4>
         <button
           onClick={handleGenerateSummary}
           disabled={loading}
-          className="text-xs font-bold text-indigo-400 hover:text-indigo-300 transition-colors cursor-pointer"
+          className="text-xs font-bold text-indigo-400 hover:text-indigo-300 transition-all duration-200 active:scale-95 cursor-pointer premium-btn"
         >
           {loading ? "Analyzing..." : summary ? "Re-Analyze Reviews" : "Generate Summary"}
         </button>
       </div>
-      {loading ? (
-        <div className="py-4 flex justify-center items-center">
-          <div className="w-5 h-5 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
-        </div>
-      ) : summary ? (
-        <div
-          className="text-xs text-zinc-300 leading-relaxed space-y-2 ai-summary-content"
-          dangerouslySetInnerHTML={{ __html: summary }}
-        />
-      ) : (
-        <p className="text-xs text-zinc-500 italic">
-          Click above to generate a smart AI consensus summary based on customer reviews.
-        </p>
-      )}
+      <div className="relative z-10">
+        {loading ? (
+          <div className="py-4 flex justify-center items-center">
+            <div className="w-5 h-5 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
+          </div>
+        ) : summary ? (
+          <div
+            className="text-xs text-zinc-700 dark:text-zinc-300 leading-relaxed space-y-2 ai-summary-content"
+            dangerouslySetInnerHTML={{ __html: summary }}
+          />
+        ) : (
+          <p className="text-xs text-zinc-400 dark:text-zinc-555 italic">
+            Click above to generate a smart AI consensus summary based on customer reviews.
+          </p>
+        )}
+      </div>
     </div>
   );
 }
@@ -99,30 +101,30 @@ export function AIRecommendations({ productId }: { productId: string }) {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h3 className="text-xl font-bold text-white flex items-center gap-2">
+        <h3 className="text-xl font-bold text-zinc-900 dark:text-white flex items-center gap-2">
           <span>🎯</span> Smart AI Recommendations
         </h3>
-        <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider">Frequently bought together</span>
+        <span className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider">Frequently bought together</span>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {recs.map((item, idx) => (
           <div
             key={idx}
-            className="p-5 rounded-2xl border border-zinc-800 bg-zinc-900/30 flex flex-col justify-between space-y-4 hover:border-zinc-700 transition-colors"
+            className="p-5 rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/30 flex flex-col justify-between space-y-4 hover:border-zinc-300 dark:hover:border-zinc-700 transition-colors"
           >
             <div>
               <div className="flex justify-between items-start">
-                <span className="text-[10px] font-bold text-indigo-400 uppercase tracking-wider">{item.category}</span>
-                <span className="text-sm font-bold text-white">${item.price.toFixed(2)}</span>
+                <span className="text-[10px] font-bold text-indigo-650 dark:text-indigo-400 uppercase tracking-wider">{item.category}</span>
+                <span className="text-sm font-bold text-zinc-950 dark:text-white">${item.price.toFixed(2)}</span>
               </div>
-              <h4 className="text-sm font-bold text-white mt-1.5 text-left">{item.name}</h4>
-              <p className="text-[11px] text-zinc-400 font-medium leading-relaxed bg-zinc-950/40 border border-zinc-900 p-2.5 rounded-xl mt-3 text-left">
-                <span className="font-bold text-indigo-400">AI Reason: </span>
+              <h4 className="text-sm font-bold text-zinc-950 dark:text-white mt-1.5 text-left">{item.name}</h4>
+              <p className="text-[11px] text-zinc-650 dark:text-zinc-400 font-medium leading-relaxed bg-white dark:bg-zinc-950/40 border border-zinc-150 dark:border-zinc-900 p-2.5 rounded-xl mt-3 text-left">
+                <span className="font-bold text-indigo-650 dark:text-indigo-400">AI Reason: </span>
                 {item.reason}
               </p>
             </div>
-            <button className="w-full h-8 rounded bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-300 font-bold text-[11px] transition-colors cursor-pointer border border-indigo-500/20">
+            <button className="w-full h-8 rounded bg-indigo-600/10 hover:bg-indigo-600/20 dark:bg-indigo-600/20 dark:hover:bg-indigo-600/30 text-indigo-700 dark:text-indigo-300 font-bold text-[11px] transition-colors cursor-pointer border border-indigo-500/10 dark:border-indigo-500/20">
               Add to Cart
             </button>
           </div>
@@ -195,17 +197,17 @@ export function AIChatSupport() {
 
       {/* Chatbox Container */}
       {isOpen && (
-        <div className="fixed bottom-24 right-6 w-80 md:w-96 h-[450px] rounded-3xl border border-zinc-800 bg-zinc-950/95 backdrop-blur-md shadow-2xl flex flex-col justify-between overflow-hidden z-50 animate-in fade-in slide-in-from-bottom-5 duration-300">
+        <div className="fixed bottom-24 right-6 w-80 md:w-96 h-[450px] rounded-3xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950/95 backdrop-blur-md shadow-2xl flex flex-col justify-between overflow-hidden z-50 animate-in fade-in slide-in-from-bottom-5 duration-300">
           {/* Header */}
-          <div className="px-5 py-4 border-b border-zinc-850 bg-indigo-600/10 flex items-center gap-3">
+          <div className="px-5 py-4 border-b border-zinc-100 dark:border-zinc-850 bg-indigo-50 dark:bg-indigo-600/10 flex items-center gap-3">
             <div className="w-8 h-8 rounded-full bg-linear-to-tr from-indigo-500 to-violet-500 flex items-center justify-center font-bold text-white text-xs shrink-0 shadow">
               AI
             </div>
             <div>
-              <h4 className="text-xs font-bold text-white text-left">Vendor Support Assistant</h4>
+              <h4 className="text-xs font-bold text-zinc-900 dark:text-white text-left">Vendor Support Assistant</h4>
               <div className="flex items-center gap-1.5 mt-0.5">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                <span className="text-[10px] text-zinc-500 font-semibold uppercase">Online</span>
+                <span className="text-[10px] text-zinc-550 dark:text-zinc-500 font-semibold uppercase">Online</span>
               </div>
             </div>
           </div>
@@ -218,7 +220,7 @@ export function AIChatSupport() {
                   className={`max-w-[75%] px-3.5 py-2.5 rounded-2xl text-xs leading-relaxed font-semibold ${
                     m.sender === "user"
                       ? "bg-indigo-600 text-white rounded-tr-none"
-                      : "bg-zinc-900 border border-zinc-800 text-zinc-200 rounded-tl-none"
+                      : "bg-zinc-50 dark:bg-zinc-900 border border-zinc-150 dark:border-zinc-800 text-zinc-800 dark:text-zinc-200 rounded-tl-none"
                   }`}
                 >
                   {m.text}
@@ -227,23 +229,23 @@ export function AIChatSupport() {
             ))}
             {sending && (
               <div className="flex justify-start">
-                <div className="bg-zinc-900 border border-zinc-800 px-3.5 py-2.5 rounded-2xl rounded-tl-none flex items-center gap-1">
-                  <span className="w-1.5 h-1.5 rounded-full bg-zinc-500 animate-bounce delay-75"></span>
-                  <span className="w-1.5 h-1.5 rounded-full bg-zinc-500 animate-bounce delay-150"></span>
-                  <span className="w-1.5 h-1.5 rounded-full bg-zinc-500 animate-bounce delay-220"></span>
+                <div className="bg-zinc-50 dark:bg-zinc-900 border border-zinc-150 dark:border-zinc-800 px-3.5 py-2.5 rounded-2xl rounded-tl-none flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-zinc-400 dark:bg-zinc-500 animate-bounce delay-75"></span>
+                  <span className="w-1.5 h-1.5 rounded-full bg-zinc-400 dark:bg-zinc-500 animate-bounce delay-150"></span>
+                  <span className="w-1.5 h-1.5 rounded-full bg-zinc-400 dark:bg-zinc-500 animate-bounce delay-220"></span>
                 </div>
               </div>
             )}
           </div>
 
           {/* Form Input */}
-          <form onSubmit={handleSendMessage} className="p-4 border-t border-zinc-800 bg-zinc-950 flex gap-2">
+          <form onSubmit={handleSendMessage} className="p-4 border-t border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-950 flex gap-2">
             <input
               type="text"
               placeholder="Ask a question about products..."
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
-              className="flex-1 h-9 px-3.5 bg-zinc-900 border border-zinc-800 focus:border-indigo-600 text-xs font-semibold text-white rounded-xl outline-none transition-colors"
+              className="flex-1 h-9 px-3.5 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 focus:border-indigo-600 text-xs font-semibold text-zinc-900 dark:text-white rounded-xl outline-none transition-colors"
             />
             <button
               type="submit"

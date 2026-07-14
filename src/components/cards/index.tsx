@@ -95,11 +95,11 @@ export function ProductCard({
     <>
       <div
         onClick={() => setShowDetailsModal(true)}
-        className="bg-white border border-zinc-200 hover:border-zinc-300 rounded-3xl p-4 text-left flex flex-col justify-between hover:shadow-lg transition-all duration-300 group cursor-pointer"
+        className="bg-white dark:bg-zinc-900 border border-zinc-200/60 dark:border-zinc-800 rounded-3xl p-4 text-left flex flex-col justify-between hover-neon-glow group cursor-pointer"
       >
         <div className="space-y-4">
           {/* Image Container */}
-          <div className="aspect-square w-full rounded-2xl bg-zinc-50 border border-zinc-100 flex items-center justify-center relative overflow-hidden group">
+          <div className="aspect-square w-full rounded-2xl bg-zinc-50 dark:bg-zinc-950 border border-zinc-100 dark:border-zinc-800 flex items-center justify-center relative overflow-hidden group">
             {image ? (
               <Image
                 src={image}
@@ -110,7 +110,7 @@ export function ProductCard({
                 sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
               />
             ) : (
-              <svg className="w-12 h-12 text-zinc-300 group-hover:text-zinc-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg className="w-12 h-12 text-zinc-300 dark:text-zinc-700 group-hover:text-zinc-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
               </svg>
             )}
@@ -142,14 +142,14 @@ export function ProductCard({
 
           {/* Product Info Block */}
           <div className="space-y-1.5">
-            <div className="flex justify-between items-center text-[10px] font-bold text-zinc-400 uppercase font-mono tracking-wide">
+            <div className="flex justify-between items-center text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase font-mono tracking-wide">
               <span>SKU: {sku || "N/A"}</span>
-              {category && <span className="text-indigo-600 lowercase">{category}</span>}
+              {category && <span className="text-indigo-650 dark:text-indigo-400 lowercase">{category}</span>}
             </div>
-            <h3 className="text-sm font-bold text-zinc-950 line-clamp-1 group-hover:text-indigo-655 transition-colors">
+            <h3 className="text-sm font-bold text-zinc-950 dark:text-zinc-50 line-clamp-1 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
               {title}
             </h3>
-            <p className="text-[11px] text-zinc-450 line-clamp-2 leading-relaxed h-8">
+            <p className="text-[11px] text-zinc-450 dark:text-zinc-400 line-clamp-2 leading-relaxed h-8">
               {description || "No description provided."}
             </p>
           </div>
@@ -178,9 +178,9 @@ export function ProductCard({
           <div className="flex items-baseline justify-between pt-1">
             <div className="flex flex-col text-left">
               <div className="flex items-baseline gap-2">
-                <span className="text-base font-black text-indigo-700">${price.toFixed(2)}</span>
+                <span className="text-base font-black text-indigo-700 dark:text-indigo-400">${price.toFixed(2)}</span>
                 {compareAtPrice && compareAtPrice > price && (
-                  <span className="text-xs font-semibold text-zinc-400 line-through">
+                  <span className="text-xs font-semibold text-zinc-400 dark:text-zinc-500 line-through">
                     ${compareAtPrice.toFixed(2)}
                   </span>
                 )}
@@ -188,13 +188,13 @@ export function ProductCard({
               {/* Show Amazon-style green badge on the card if a coupon is available */}
               {availableCoupons.length > 0 && (
                 <div className="mt-1 flex items-center gap-1">
-                  <span className="inline-block px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-700 text-[8px] font-extrabold uppercase border border-emerald-200">
+                  <span className="inline-block px-1.5 py-0.5 rounded bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 text-[8px] font-extrabold uppercase border border-emerald-200 dark:border-emerald-900/30">
                     🏷️ Coupon Save {availableCoupons[0].discount_type === "percentage" ? `${parseFloat(availableCoupons[0].discount_value)}%` : `$${parseFloat(availableCoupons[0].discount_value).toFixed(2)}`}
                   </span>
                 </div>
               )}
             </div>
-            <span className={`text-[10px] font-bold ${stock > 0 ? "text-emerald-600" : "text-red-500"}`}>
+            <span className={`text-[10px] font-bold ${stock > 0 ? "text-emerald-600 dark:text-emerald-400" : "text-red-500"}`}>
               {stock > 0 ? `In Stock (${stock})` : "Out of Stock"}
             </span>
           </div>
@@ -213,8 +213,8 @@ export function ProductCard({
               }
             }}
             className={`w-full h-10 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer ${stock > 0 && !isAdding
-              ? "bg-indigo-50 hover:bg-indigo-100/80 text-indigo-700 active:scale-95"
-              : "bg-zinc-100 text-zinc-400 cursor-not-allowed"
+              ? "bg-indigo-50 dark:bg-indigo-950/50 hover:bg-indigo-100/80 dark:hover:bg-indigo-900/50 text-indigo-700 dark:text-indigo-400 active:scale-95"
+              : "bg-zinc-100 dark:bg-zinc-800 text-zinc-400 dark:text-zinc-550 cursor-not-allowed"
               }`}
           >
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -496,24 +496,24 @@ export function StatsCard({
   icon,
 }: StatsCardProps) {
   return (
-    <div className="rounded-2xl border border-zinc-200 bg-white p-6 flex items-center justify-between hover:shadow-md transition-shadow">
+    <div className="rounded-2xl border border-zinc-200/60 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-6 flex items-center justify-between hover-neon-glow">
       <div className="space-y-1.5 text-left">
-        <span className="text-xs font-semibold text-zinc-500">{label}</span>
-        <h3 className="text-2xl font-extrabold text-zinc-900 tracking-tight">{value}</h3>
+        <span className="text-xs font-semibold text-zinc-500 dark:text-zinc-400">{label}</span>
+        <h3 className="text-2xl font-extrabold text-zinc-900 dark:text-zinc-50 tracking-tight">{value}</h3>
         {change && (
           <div className="flex items-center gap-1">
             <span
-              className={`text-xs font-bold ${isPositive ? "text-emerald-600" : "text-red-600"
+              className={`text-xs font-bold ${isPositive ? "text-emerald-600 dark:text-emerald-400" : "text-red-600 dark:text-red-400"
                 }`}
             >
-              {isPositive ? "+" : ""}{change}
+              {change}
             </span>
-            <span className="text-xs text-zinc-400">from last month</span>
+            <span className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500">vs last month</span>
           </div>
         )}
       </div>
       {icon && (
-        <div className="w-12 h-12 rounded-xl bg-indigo-50/80 text-indigo-650 flex items-center justify-center">
+        <div className="w-12 h-12 rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-150 dark:border-zinc-700/60 flex items-center justify-center text-zinc-500 dark:text-zinc-400">
           {icon}
         </div>
       )}

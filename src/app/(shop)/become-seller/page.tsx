@@ -91,18 +91,18 @@ export default function BecomeSellerPage() {
   ];
 
   return (
-    <div className="w-full bg-white font-sans">
+    <div className="w-full bg-white dark:bg-zinc-950 text-zinc-900 dark:text-zinc-50 transition-colors duration-300 font-sans">
       {/* Hero Section */}
-      <section className="relative py-20 bg-linear-to-b from-indigo-50/50 to-white overflow-hidden border-b border-zinc-100">
+      <section className="relative py-20 bg-linear-to-b from-indigo-50/50 dark:from-indigo-950/20 to-white dark:to-zinc-950 overflow-hidden border-b border-zinc-100 dark:border-zinc-800">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-indigo-100/40 via-transparent to-transparent pointer-events-none" />
         <div className="max-w-7xl mx-auto px-6 text-center space-y-6 max-w-4xl mx-auto">
-          <span className="inline-block px-3.5 py-1 rounded-full bg-indigo-50 text-indigo-700 text-xs font-black uppercase tracking-wider">
+          <span className="inline-block px-3.5 py-1 rounded-full bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-400 text-xs font-black uppercase tracking-wider">
             Become a Verified Merchant
           </span>
-          <h1 className="text-4xl sm:text-5xl md:text-6xl font-black text-zinc-950 tracking-tight leading-none">
-            Start your digital shop in <span className="text-indigo-650">Minutes</span>
+          <h1 className="text-4xl sm:text-5xl md:text-6xl font-black text-zinc-950 dark:text-zinc-50 tracking-tight leading-none">
+            Start your digital shop in <span className="text-indigo-650 dark:text-indigo-400">Minutes</span>
           </h1>
-          <p className="text-base sm:text-lg text-zinc-500 leading-relaxed max-w-2xl mx-auto">
+          <p className="text-base sm:text-lg text-zinc-500 dark:text-zinc-400 leading-relaxed max-w-2xl mx-auto">
             VendorNest provides the complete multi-tenant infrastructure. Host your storefront, automate customer split payments, and write copy with integrated AI tools.
           </p>
 
@@ -118,7 +118,7 @@ export default function BecomeSellerPage() {
                 </Link>
                 <Link
                   href="/login"
-                  className="px-8 py-4 rounded-2xl bg-zinc-100 hover:bg-zinc-200 text-zinc-800 text-xs font-black shadow-xs transition-all active:scale-95 cursor-pointer"
+                  className="px-8 py-4 rounded-2xl bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-zinc-800 dark:text-zinc-200 text-xs font-black shadow-xs transition-all active:scale-95 cursor-pointer"
                 >
                   Login to Merchant Portal
                 </Link>
@@ -152,10 +152,10 @@ export default function BecomeSellerPage() {
       {/* Benefits / Features Grid */}
       <section className="py-20 max-w-7xl mx-auto px-6">
         <div className="text-center max-w-2xl mx-auto space-y-4 mb-16">
-          <h2 className="text-3xl font-black text-zinc-950 tracking-tight">
-            Why sell on <span className="text-indigo-600 font-extrabold">VendorNest</span>?
+          <h2 className="text-3xl font-black text-zinc-955 dark:text-zinc-50 tracking-tight">
+            Why sell on <span className="text-indigo-600 dark:text-indigo-400 font-extrabold">VendorNest</span>?
           </h2>
-          <p className="text-sm text-zinc-500">
+          <p className="text-sm text-zinc-500 dark:text-zinc-400">
             SaaS infrastructure built to remove developer complexity and help you sell products globally with zero overhead.
           </p>
         </div>
@@ -164,14 +164,14 @@ export default function BecomeSellerPage() {
           {benefits.map((benefit, idx) => (
             <div
               key={idx}
-              className="p-6 rounded-3xl border border-zinc-200 bg-white hover:border-zinc-350 hover:shadow-xs transition-all duration-300 flex items-start gap-4 text-left"
+              className="p-6 rounded-3xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:border-zinc-350 dark:hover:border-zinc-700 hover:shadow-xs transition-all duration-300 flex items-start gap-4 text-left"
             >
-              <div className="p-3 rounded-xl bg-indigo-50 shrink-0">
+              <div className="p-3 rounded-xl bg-indigo-50 dark:bg-indigo-950/40 shrink-0">
                 {benefit.icon}
               </div>
               <div className="space-y-1">
-                <h3 className="text-sm font-extrabold text-zinc-900">{benefit.title}</h3>
-                <p className="text-xs text-zinc-500 leading-relaxed">{benefit.desc}</p>
+                <h3 className="text-sm font-extrabold text-zinc-905 dark:text-zinc-50">{benefit.title}</h3>
+                <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">{benefit.desc}</p>
               </div>
             </div>
           ))}
@@ -179,11 +179,11 @@ export default function BecomeSellerPage() {
       </section>
 
       {/* How it works Timeline */}
-      <section className="py-20 bg-zinc-50 border-t border-b border-zinc-200">
+      <section className="py-20 bg-zinc-50 dark:bg-zinc-950 border-t border-b border-zinc-200 dark:border-zinc-800">
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center max-w-2xl mx-auto space-y-4 mb-16">
-            <h2 className="text-3xl font-black text-zinc-950 tracking-tight">Onboarding Timeline</h2>
-            <p className="text-sm text-zinc-500">
+            <h2 className="text-3xl font-black text-zinc-955 dark:text-zinc-50 tracking-tight">Onboarding Timeline</h2>
+            <p className="text-sm text-zinc-500 dark:text-zinc-400">
               Four simple phases to register your company and start collecting orders.
             </p>
           </div>
@@ -192,14 +192,14 @@ export default function BecomeSellerPage() {
             {steps.map((step, idx) => (
               <div
                 key={idx}
-                className="bg-white border border-zinc-200 rounded-3xl p-6 text-left relative shadow-xs hover:border-zinc-300 transition-colors"
+                className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl p-6 text-left relative shadow-xs hover:border-zinc-300 dark:hover:border-zinc-700 transition-colors"
               >
-                <span className="text-3xl font-black text-indigo-100 absolute top-4 right-4 font-mono leading-none">
+                <span className="text-3xl font-black text-indigo-100 dark:text-indigo-950 absolute top-4 right-4 font-mono leading-none">
                   {step.number}
                 </span>
                 <div className="space-y-2 mt-4">
-                  <h3 className="text-sm font-extrabold text-zinc-950 tracking-tight">{step.title}</h3>
-                  <p className="text-xs text-zinc-500 leading-relaxed">{step.desc}</p>
+                  <h3 className="text-sm font-extrabold text-zinc-950 dark:text-zinc-50 tracking-tight">{step.title}</h3>
+                  <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">{step.desc}</p>
                 </div>
               </div>
             ))}
@@ -209,20 +209,20 @@ export default function BecomeSellerPage() {
 
       {/* Pricing CTA */}
       <section className="py-20 max-w-5xl mx-auto px-6 text-center space-y-6">
-        <h2 className="text-3xl font-black text-zinc-950 tracking-tight">Ready to launch your store?</h2>
-        <p className="text-sm text-zinc-500 max-w-lg mx-auto leading-relaxed">
+        <h2 className="text-3xl font-black text-zinc-950 dark:text-zinc-50 tracking-tight">Ready to launch your store?</h2>
+        <p className="text-sm text-zinc-500 dark:text-zinc-400 max-w-lg mx-auto leading-relaxed">
           Start for free on our Starter tier (only paying platform commission on actual transactions) and scale as you grow. No setup fees or monthly obligations.
         </p>
         <div className="pt-4 flex justify-center gap-4">
           <Link
             href="/seller/pricing"
-            className="px-6 py-3 rounded-2xl bg-zinc-950 hover:bg-zinc-900 text-white text-xs font-black shadow-sm transition-all cursor-pointer"
+            className="px-6 py-3 rounded-2xl bg-zinc-950 hover:bg-zinc-900 dark:bg-indigo-650 dark:hover:bg-indigo-700 text-white text-xs font-black shadow-sm transition-all cursor-pointer"
           >
             Explore Pricing Plans
           </Link>
           <Link
             href="/seller/faq"
-            className="px-6 py-3 rounded-2xl bg-white hover:bg-zinc-100 text-zinc-800 text-xs font-black border border-zinc-200 transition-all cursor-pointer"
+            className="px-6 py-3 rounded-2xl bg-white dark:bg-zinc-900 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-800 dark:text-zinc-200 text-xs font-black border border-zinc-200 dark:border-zinc-800 transition-all cursor-pointer"
           >
             Read Seller FAQ
           </Link>

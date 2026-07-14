@@ -95,7 +95,7 @@ export default function HowItWorks() {
   const steps = activeTab === "seller" ? sellerSteps : shopperSteps;
 
   return (
-    <section className="relative py-24 bg-white border-t border-zinc-200/80 overflow-hidden font-sans">
+    <section className="relative py-24 bg-white dark:bg-zinc-950 border-t border-zinc-200/80 dark:border-zinc-800/60 overflow-hidden font-sans transition-colors duration-300">
       {/* Decorative background glow */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[300px] rounded-full bg-linear-to-r from-indigo-500/5 to-purple-500/5 blur-[120px] pointer-events-none" />
 
@@ -103,24 +103,24 @@ export default function HowItWorks() {
         
         {/* Header Block */}
         <div className="text-center max-w-2xl mx-auto space-y-4 mb-16">
-          <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-zinc-950">
+          <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-zinc-950 dark:text-zinc-50">
             How It Works <br />
             <span className="bg-linear-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
               কিভাবে এটি কাজ করে
             </span>
           </h2>
-          <p className="text-sm sm:text-base text-zinc-500 font-medium">
+          <p className="text-sm sm:text-base text-zinc-550 dark:text-zinc-400 font-medium">
             Scale your business as a vendor or enjoy a premium shopping experience as a buyer using the VendorNest platform.
           </p>
 
           {/* Toggle Switcher */}
-          <div className="inline-flex p-1 bg-zinc-100 rounded-full border border-zinc-200/60 mt-4 select-none relative">
+          <div className="inline-flex p-1 bg-zinc-100 dark:bg-zinc-900 rounded-full border border-zinc-200/60 dark:border-zinc-800 mt-4 select-none relative">
             <button
               onClick={() => setActiveTab("seller")}
               className={`px-6 py-2 rounded-full text-xs font-bold transition-all duration-300 cursor-pointer ${
                 activeTab === "seller"
                   ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/10"
-                  : "text-zinc-600 hover:text-zinc-950"
+                  : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-zinc-100"
               }`}
             >
               💼 Open Shop (বিক্রেতা)
@@ -130,7 +130,7 @@ export default function HowItWorks() {
               className={`px-6 py-2 rounded-full text-xs font-bold transition-all duration-300 cursor-pointer ${
                 activeTab === "shopper"
                   ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/10"
-                  : "text-zinc-600 hover:text-zinc-950"
+                  : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-zinc-100"
               }`}
             >
               🛍️ Shop Online (ক্রেতা)
@@ -151,25 +151,25 @@ export default function HowItWorks() {
               
               {/* Icon Container with step number */}
               <div className="relative">
-                <div className="w-20 h-20 rounded-3xl bg-linear-to-tr from-zinc-50 to-white border border-zinc-200/80 shadow-lg flex items-center justify-center text-indigo-600 group-hover:text-white group-hover:from-indigo-600 group-hover:to-purple-600 group-hover:border-transparent transition-all duration-300 group-hover:-translate-y-1">
+                <div className="w-20 h-20 rounded-3xl bg-linear-to-tr from-zinc-50 to-white dark:from-zinc-900 dark:to-zinc-800 border border-zinc-200/80 dark:border-zinc-700/60 shadow-lg flex items-center justify-center text-indigo-600 dark:text-indigo-400 group-hover:text-white group-hover:from-indigo-600 group-hover:to-purple-600 group-hover:border-transparent transition-all duration-300 group-hover:-translate-y-1">
                   {step.icon}
                 </div>
                 {/* Step Number Badge */}
-                <div className="absolute -top-2 -right-2 w-7 h-7 rounded-full bg-zinc-900 text-white font-extrabold text-[10px] flex items-center justify-center border-2 border-white shadow">
+                <div className="absolute -top-2 -right-2 w-7 h-7 rounded-full bg-zinc-900 dark:bg-zinc-800 text-white font-extrabold text-[10px] flex items-center justify-center border-2 border-white dark:border-zinc-900 shadow">
                   {step.number}
                 </div>
               </div>
 
               {/* Step Text Details */}
               <div className="space-y-2 max-w-sm px-4">
-                <h3 className="text-lg font-bold text-zinc-900 transition-colors group-hover:text-indigo-600">
+                <h3 className="text-lg font-bold text-zinc-900 dark:text-zinc-100 transition-colors group-hover:text-indigo-600 dark:group-hover:text-indigo-400">
                   {step.title} <br className="hidden sm:inline" />
-                  <span className="text-xs font-semibold text-zinc-400">({step.titleBn})</span>
+                  <span className="text-xs font-semibold text-zinc-400 dark:text-zinc-500">({step.titleBn})</span>
                 </h3>
-                <p className="text-xs text-zinc-500 font-medium leading-relaxed">
+                <p className="text-xs text-zinc-500 dark:text-zinc-400 font-medium leading-relaxed">
                   {step.desc}
                 </p>
-                <p className="text-[11px] text-zinc-450 leading-relaxed italic bg-zinc-50 p-2.5 rounded-xl border border-zinc-100 group-hover:bg-indigo-50/20 group-hover:border-indigo-100/30 transition-all font-semibold">
+                <p className="text-[11px] text-zinc-700 dark:text-zinc-300 leading-relaxed italic bg-zinc-50 dark:bg-zinc-900 p-2.5 rounded-xl border border-zinc-100 dark:border-zinc-800 group-hover:bg-indigo-50/20 dark:group-hover:bg-indigo-950/20 group-hover:border-indigo-100/30 dark:group-hover:border-indigo-900/30 transition-all font-semibold">
                   {step.descBn}
                 </p>
               </div>

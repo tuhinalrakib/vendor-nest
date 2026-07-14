@@ -327,7 +327,7 @@ export default function AIFeatureShowcase() {
   ];
 
   return (
-    <section className="relative py-24 bg-zinc-50 border-t border-zinc-200/80 overflow-hidden font-sans">
+    <section className="relative py-24 bg-zinc-50 dark:bg-zinc-950 border-t border-zinc-200/80 dark:border-zinc-800/60 overflow-hidden font-sans transition-colors duration-300">
       {/* Decorative Blur Backgrounds */}
       <div className="absolute top-1/4 right-0 w-[500px] h-[500px] rounded-full bg-purple-500/5 blur-[120px] pointer-events-none" />
       <div className="absolute bottom-1/4 left-0 w-[500px] h-[500px] rounded-full bg-indigo-500/5 blur-[120px] pointer-events-none" />
@@ -336,16 +336,16 @@ export default function AIFeatureShowcase() {
         
         {/* Section Header */}
         <div className="text-center max-w-3xl mx-auto space-y-5 mb-16">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 border border-indigo-100 text-xs font-bold text-indigo-700 select-none">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-100 dark:border-indigo-900/40 text-xs font-bold text-indigo-700 dark:text-indigo-400 select-none">
             ✨ Platform intelligence
           </div>
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-zinc-950 leading-tight">
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-zinc-955 dark:text-zinc-50 leading-tight">
             Supercharge Commerce With <br className="hidden sm:inline" />
             <span className="bg-linear-to-r from-indigo-600 via-purple-600 to-indigo-700 bg-clip-text text-transparent">
               Integrated AI Engines
             </span>
           </h2>
-          <p className="text-base sm:text-lg text-zinc-500 max-w-2xl mx-auto font-medium">
+          <p className="text-base sm:text-lg text-zinc-500 dark:text-zinc-400 max-w-2xl mx-auto font-medium">
             VendorNest comes standard with pre-built, production-ready AI models to optimize conversion, generate descriptions, and guide shoppers instantly.
           </p>
         </div>
@@ -368,8 +368,8 @@ export default function AIFeatureShowcase() {
                   }}
                   className={`text-left p-6 rounded-2xl border transition-all duration-300 cursor-pointer relative overflow-hidden group ${
                     isActive
-                      ? "bg-white border-zinc-200/90 shadow-xl shadow-indigo-600/5 scale-[1.02] z-10"
-                      : "bg-transparent border-transparent hover:bg-zinc-100/60 hover:border-zinc-200/50"
+                      ? "bg-white dark:bg-zinc-900 border-zinc-200/90 dark:border-zinc-800 shadow-xl shadow-indigo-600/5 scale-[1.02] z-10"
+                      : "bg-transparent border-transparent hover:bg-zinc-100/60 dark:hover:bg-zinc-900/40 hover:border-zinc-200/50 dark:hover:border-zinc-800/50"
                   }`}
                 >
                   {/* Glowing active indicator dot */}
@@ -381,22 +381,22 @@ export default function AIFeatureShowcase() {
                     <div className={`p-3 rounded-xl shrink-0 transition-colors ${
                       isActive 
                         ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/10" 
-                        : "bg-zinc-100 text-zinc-500 group-hover:bg-zinc-200/80 group-hover:text-zinc-700"
+                        : "bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400 group-hover:bg-zinc-200/80 dark:group-hover:bg-zinc-700/80 group-hover:text-zinc-700 dark:group-hover:text-zinc-200"
                     }`}>
                       {feat.icon}
                     </div>
                     <div className="space-y-1.5">
                       <div className="flex items-center gap-2">
-                        <h4 className="text-base font-extrabold text-zinc-900">{feat.name}</h4>
+                        <h4 className="text-base font-extrabold text-zinc-900 dark:text-zinc-100">{feat.name}</h4>
                         <span className={`text-[9px] font-extrabold px-2 py-0.5 rounded-full uppercase tracking-wider ${
                           isActive 
                             ? "bg-indigo-650/15 text-indigo-700" 
-                            : "bg-zinc-200/60 text-zinc-500"
+                            : "bg-zinc-200/60 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400"
                         }`}>
                           {feat.badge}
                         </span>
                       </div>
-                      <p className="text-xs text-zinc-500 leading-relaxed font-medium">
+                      <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed font-medium">
                         {feat.description}
                       </p>
                     </div>

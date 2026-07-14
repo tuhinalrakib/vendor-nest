@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import api from "@/lib/api";
 import Link from "next/link";
+import { useParams } from "next/navigation";
 
 interface CategoryShowcase {
   id: string;
@@ -14,19 +15,26 @@ interface CategoryShowcase {
   icon: React.ReactNode;
 }
 
-export default function CategoriesCatalog() {
+export default function TenantCategoriesCatalog() {
+  const params = useParams();
+  const domain = (params.domain as string) || "";
+
+  const vendorName = domain
+    .split("-")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
+
   const [categories, setCategories] = useState<CategoryShowcase[]>([]);
   const [filteredCategories, setFilteredCategories] = useState<CategoryShowcase[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
 
-  // High-fidelity fallback categories
   const fallbackCategories: CategoryShowcase[] = [
     {
       id: "electronics",
       name: "Electronics",
       slug: "electronics",
-      productCount: 15,
+      productCount: 0,
       bannerGradient: "from-blue-500 to-indigo-650",
       description: "Laptops, high-performance headphones, charging adapters & tech tools.",
       icon: (
@@ -39,7 +47,7 @@ export default function CategoriesCatalog() {
       id: "fashion",
       name: "Fashion",
       slug: "fashion",
-      productCount: 28,
+      productCount: 0,
       bannerGradient: "from-pink-500 to-rose-600",
       description: "Apparel, waterproof urban jackets, footwear & designer accessories.",
       icon: (
@@ -52,7 +60,7 @@ export default function CategoriesCatalog() {
       id: "home",
       name: "Home & Living",
       slug: "home",
-      productCount: 12,
+      productCount: 0,
       bannerGradient: "from-emerald-500 to-teal-600",
       description: "Organic hand-poured candles, LED desk lamps & room aesthetics.",
       icon: (
@@ -72,13 +80,16 @@ export default function CategoriesCatalog() {
           api.get("/api/products/")
         ]);
 
+        const sellerProducts = (prodRes.data || []).filter(
+          (p: any) =>
+            p.seller_shop &&
+            p.seller_shop.toLowerCase().replace(/\s+/g, "-") === domain.toLowerCase()
+        );
+
         if (catRes.data && catRes.data.length > 0) {
-          const productsList = prodRes.data || [];
-          
           const extracted: CategoryShowcase[] = catRes.data.map((cat: any, idx: number) => {
-            const count = productsList.filter((p: any) => p.category === cat.id).length;
+            const count = sellerProducts.filter((p: any) => p.category === cat.id).length;
             
-            // Assign gradient styles based on category slug/name
             const gradients = [
               "from-blue-500 to-indigo-650",
               "from-pink-500 to-rose-600",
@@ -88,7 +99,6 @@ export default function CategoriesCatalog() {
             ];
             const selectGradient = gradients[idx % gradients.length];
 
-            // Assign icons based on keyword
             const nameLower = cat.name.toLowerCase();
             let iconElement = (
               <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -122,13 +132,16 @@ export default function CategoriesCatalog() {
               slug: cat.slug || cat.id,
               productCount: count,
               bannerGradient: selectGradient,
-              description: `Explore quality collections under the ${cat.name} marketplace department directory.`,
+              description: `Explore quality collections under the ${cat.name} department in our store.`,
               icon: iconElement
             };
           });
 
-          setCategories(extracted);
-          setFilteredCategories(extracted);
+          // Only display categories that actually contain products for this seller to keep storefront clean
+          const activeCategories = extracted.filter(cat => cat.productCount > 0);
+          
+          setCategories(activeCategories.length > 0 ? activeCategories : extracted);
+          setFilteredCategories(activeCategories.length > 0 ? activeCategories : extracted);
         } else {
           setCategories(fallbackCategories);
           setFilteredCategories(fallbackCategories);
@@ -142,10 +155,11 @@ export default function CategoriesCatalog() {
       }
     };
 
-    fetchCategoriesData();
-  }, []);
+    if (domain) {
+      fetchCategoriesData();
+    }
+  }, [domain]);
 
-  // Filter categories by search input
   useEffect(() => {
     const query = searchQuery.trim().toLowerCase();
     if (query === "") {
@@ -162,16 +176,13 @@ export default function CategoriesCatalog() {
 
   return (
     <div className="bg-zinc-50 dark:bg-zinc-950 min-h-screen font-sans pb-20 transition-colors duration-300">
-      {/* Background glowing decorations */}
-      <div className="absolute top-0 right-1/4 w-[400px] h-[400px] bg-indigo-500/5 blur-[120px] pointer-events-none" />
-      <div className="absolute top-1/2 left-1/4 w-[500px] h-[500px] bg-purple-500/5 blur-[130px] pointer-events-none" />
-
       {/* Hero Banner Header */}
       <div className="bg-white dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-800 py-12 text-left relative overflow-hidden">
         <div className="max-w-7xl mx-auto px-6 sm:px-8">
-          <h1 className="text-3xl font-extrabold text-zinc-955 dark:text-zinc-50 tracking-tight">Marketplace Departments</h1>
-          <p className="text-sm font-semibold text-zinc-400 dark:text-zinc-550 mt-1 max-w-xl">
-            Browse our curated collections of items. Filter the marketplace by focus area to find exactly what you need.
+          <span className="text-[10px] font-extrabold text-indigo-600 dark:text-indigo-400 uppercase tracking-widest">Departments</span>
+          <h1 className="text-3xl font-extrabold text-zinc-950 dark:text-zinc-50 tracking-tight mt-1">{vendorName} Categories</h1>
+          <p className="text-sm font-semibold text-zinc-400 dark:text-zinc-500 mt-1 max-w-xl">
+            Browse our curated collections of items. Filter our store catalog by department to find exactly what you need.
           </p>
         </div>
       </div>
@@ -189,85 +200,64 @@ export default function CategoriesCatalog() {
             </span>
             <input
               type="text"
-              placeholder="Search category departments..."
+              placeholder="Search store categories..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full h-11 pl-11 pr-4 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 focus:border-indigo-650 focus:bg-white dark:focus:bg-zinc-900 text-zinc-900 dark:text-zinc-50 rounded-2xl text-sm font-semibold outline-none transition-all"
+              className="w-full h-11 pl-11 pr-4 bg-zinc-50 dark:bg-zinc-950/50 border border-zinc-200 dark:border-zinc-800 focus:border-indigo-650 focus:bg-white dark:focus:bg-zinc-900 text-zinc-900 dark:text-zinc-200 rounded-2xl text-sm font-semibold outline-none transition-all"
             />
           </div>
         </div>
 
         {/* Loading Spinner */}
         {isLoading ? (
-          <div className="py-24 flex flex-col items-center justify-center space-y-4">
-            <div className="w-10 h-10 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
-            <span className="text-xs text-zinc-550 dark:text-zinc-400 font-bold">Querying catalog departments...</span>
+          <div className="flex justify-center items-center py-20">
+            <div className="w-8 h-8 border-3 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
           </div>
         ) : filteredCategories.length === 0 ? (
-          <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl p-16 text-center mt-8 shadow-xs max-w-xl mx-auto space-y-4">
-            <div className="w-16 h-16 rounded-full bg-zinc-50 dark:bg-zinc-950 flex items-center justify-center text-zinc-400 mx-auto">
-              <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-            </div>
-            <div className="space-y-1">
-              <h3 className="text-base font-extrabold text-zinc-955 dark:text-zinc-50">No categories found</h3>
-              <p className="text-xs font-semibold text-zinc-400 dark:text-zinc-500">
-                We couldn't find any category department matching your search keywords.
-              </p>
-            </div>
+          <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl p-16 text-center mt-6 shadow-xs max-w-md mx-auto space-y-3 text-zinc-900 dark:text-zinc-200">
+            <svg className="w-12 h-12 text-zinc-400 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <h3 className="text-base font-extrabold">No categories found</h3>
+            <p className="text-xs text-zinc-400">
+              No categories matched your search keywords.
+            </p>
           </div>
         ) : (
-          /* Categories Grid Layout */
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mt-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-8">
             {filteredCategories.map((cat) => (
-              <div
+              <Link
                 key={cat.id}
-                className="bg-white dark:bg-zinc-900 border border-zinc-205 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 rounded-3xl p-6 text-left flex flex-col justify-between hover:shadow-xl transition-all duration-300 group relative overflow-hidden hover-neon-glow"
+                href={`/products?category=${cat.id}`}
+                className="group relative h-48 rounded-3xl overflow-hidden border border-zinc-200 dark:border-zinc-800/80 shadow-xs flex flex-col justify-between p-6 transition-all duration-300 hover:shadow-lg hover:scale-[1.01]"
               >
-                {/* Floating ambient glow corner */}
-                <div className={`absolute -right-4 -top-4 w-20 h-20 bg-linear-to-tr ${cat.bannerGradient} opacity-5 group-hover:opacity-10 transition-opacity rounded-full blur-xl pointer-events-none`} />
+                {/* Background decorative gradient */}
+                <div className={`absolute inset-0 bg-linear-to-br ${cat.bannerGradient} opacity-5 group-hover:opacity-10 transition-opacity duration-300`} />
+                <div className={`absolute -right-10 -bottom-10 w-36 h-36 bg-linear-to-br ${cat.bannerGradient} opacity-10 rounded-full blur-xl group-hover:scale-110 transition-transform duration-300`} />
 
-                <div className="space-y-6">
-                  {/* Category Header with Icon */}
-                  <div className="flex items-center gap-4">
-                    <div className={`w-14 h-14 rounded-2xl bg-linear-to-tr ${cat.bannerGradient} text-white flex items-center justify-center shadow-md shadow-indigo-500/10 group-hover:scale-105 transition-transform duration-300`}>
-                      {cat.icon}
-                    </div>
-                    <div className="text-left space-y-0.5">
-                      <h3 className="text-base font-extrabold text-zinc-955 dark:text-zinc-50 group-hover:text-indigo-650 dark:group-hover:text-indigo-400 transition-colors">
-                        {cat.name}
-                      </h3>
-                      <p className="text-[10px] font-bold text-zinc-400 dark:text-zinc-550 uppercase tracking-widest">
-                        {cat.productCount} Active Items
-                      </p>
-                    </div>
+                {/* Card Header (Icon & Badge Count) */}
+                <div className="flex justify-between items-start z-10">
+                  <div className={`p-3 rounded-2xl bg-linear-to-br ${cat.bannerGradient} text-white shadow-xs group-hover:scale-105 transition-transform duration-200`}>
+                    {cat.icon}
                   </div>
+                  <span className="px-3 py-1 rounded-full text-[10px] font-bold bg-zinc-100 dark:bg-zinc-900 border border-zinc-200/80 dark:border-zinc-800 text-zinc-650 dark:text-zinc-400 group-hover:border-indigo-200 dark:group-hover:border-indigo-900/50 group-hover:text-indigo-650 dark:group-hover:text-indigo-400 transition-colors">
+                    {cat.productCount} {cat.productCount === 1 ? 'Product' : 'Products'}
+                  </span>
+                </div>
 
-                  {/* Description */}
-                  <p className="text-xs sm:text-[13px] text-zinc-450 dark:text-zinc-400 leading-relaxed font-semibold">
+                {/* Card Footer (Name & Arrow) */}
+                <div className="space-y-1.5 z-10 text-left">
+                  <h2 className="text-lg font-bold text-zinc-900 dark:text-zinc-100 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+                    {cat.name}
+                  </h2>
+                  <p className="text-xs text-zinc-400 dark:text-zinc-550 font-medium leading-relaxed truncate">
                     {cat.description}
                   </p>
                 </div>
-
-                {/* Bottom CTA Browse Link */}
-                <div className="mt-6 pt-5 border-t border-zinc-100 dark:border-zinc-800">
-                  <Link
-                    href={`/products?category=${encodeURIComponent(cat.id)}`}
-                    className="w-full h-11 rounded-2xl bg-zinc-50 dark:bg-zinc-950 hover:bg-indigo-650 hover:text-white dark:hover:bg-indigo-600 text-zinc-800 dark:text-zinc-300 border border-zinc-205 dark:border-zinc-800 hover:border-transparent dark:hover:border-transparent font-bold text-xs flex items-center justify-center gap-2 transition-all cursor-pointer shadow-sm hover:shadow-md active:scale-[0.98]"
-                  >
-                    <span>Browse Collection</span>
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                    </svg>
-                  </Link>
-                </div>
-
-              </div>
+              </Link>
             ))}
           </div>
         )}
-
       </div>
     </div>
   );

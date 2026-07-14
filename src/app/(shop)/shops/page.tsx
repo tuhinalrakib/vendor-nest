@@ -259,16 +259,16 @@ export default function ShopsCatalog() {
   if(isLoading) return <DynamicLoading loadingText="Querying storefront network..." />;
 
   return (
-    <div className="bg-zinc-50 min-h-screen font-sans pb-20">
+    <div className="bg-zinc-50 dark:bg-zinc-950 min-h-screen font-sans pb-20 transition-colors duration-300">
       {/* Decorative ambient background glows */}
       <div className="absolute top-0 right-1/4 w-100 h-100 bg-indigo-500/5 blur-[120px] pointer-events-none" />
       <div className="absolute top-1/2 left-1/4 w-125 h-125 bg-purple-500/5 blur-[130px] pointer-events-none" />
 
       {/* Hero Banner Header */}
-      <div className="bg-white border-b border-zinc-200 py-12 text-left relative overflow-hidden">
+      <div className="bg-white dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-800 py-12 text-left relative overflow-hidden">
         <div className="max-w-7xl mx-auto px-6 sm:px-8">
-          <h1 className="text-3xl font-extrabold text-zinc-950 tracking-tight">Verified Storefronts</h1>
-          <p className="text-sm font-semibold text-zinc-400 mt-1 max-w-xl">
+          <h1 className="text-3xl font-extrabold text-zinc-950 dark:text-zinc-50 tracking-tight">Verified Storefronts</h1>
+          <p className="text-sm font-semibold text-zinc-400 dark:text-zinc-500 mt-1 max-w-xl">
             Explore and connect directly with independent global merchants. Enjoy unique product lines and direct customer support.
           </p>
         </div>
@@ -278,7 +278,7 @@ export default function ShopsCatalog() {
       <div className="max-w-7xl mx-auto px-6 sm:px-8 mt-10">
 
         {/* Filters Top Bar */}
-        <div className="bg-white border border-zinc-200 rounded-3xl p-5 shadow-xs">
+        <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl p-5 shadow-xs">
           {/* Search Box */}
           <div className="relative w-full">
             <span className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-zinc-400">
@@ -291,7 +291,7 @@ export default function ShopsCatalog() {
               placeholder="Search shops by name, brand, tag..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full h-11 pl-11 pr-4 bg-zinc-50 border border-zinc-200 focus:border-indigo-600 focus:bg-white rounded-2xl text-sm font-semibold outline-none transition-all"
+              className="w-full h-11 pl-11 pr-4 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 focus:border-indigo-650 focus:bg-white dark:focus:bg-zinc-900 text-zinc-900 dark:text-zinc-50 rounded-2xl text-sm font-semibold outline-none transition-all"
             />
           </div>
         </div>
@@ -302,7 +302,7 @@ export default function ShopsCatalog() {
           {showLeftArrow && (
             <button
               onClick={() => scroll(-240)}
-              className="absolute left-1 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white border border-zinc-200 shadow-lg flex items-center justify-center text-zinc-700 hover:text-indigo-600 hover:bg-zinc-50 transition-all z-20 cursor-pointer active:scale-95"
+              className="absolute left-1 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-lg flex items-center justify-center text-zinc-700 dark:text-zinc-300 hover:text-indigo-650 dark:hover:text-indigo-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-all z-20 cursor-pointer active:scale-95"
             >
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" />
@@ -314,7 +314,7 @@ export default function ShopsCatalog() {
           {showRightArrow && (
             <button
               onClick={() => scroll(240)}
-              className="absolute right-1 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white border border-zinc-200 shadow-lg flex items-center justify-center text-zinc-700 hover:text-indigo-600 hover:bg-zinc-50 transition-all z-20 cursor-pointer active:scale-95"
+              className="absolute right-1 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-lg flex items-center justify-center text-zinc-700 dark:text-zinc-300 hover:text-indigo-650 dark:hover:text-indigo-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-all z-20 cursor-pointer active:scale-95"
             >
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
@@ -323,8 +323,8 @@ export default function ShopsCatalog() {
           )}
 
           {/* Left & Right Fade Overlays */}
-          <div className="absolute left-0 top-0 bottom-0 w-12 bg-linear-to-r from-zinc-50 to-transparent pointer-events-none z-10 hidden sm:block" />
-          <div className="absolute right-0 top-0 bottom-0 w-12 bg-linear-to-l from-zinc-50 to-transparent pointer-events-none z-10 hidden sm:block" />
+          <div className="absolute left-0 top-0 bottom-0 w-12 bg-linear-to-r from-zinc-50 dark:from-zinc-950 to-transparent pointer-events-none z-10 hidden sm:block" />
+          <div className="absolute right-0 top-0 bottom-0 w-12 bg-linear-to-l from-zinc-50 dark:from-zinc-950 to-transparent pointer-events-none z-10 hidden sm:block" />
 
           <div
             ref={scrollContainerRef}
@@ -333,8 +333,8 @@ export default function ShopsCatalog() {
             <button
               onClick={() => setSelectedCategory("all")}
               className={`px-4.5 py-2.5 rounded-full text-xs font-bold transition-all border whitespace-nowrap cursor-pointer ${selectedCategory === "all"
-                  ? "bg-indigo-600 border-indigo-600 text-white shadow-md shadow-indigo-600/10"
-                  : "bg-white border-zinc-200 text-zinc-650 hover:bg-zinc-50"
+                  ? "bg-linear-to-r from-indigo-600 to-purple-650 text-white shadow-md shadow-indigo-600/20 scale-[1.02]"
+                  : "bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-650 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 hover:text-zinc-900 dark:hover:text-zinc-200"
                 }`}
             >
               All Categories
@@ -344,8 +344,8 @@ export default function ShopsCatalog() {
                 key={cat}
                 onClick={() => setSelectedCategory(cat)}
                 className={`px-4.5 py-2.5 rounded-full text-xs font-bold transition-all border whitespace-nowrap cursor-pointer ${selectedCategory.toLowerCase() === cat.toLowerCase()
-                    ? "bg-indigo-600 border-indigo-600 text-white shadow-md shadow-indigo-600/10"
-                    : "bg-white border-zinc-200 text-zinc-650 hover:bg-zinc-50"
+                    ? "bg-linear-to-r from-indigo-600 to-purple-650 text-white shadow-md shadow-indigo-600/20 scale-[1.02]"
+                    : "bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-650 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 hover:text-zinc-900 dark:hover:text-zinc-200"
                   }`}
               >
                 {cat}
@@ -356,14 +356,14 @@ export default function ShopsCatalog() {
 
         {/* Loading Spinner */}
         { filteredStores.length === 0 ? (
-          <div className="bg-white border border-zinc-200 rounded-3xl p-16 text-center mt-6 shadow-xs max-w-xl mx-auto space-y-4">
-            <div className="w-16 h-16 rounded-full bg-zinc-50 flex items-center justify-center text-zinc-400 mx-auto">
+          <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl p-16 text-center mt-6 shadow-xs max-w-xl mx-auto space-y-4">
+            <div className="w-16 h-16 rounded-full bg-zinc-50 dark:bg-zinc-950 flex items-center justify-center text-zinc-400 mx-auto">
               <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
             <div className="space-y-1">
-              <h3 className="text-base font-extrabold text-zinc-950">No shops found</h3>
+              <h3 className="text-base font-extrabold text-zinc-950 dark:text-zinc-550">No shops found</h3>
               <p className="text-xs font-semibold text-zinc-400">
                 We couldn't find any merchant matching your search filters.
               </p>
@@ -375,7 +375,7 @@ export default function ShopsCatalog() {
             {filteredStores.map((store) => (
               <div
                 key={store.id}
-                className="bg-white border border-zinc-205 hover:border-zinc-300 rounded-3xl overflow-hidden hover:shadow-xl transition-all duration-300 flex flex-col justify-between group"
+                className="bg-white dark:bg-zinc-900 border border-zinc-205 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 rounded-3xl overflow-hidden hover:shadow-xl transition-all duration-300 flex flex-col justify-between group hover-neon-glow"
               >
                 <div>
                   {/* Shop Banner Header */}
@@ -385,7 +385,7 @@ export default function ShopsCatalog() {
                   <div className="p-6 relative">
                     {/* Avatar Icon floating */}
                     <div className="absolute -top-12 left-6">
-                      <div className="w-16 h-16 rounded-2xl bg-white border border-zinc-150 shadow-md flex items-center justify-center font-extrabold text-xl group-hover:scale-105 transition-transform duration-300">
+                      <div className="w-16 h-16 rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-150 dark:border-zinc-800 shadow-md flex items-center justify-center font-extrabold text-xl group-hover:scale-105 transition-transform duration-300">
                         <div className={`w-[90%] h-[90%] rounded-xl bg-linear-to-tr ${store.bannerGradient} text-white flex items-center justify-center`}>
                           {store.avatarChar}
                         </div>
@@ -395,23 +395,23 @@ export default function ShopsCatalog() {
                     {/* Meta names info */}
                     <div className="pt-6 space-y-2 text-left">
                       <div className="flex justify-between items-start gap-4">
-                        <h3 className="text-base font-extrabold text-zinc-950 line-clamp-1 group-hover:text-indigo-650 transition-colors">
+                        <h3 className="text-base font-extrabold text-zinc-950 dark:text-zinc-50 line-clamp-1 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
                           {store.name}
                         </h3>
-                        <span className="shrink-0 inline-block text-[9px] font-bold text-indigo-600 bg-indigo-50 border border-indigo-100 px-2 py-0.5 rounded-full uppercase tracking-wider">
+                        <span className="shrink-0 inline-block text-[9px] font-bold text-indigo-650 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/50 border border-indigo-100 dark:border-indigo-900/40 px-2 py-0.5 rounded-full uppercase tracking-wider">
                           {store.category}
                         </span>
                       </div>
-                      <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">
+                      <p className="text-[10px] font-bold text-zinc-400 dark:text-zinc-550 uppercase tracking-wider">
                         Seller: {store.sellerName}
                       </p>
-                      <p className="text-xs text-zinc-450 line-clamp-2 leading-relaxed h-8 font-semibold">
+                      <p className="text-xs text-zinc-450 dark:text-zinc-400 line-clamp-2 leading-relaxed h-8 font-semibold">
                         {store.description}
                       </p>
                     </div>
 
                     {/* Quick reviews rating block */}
-                    <div className="mt-4 pt-4 border-t border-zinc-100 flex items-center justify-between text-xs font-semibold text-zinc-500">
+                    <div className="mt-4 pt-4 border-t border-zinc-100 dark:border-zinc-800 flex items-center justify-between text-xs font-semibold text-zinc-500 dark:text-zinc-450">
                       <div className="flex items-center gap-1">
                         <svg className="w-4 h-4 text-amber-500 fill-amber-500" viewBox="0 0 20 20">
                           <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
@@ -419,7 +419,7 @@ export default function ShopsCatalog() {
                         <span>{store.rating} ({20 + Math.floor(store.rating * 8)} reviews)</span>
                       </div>
                       <div>
-                        <span className="text-zinc-950 font-extrabold">{store.productCount}</span> active items
+                        <span className="text-zinc-950 dark:text-zinc-200 font-extrabold">{store.productCount}</span> active items
                       </div>
                     </div>
                   </div>
@@ -427,7 +427,7 @@ export default function ShopsCatalog() {
                   {/* Featured mini-thumbnails gallery */}
                   {store.featuredProducts.length > 0 && (
                     <div className="px-6 pb-6 pt-2 text-left">
-                      <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-2.5">Featured Catalog</p>
+                      <p className="text-[10px] font-bold text-zinc-400 dark:text-zinc-550 uppercase tracking-widest mb-2.5">Featured Catalog</p>
                       <div className="flex gap-3">
                         {store.featuredProducts.map((prod) => {
                           const imgUrl = prod.image
@@ -439,7 +439,7 @@ export default function ShopsCatalog() {
                             <Link
                               key={prod.id}
                               href={`/products?search=${encodeURIComponent(prod.name)}`}
-                              className="w-12 h-12 rounded-xl bg-zinc-50 border border-zinc-150 overflow-hidden flex items-center justify-center shrink-0 hover:border-indigo-500 hover:scale-105 transition-all relative"
+                              className="w-12 h-12 rounded-xl bg-zinc-50 dark:bg-zinc-950 border border-zinc-150 dark:border-zinc-800 overflow-hidden flex items-center justify-center shrink-0 hover:border-indigo-500 hover:scale-105 transition-all relative"
                               title={prod.name}
                             >
                               {imgUrl ? (
@@ -451,7 +451,7 @@ export default function ShopsCatalog() {
                                   className="object-cover"
                                 />
                               ) : (
-                                <svg className="w-5 h-5 text-zinc-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <svg className="w-5 h-5 text-zinc-300 dark:text-zinc-650" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                                 </svg>
                               )}
@@ -467,7 +467,7 @@ export default function ShopsCatalog() {
                 <div className="p-6 pt-0">
                   <Link
                     href={`/products?search=${encodeURIComponent(store.name)}`}
-                    className="w-full h-11 rounded-2xl bg-zinc-50 hover:bg-indigo-650 hover:text-white text-zinc-800 border hover:bg-indigo-600 border-zinc-200 hover:border-transparent font-bold text-xs flex items-center justify-center transition-all cursor-pointer shadow-sm hover:shadow-md active:scale-[0.98]"
+                    className="w-full h-11 rounded-2xl bg-zinc-50 dark:bg-zinc-950 hover:bg-indigo-650 hover:text-white dark:hover:bg-indigo-600 text-zinc-800 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-800 hover:border-transparent dark:hover:border-transparent font-bold text-xs flex items-center justify-center transition-all cursor-pointer shadow-sm hover:shadow-md active:scale-[0.98]"
                   >
                     View Catalog
                   </Link>

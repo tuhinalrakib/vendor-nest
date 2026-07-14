@@ -29,7 +29,7 @@ export default function Logo({ className = "", iconOnly = false, size = "md", li
 
   const logoIcon = (
     <div
-      className={`${currentSize.box} overflow-hidden flex items-center justify-center bg-zinc-50 border border-zinc-150 shadow-xs group-hover:scale-105 transition-transform duration-200 relative`}
+      className={`${currentSize.box} overflow-hidden flex items-center justify-center bg-zinc-50 dark:bg-zinc-900 border border-zinc-150 dark:border-zinc-800 shadow-xs group-hover:scale-105 transition-transform duration-200 relative`}
     >
       <Image
         src="/logo.png"
@@ -49,8 +49,8 @@ export default function Logo({ className = "", iconOnly = false, size = "md", li
   return (
     <Link href="/" className={`flex items-center gap-2.5 group ${className}`}>
       {logoIcon}
-      <span className={`font-bold tracking-tight ${light ? "text-white" : "text-zinc-950"} ${currentSize.text}`}>
-        Vendor<span className="text-indigo-600">Nest</span>
+      <span className={`font-bold tracking-tight ${light ? "text-white" : "text-zinc-955 dark:text-zinc-50"} ${currentSize.text}`}>
+        Vendor<span className="text-indigo-600 dark:text-indigo-500">Nest</span>
       </span>
     </Link>
   );

@@ -6,7 +6,7 @@ import Link from "next/link";
 import Swal from "sweetalert2";
 import { useAuth } from "@/lib/AuthContext";
 import { useCart } from "@/lib/CartContext";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import { ProductCard } from "@/components/cards";
 
 interface Category {
@@ -32,10 +32,17 @@ interface Product {
   seller?: string; // Seller profile UUID
 }
 
-export default function ProductsCatalog() {
+export default function TenantProductsCatalog() {
   const { isAuthenticated } = useAuth();
   const { addToCart } = useCart();
   const router = useRouter();
+  const params = useParams();
+  const domain = (params.domain as string) || "";
+
+  const vendorName = domain
+    .split("-")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
 
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -92,14 +99,22 @@ export default function ProductsCatalog() {
         api.get("/api/products/"),
         api.get("/api/categories/"),
       ]);
-      setProducts(prodRes.data);
+
+      // Filter products only belonging to this seller
+      const sellerProducts = prodRes.data.filter(
+        (p: any) =>
+          p.seller_shop &&
+          p.seller_shop.toLowerCase().replace(/\s+/g, "-") === domain.toLowerCase()
+      );
+
+      setProducts(sellerProducts);
       setCategories(catRes.data);
-      setFilteredProducts(prodRes.data);
+      setFilteredProducts(sellerProducts);
     } catch (err: any) {
       console.error("Failed to load catalog data:", err);
       Swal.fire({
         title: "Load Failed",
-        text: "Could not load marketplace catalog from server.",
+        text: "Could not load vendor catalog from server.",
         icon: "error",
         confirmButtonColor: "#4f46e5",
       });
@@ -109,15 +124,17 @@ export default function ProductsCatalog() {
   };
 
   useEffect(() => {
-    fetchData();
+    if (domain) {
+      fetchData();
+    }
     if (typeof window !== "undefined") {
-      const params = new URLSearchParams(window.location.search);
-      const searchVal = params.get("search");
-      const catVal = params.get("category");
+      const urlParams = new URLSearchParams(window.location.search);
+      const searchVal = urlParams.get("search");
+      const catVal = urlParams.get("category");
       if (searchVal) setSearchQuery(searchVal);
       if (catVal) setSelectedCategory(catVal);
     }
-  }, []);
+  }, [domain]);
 
   // Filter and Sort Logic
   useEffect(() => {
@@ -135,8 +152,7 @@ export default function ProductsCatalog() {
         (p) =>
           p.name.toLowerCase().includes(query) ||
           p.description.toLowerCase().includes(query) ||
-          (p.sku && p.sku.toLowerCase().includes(query)) ||
-          (p.seller_shop && p.seller_shop.toLowerCase().includes(query))
+          (p.sku && p.sku.toLowerCase().includes(query))
       );
     }
 
@@ -151,12 +167,6 @@ export default function ProductsCatalog() {
 
     setFilteredProducts(result);
   }, [selectedCategory, searchQuery, sortBy, products]);
-
-  // Helper to parse badges/tags
-  const getBadges = (tagsStr: string) => {
-    if (!tagsStr) return [];
-    return tagsStr.split(",").map((t) => t.trim().toLowerCase()).filter(Boolean);
-  };
 
   const handleAddToCart = async (product: Product) => {
     if (!isAuthenticated) {
@@ -202,16 +212,13 @@ export default function ProductsCatalog() {
 
   return (
     <div className="bg-zinc-50 dark:bg-zinc-950 min-h-screen font-sans pb-20 transition-colors duration-300">
-      {/* Decorative backdrop gradients */}
-      <div className="absolute top-0 right-1/4 w-[400px] h-[400px] rounded-full bg-indigo-500/5 blur-[120px] pointer-events-none" />
-      <div className="absolute top-1/2 left-1/4 w-[500px] h-[500px] rounded-full bg-purple-500/5 blur-[130px] pointer-events-none" />
-
       {/* Hero Banner Header */}
       <div className="bg-white dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-800 py-12 text-left relative overflow-hidden">
         <div className="max-w-7xl mx-auto px-6 sm:px-8">
-          <h1 className="text-3xl font-extrabold text-zinc-950 dark:text-zinc-50 tracking-tight">Marketplace Catalog</h1>
+          <span className="text-[10px] font-extrabold text-indigo-600 dark:text-indigo-400 uppercase tracking-widest">Store Catalog</span>
+          <h1 className="text-3xl font-extrabold text-zinc-950 dark:text-zinc-50 tracking-tight mt-1">{vendorName} Products</h1>
           <p className="text-sm font-semibold text-zinc-400 dark:text-zinc-500 mt-1 max-w-xl">
-            Browse high-quality products listed by verified independent vendors. Find unique items and support direct creators.
+            Browse high-quality products listed by {vendorName}. Find unique items and enjoy instant delivery.
           </p>
         </div>
       </div>
@@ -230,10 +237,10 @@ export default function ProductsCatalog() {
             </span>
             <input
               type="text"
-              placeholder="Search products, SKUs, tags or shops..."
+              placeholder={`Search products in ${vendorName}...`}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full h-11 pl-11 pr-4 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 focus:border-indigo-650 focus:bg-white dark:focus:bg-zinc-900 text-zinc-900 dark:text-zinc-550 rounded-2xl text-sm font-semibold outline-none transition-all"
+              className="w-full h-11 pl-11 pr-4 bg-zinc-50 dark:bg-zinc-950/50 border border-zinc-200 dark:border-zinc-800 focus:border-indigo-650 focus:bg-white dark:focus:bg-zinc-900 text-zinc-900 dark:text-zinc-200 rounded-2xl text-sm font-semibold outline-none transition-all"
             />
           </div>
 
@@ -259,7 +266,7 @@ export default function ProductsCatalog() {
           {showLeftArrow && (
             <button
               onClick={() => scroll(-240)}
-              className="absolute left-1 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-lg flex items-center justify-center text-zinc-700 dark:text-zinc-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-all z-20 cursor-pointer active:scale-95"
+              className="absolute left-1 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white dark:bg-zinc-900/90 border border-zinc-200 dark:border-zinc-800 shadow-lg flex items-center justify-center text-zinc-700 dark:text-zinc-300 hover:text-indigo-650 dark:hover:text-indigo-450 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-all z-20 cursor-pointer active:scale-95"
             >
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" />
@@ -271,17 +278,13 @@ export default function ProductsCatalog() {
           {showRightArrow && (
             <button
               onClick={() => scroll(240)}
-              className="absolute right-1 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-lg flex items-center justify-center text-zinc-700 dark:text-zinc-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-all z-20 cursor-pointer active:scale-95"
+              className="absolute right-1 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white dark:bg-zinc-900/90 border border-zinc-200 dark:border-zinc-800 shadow-lg flex items-center justify-center text-zinc-700 dark:text-zinc-300 hover:text-indigo-650 dark:hover:text-indigo-450 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-all z-20 cursor-pointer active:scale-95"
             >
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
               </svg>
             </button>
           )}
-
-          {/* Left & Right Fade Overlays */}
-          <div className="absolute left-0 top-0 bottom-0 w-12 bg-linear-to-r from-zinc-50 to-transparent pointer-events-none z-10 hidden sm:block" />
-          <div className="absolute right-0 top-0 bottom-0 w-12 bg-linear-to-l from-zinc-50 to-transparent pointer-events-none z-10 hidden sm:block" />
 
           <div
             ref={scrollContainerRef}
@@ -292,7 +295,7 @@ export default function ProductsCatalog() {
               className={`px-5 py-2.5 rounded-full text-xs font-bold whitespace-nowrap transition-all duration-200 cursor-pointer shadow-sm ${
                 selectedCategory === "all"
                   ? "bg-linear-to-r from-indigo-600 to-purple-650 text-white shadow-md shadow-indigo-600/20 scale-[1.03]"
-                  : "bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-650 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 hover:text-zinc-900 dark:hover:text-zinc-200 hover:border-zinc-300 dark:hover:border-zinc-700"
+                  : "bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-650 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 hover:text-zinc-900 dark:hover:text-zinc-200"
               }`}
             >
               All Categories
@@ -304,7 +307,7 @@ export default function ProductsCatalog() {
                 className={`px-5 py-2.5 rounded-full text-xs font-bold whitespace-nowrap transition-all duration-200 cursor-pointer shadow-sm ${
                   selectedCategory === cat.id
                     ? "bg-linear-to-r from-indigo-600 to-purple-650 text-white shadow-md shadow-indigo-600/20 scale-[1.03]"
-                    : "bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-650 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 hover:text-zinc-900 dark:hover:text-zinc-200 hover:border-zinc-300 dark:hover:border-zinc-700"
+                    : "bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-650 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 hover:text-zinc-900 dark:hover:text-zinc-200"
                 }`}
               >
                 {cat.name}
@@ -318,28 +321,28 @@ export default function ProductsCatalog() {
           /* Skeleton Loader cards */
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mt-6">
             {[1, 2, 3, 4, 5, 6, 7, 8].map((s) => (
-              <div key={s} className="bg-white border border-zinc-200 rounded-3xl p-4 space-y-4 animate-pulse">
-                <div className="aspect-square w-full rounded-2xl bg-zinc-100" />
+              <div key={s} className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl p-4 space-y-4 animate-pulse">
+                <div className="aspect-square w-full rounded-2xl bg-zinc-100 dark:bg-zinc-800" />
                 <div className="space-y-2">
-                  <div className="h-4 bg-zinc-100 rounded-lg w-2/3" />
-                  <div className="h-3 bg-zinc-100 rounded-lg w-1/3" />
-                  <div className="h-4 bg-zinc-100 rounded-lg w-1/2 pt-1" />
+                  <div className="h-4 bg-zinc-100 dark:bg-zinc-800 rounded-lg w-2/3" />
+                  <div className="h-3 bg-zinc-100 dark:bg-zinc-800 rounded-lg w-1/3" />
+                  <div className="h-4 bg-zinc-100 dark:bg-zinc-800 rounded-lg w-1/2 pt-1" />
                 </div>
               </div>
             ))}
           </div>
         ) : filteredProducts.length === 0 ? (
           /* Empty Search/Filter State */
-          <div className="bg-white border border-zinc-200 rounded-3xl p-16 text-center mt-6 shadow-xs max-w-xl mx-auto space-y-4">
-            <div className="w-16 h-16 rounded-full bg-zinc-50 flex items-center justify-center text-zinc-400 mx-auto">
+          <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl p-16 text-center mt-6 shadow-xs max-w-xl mx-auto space-y-4 text-zinc-900 dark:text-zinc-200">
+            <div className="w-16 h-16 rounded-full bg-zinc-55 dark:bg-zinc-800 flex items-center justify-center text-zinc-400 mx-auto">
               <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
             <div className="space-y-1">
-              <h3 className="text-base font-extrabold text-zinc-950">No products found</h3>
+              <h3 className="text-base font-extrabold">No products found</h3>
               <p className="text-xs font-semibold text-zinc-400">
-                We couldn't find any products matching your current category selection or search keywords.
+                We couldn't find any products in this store matching your selection or keyword.
               </p>
             </div>
             <button
@@ -347,7 +350,7 @@ export default function ProductsCatalog() {
                 setSearchQuery("");
                 setSelectedCategory("all");
               }}
-              className="px-5 py-2.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-xl text-xs font-bold transition-colors cursor-pointer"
+              className="px-5 py-2.5 bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-400 hover:bg-indigo-100 rounded-xl text-xs font-bold transition-colors cursor-pointer"
             >
               Clear Filters
             </button>

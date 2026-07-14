@@ -181,6 +181,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const logout = async () => {
     setIsLoading(true);
+    setUser(null); // Clear user state immediately to reactively reset cart and show loading state
     try {
       const refreshToken = getCookie("refresh_token");
       if (refreshToken) {

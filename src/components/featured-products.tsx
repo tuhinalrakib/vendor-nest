@@ -185,15 +185,15 @@ export default function FeaturedProducts() {
   if(loading) return <DynamicLoading loadingText="Loading marketplace catalog..." />;
 
   return (
-    <section className="relative py-24 bg-zinc-50 border-t border-zinc-200/80 overflow-hidden font-sans">
+    <section className="relative py-24 bg-zinc-50 dark:bg-zinc-950 border-t border-zinc-200/80 dark:border-zinc-800/60 overflow-hidden font-sans transition-colors duration-300">
       <div className="max-w-7xl mx-auto px-6 sm:px-8 relative z-10">
         
         {/* Header Block */}
         <div className="text-center max-w-3xl mx-auto space-y-4 mb-10">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 border border-indigo-100 text-xs font-bold text-indigo-700 select-none font-sans">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-100 dark:border-indigo-900/40 text-xs font-bold text-indigo-700 dark:text-indigo-400 select-none font-sans">
             🔥 Trending Now
           </div>
-          <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-zinc-950 font-sans">
+          <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-zinc-955 dark:text-zinc-50 font-sans">
             Featured & Trending Products <br />
             <span className="bg-linear-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
               সেরা ও ট্রেন্ডিং প্রোডাক্টস
@@ -207,7 +207,7 @@ export default function FeaturedProducts() {
           {showLeftArrow && (
             <button
               onClick={() => scroll(-240)}
-              className="absolute left-1 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white border border-zinc-200 shadow-lg flex items-center justify-center text-zinc-700 hover:text-indigo-600 hover:bg-zinc-50 transition-all z-20 cursor-pointer active:scale-95"
+              className="absolute left-1 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-lg flex items-center justify-center text-zinc-700 dark:text-zinc-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-all z-20 cursor-pointer active:scale-95"
             >
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" />
@@ -219,7 +219,7 @@ export default function FeaturedProducts() {
           {showRightArrow && (
             <button
               onClick={() => scroll(240)}
-              className="absolute right-1 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white border border-zinc-200 shadow-lg flex items-center justify-center text-zinc-700 hover:text-indigo-600 hover:bg-zinc-50 transition-all z-20 cursor-pointer active:scale-95"
+              className="absolute right-1 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-lg flex items-center justify-center text-zinc-700 dark:text-zinc-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-all z-20 cursor-pointer active:scale-95"
             >
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
@@ -228,8 +228,8 @@ export default function FeaturedProducts() {
           )}
 
           {/* Left & Right Fade Overlays */}
-          <div className="absolute left-0 top-0 bottom-0 w-12 bg-linear-to-r from-zinc-50 to-transparent pointer-events-none z-10 hidden sm:block" />
-          <div className="absolute right-0 top-0 bottom-0 w-12 bg-linear-to-l from-zinc-50 to-transparent pointer-events-none z-10 hidden sm:block" />
+          <div className="absolute left-0 top-0 bottom-0 w-12 bg-linear-to-r from-zinc-50 dark:from-zinc-950 to-transparent pointer-events-none z-10 hidden sm:block" />
+          <div className="absolute right-0 top-0 bottom-0 w-12 bg-linear-to-l from-zinc-50 dark:from-zinc-950 to-transparent pointer-events-none z-10 hidden sm:block" />
           
           <div 
             ref={scrollContainerRef}
@@ -242,7 +242,7 @@ export default function FeaturedProducts() {
                 className={`px-5 py-2.5 rounded-full text-xs font-bold whitespace-nowrap transition-all duration-200 cursor-pointer shadow-sm ${
                   activeCategory === cat.id
                     ? "bg-linear-to-r from-indigo-600 to-purple-600 text-white shadow-md shadow-indigo-600/20 scale-[1.03]"
-                    : "bg-white border border-zinc-200 text-zinc-650 hover:bg-zinc-100 hover:text-zinc-900 hover:border-zinc-300"
+                    : "bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-650 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 hover:text-zinc-900 dark:hover:text-zinc-200 hover:border-zinc-300 dark:hover:border-zinc-700"
                 }`}
               >
                 {cat.name}

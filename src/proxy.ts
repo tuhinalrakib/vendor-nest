@@ -22,6 +22,8 @@ export function proxy(req: NextRequest) {
 
   // Normalize host (remove port number if present)
   const currentHost = hostname.replace(/:\d+$/, "");
+  console.log(`[Proxy] hostname: ${hostname}, currentHost: ${currentHost}, path: ${path}`);
+
 
   let subdomain = "";
 
@@ -44,10 +46,21 @@ export function proxy(req: NextRequest) {
     }
   }
 
+  // Exclude shared platform paths from subdomain rewrites
+  const isSharedPath =
+    path.startsWith("/login") ||
+    path.startsWith("/register") ||
+    path.startsWith("/checkout") ||
+    path.startsWith("/orders") ||
+    path.startsWith("/order-success") ||
+    path.startsWith("/become-seller");
+
   // If a vendor subdomain is found, rewrite the request path
-  // to the tenant-specific dynamic path: /_sites/[domain]/...
-  if (subdomain && subdomain !== "www") {
-    return NextResponse.rewrite(new URL(`/_sites/${subdomain}${path}`, req.url));
+  // to the tenant-specific dynamic path: /sites/[domain]/...
+  if (subdomain && subdomain !== "www" && !isSharedPath) {
+    const rewriteUrl = new URL(`/sites/${subdomain}${path}`, req.url);
+    console.log(`[Proxy] Rewriting subdomain "${subdomain}" path "${path}" to: ${rewriteUrl.toString()}`);
+    return NextResponse.rewrite(rewriteUrl);
   }
 
   // --- RBAC (Role-Based Access Control) ---
@@ -80,3 +93,6 @@ export function proxy(req: NextRequest) {
   // Fallback to normal routing for the main platform site
   return NextResponse.next();
 }
+
+export default proxy;
+

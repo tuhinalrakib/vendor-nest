@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { StatsCard } from "@/components/cards";
 import api from "@/lib/api";
-import { BarChart } from "@/components/charts";
+import { BarChart, AreaChart } from "@/components/charts";
 import Table from "@/components/tables";
 import {
   ProductsIcon,
@@ -238,13 +238,13 @@ export default function SellerDashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Monthly Sales Graph */}
         <div className="lg:col-span-2">
-          <BarChart data={salesData} height={220} color="indigo" title="Store Sales Performance ($)" />
+          <AreaChart data={salesData} height={220} color="indigo" title="Store Sales Performance ($)" />
         </div>
 
         {/* Store Action Items */}
-        <div className="rounded-2xl border border-zinc-200 bg-white p-6 flex flex-col justify-between text-left">
+        <div className="rounded-2xl border border-zinc-200/60 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-6 flex flex-col justify-between text-left hover-neon-glow">
           <div>
-            <h3 className="text-sm font-bold text-zinc-950 mb-4">Required Actions</h3>
+            <h3 className="text-sm font-bold text-zinc-950 dark:text-zinc-50 mb-4">Required Actions</h3>
             <div className="space-y-4 max-h-55 overflow-y-auto pr-1">
               {isLoading ? (
                 <div className="space-y-3 animate-pulse">

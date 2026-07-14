@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import CouponCard from "@/components/coupons/CouponCard";
 import api from "@/lib/api";
 import Swal from "sweetalert2";
+import { useParams } from "next/navigation";
 
 interface Coupon {
   id: string;
@@ -17,7 +18,15 @@ interface Coupon {
   is_used: boolean;
 }
 
-export default function CouponsLandingPage() {
+export default function TenantCouponsLandingPage() {
+  const params = useParams();
+  const domain = (params.domain as string) || "";
+
+  const vendorName = domain
+    .split("-")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
+
   const [coupons, setCoupons] = useState<Coupon[]>([]);
   const [filteredCoupons, setFilteredCoupons] = useState<Coupon[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -28,8 +37,16 @@ export default function CouponsLandingPage() {
     try {
       setIsLoading(true);
       const res = await api.get("/api/coupons/");
-      setCoupons(res.data);
-      setFilteredCoupons(res.data);
+      
+      // Filter coupons that belong to this seller
+      const sellerCoupons = (res.data || []).filter(
+        (c: any) =>
+          c.seller_shop &&
+          c.seller_shop.toLowerCase().replace(/\s+/g, "-") === domain.toLowerCase()
+      );
+
+      setCoupons(sellerCoupons);
+      setFilteredCoupons(sellerCoupons);
     } catch (err) {
       console.error("Failed to load active coupons:", err);
       Swal.fire({
@@ -44,8 +61,10 @@ export default function CouponsLandingPage() {
   };
 
   useEffect(() => {
-    fetchCoupons();
-  }, []);
+    if (domain) {
+      fetchCoupons();
+    }
+  }, [domain]);
 
   // Filter coupons dynamically when search query or filter type changes
   useEffect(() => {
@@ -56,8 +75,7 @@ export default function CouponsLandingPage() {
       const q = searchQuery.toLowerCase();
       result = result.filter(
         (c) =>
-          c.code.toLowerCase().includes(q) ||
-          c.seller_shop.toLowerCase().includes(q)
+          c.code.toLowerCase().includes(q)
       );
     }
 
@@ -80,16 +98,16 @@ export default function CouponsLandingPage() {
 
           <div className="text-left space-y-4 max-w-xl relative z-10">
             <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/15 border border-indigo-500/30 text-xs font-bold text-indigo-400">
-              🏷️ Smart Savings
+              🏷️ Store Savings
             </span>
             <h1 className="text-3xl md:text-5xl font-black tracking-tight leading-tight">
-              Marketplace <br />
+              {vendorName} <br />
               <span className="bg-linear-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
                 Coupons & Offers
               </span>
             </h1>
             <p className="text-zinc-400 text-sm font-semibold leading-relaxed">
-              Clip vendor coupons below to automatically save at checkout. Shop directly from authorized multi-tenant SaaS sellers.
+              Clip coupons from {vendorName} below to automatically save at checkout. Save more on your shopping today!
             </p>
           </div>
 
@@ -109,10 +127,10 @@ export default function CouponsLandingPage() {
           <div className="relative w-full sm:max-w-md">
             <input
               type="text"
-              placeholder="Search by code or merchant shop..."
+              placeholder="Search by coupon code..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full h-11 pl-10 pr-4 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 focus:border-indigo-650 focus:bg-white dark:focus:bg-zinc-900 rounded-xl text-xs font-bold outline-none text-zinc-800 dark:text-zinc-50"
+              className="w-full h-11 pl-10 pr-4 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 focus:border-indigo-650 focus:bg-white dark:focus:bg-zinc-900 rounded-xl text-xs font-bold outline-none text-zinc-800 dark:text-zinc-200"
             />
             <svg className="absolute left-3.5 top-3.5 w-4 h-4 text-zinc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -140,20 +158,20 @@ export default function CouponsLandingPage() {
         {/* Coupons Showcase Grid */}
         {isLoading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {Array.from({ length: 6 }).map((_, i) => (
+            {Array.from({ length: 3 }).map((_, i) => (
               <div key={i} className="h-28 border border-dashed border-zinc-250 dark:border-zinc-800 bg-white dark:bg-zinc-900 rounded-2xl animate-pulse flex items-center justify-center">
                 <span className="text-xs text-zinc-400 font-semibold">Loading offer...</span>
               </div>
             ))}
           </div>
         ) : filteredCoupons.length === 0 ? (
-          <div className="py-24 text-center bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-8 max-w-lg mx-auto shadow-xs">
+          <div className="py-24 text-center bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-8 max-w-lg mx-auto shadow-xs text-zinc-850 dark:text-zinc-200">
             <div className="w-16 h-16 rounded-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-100 dark:border-zinc-800 flex items-center justify-center mx-auto mb-4 text-zinc-400">
               🏷️
             </div>
-            <h3 className="text-base font-extrabold text-zinc-800 dark:text-zinc-100">No active coupons found</h3>
+            <h3 className="text-base font-extrabold">No active coupons found</h3>
             <p className="text-xs text-zinc-400 dark:text-zinc-500 font-semibold mt-1">
-              Check back later for seasonal promotions, flash sales, or shop-specific coupon deals!
+              Check back later for seasonal promotions, flash sales, or coupon deals from this shop!
             </p>
             {(searchQuery || filterType !== "all") && (
               <button

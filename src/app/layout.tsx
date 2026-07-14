@@ -2,7 +2,9 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { AuthProvider } from "@/lib/AuthContext";
 import { CartProvider } from "@/lib/CartContext";
+import { ThemeProvider } from "@/lib/ThemeContext";
 import CartDrawer from "@/components/navbar/CartDrawer";
+import { AIChatSupport } from "@/components/ai-storefront";
 import Script from "next/script";
 
 export const metadata: Metadata = {
@@ -60,12 +62,15 @@ export default function RootLayout({
       className="h-full antialiased"
     >
       <body className="min-h-full flex flex-col">
-        <AuthProvider>
-          <CartProvider>
-            {children}
-            <CartDrawer />
-          </CartProvider>
-        </AuthProvider>
+        <ThemeProvider>
+          <AuthProvider>
+            <CartProvider>
+              {children}
+              <CartDrawer />
+              <AIChatSupport />
+            </CartProvider>
+          </AuthProvider>
+        </ThemeProvider>
         <Script src="https://accounts.google.com/gsi/client" strategy="afterInteractive" />
       </body>
     </html>

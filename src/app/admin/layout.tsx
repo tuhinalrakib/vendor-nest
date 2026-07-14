@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { useAuth } from "@/lib/AuthContext";
+import { useTheme } from "@/lib/ThemeContext";
 import Sidebar from "@/components/sidebar";
 import Loading from "@/app/loading";
 import api from "@/lib/api";
@@ -23,6 +24,7 @@ import {
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const { user, isAuthenticated, isLoading, logout } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const router = useRouter();
   const pathname = usePathname();
   const [showProfileMenu, setShowProfileMenu] = useState(false);
@@ -195,21 +197,38 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   };
 
   return (
-    <div className="flex min-h-screen bg-zinc-50/60 font-sans">
+    <div className="flex min-h-screen bg-zinc-50/60 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-50 transition-colors duration-300 font-sans">
       {/* Sidebar Panel */}
       <Sidebar items={sidebarItems} title="VendorNest Admin" footer={sidebarFooter} />
 
       {/* Workspace Panel */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* Header */}
-        <header className="h-16 px-8 border-b border-zinc-200/80 bg-white/80 backdrop-blur-md sticky top-0 z-30 flex items-center justify-between">
+        <header className="h-16 px-8 border-b border-zinc-200/80 dark:border-zinc-800/80 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-md sticky top-0 z-30 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <span className="text-xs font-bold text-red-500 tracking-wide uppercase">Admin Console</span>
             <span className="text-xs font-extrabold text-zinc-300">/</span>
-            <span className="text-sm font-bold text-zinc-900">{getPageTitle()}</span>
+            <span className="text-sm font-bold text-zinc-900 dark:text-zinc-50">{getPageTitle()}</span>
           </div>
 
           <div className="flex items-center gap-5">
+            {/* Theme Toggle Button */}
+            <button
+              onClick={toggleTheme}
+              className="p-2 text-zinc-500 hover:text-indigo-650 dark:text-zinc-400 dark:hover:text-indigo-400 hover:bg-zinc-50 dark:hover:bg-zinc-900 rounded-xl transition-all duration-200 active:scale-95 cursor-pointer flex items-center justify-center"
+              aria-label="Toggle Theme"
+            >
+              {theme === "light" ? (
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                </svg>
+              ) : (
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m12.728 0l-.707-.707M6.343 6.343l-.707-.707m2.828 9.9a5 5 0 117.072-7.072 5 5 0 01-7.072 7.072z" />
+                </svg>
+              )}
+            </button>
+
             {/* Notification Indicator */}
             <div className="relative">
               <button
@@ -232,7 +251,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                   />
                   <div className="absolute right-0 mt-2 w-80 rounded-2xl border border-zinc-200 bg-white p-3 shadow-xl z-50 animate-in fade-in slide-in-from-top-3 duration-200 origin-top-right text-left">
                     <div className="flex items-center justify-between px-2 pb-2.5 border-b border-zinc-100 mb-2">
-                      <span className="text-xs font-extrabold text-zinc-955">Notifications</span>
+                      <span className="text-xs font-extrabold text-zinc-950">Notifications</span>
                       {notifications.filter((n) => !n.is_read).length > 0 && (
                         <button
                           onClick={handleMarkAllRead}

@@ -94,24 +94,24 @@ export default function CouponCard({
   return (
     <div className={`border border-dashed p-3.5 rounded-2xl flex items-center justify-between gap-3 text-left transition-all duration-300 hover:shadow-xs ${
       isUsed 
-        ? "border-zinc-300 bg-zinc-50/60 opacity-75" 
-        : "border-emerald-500 bg-emerald-50/40"
+        ? "border-zinc-300 dark:border-zinc-800 bg-zinc-50/60 dark:bg-zinc-900/40 opacity-75" 
+        : "border-emerald-500 dark:border-emerald-700 bg-emerald-50/40 dark:bg-emerald-950/20"
     }`}>
       <div className="space-y-1">
         <div className="flex items-center gap-1.5">
           <span className={`text-[9px] font-extrabold px-1.5 py-0.5 rounded uppercase tracking-wider ${
             isUsed 
-              ? "text-zinc-500 bg-zinc-200" 
-              : "text-emerald-700 bg-emerald-100"
+              ? "text-zinc-500 bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-400" 
+              : "text-emerald-700 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-950/50"
           }`}>
             Coupon
           </span>
-          <span className="text-[10px] font-mono text-zinc-400 font-bold uppercase">{code}</span>
+          <span className="text-[10px] font-mono text-zinc-400 dark:text-zinc-500 font-bold uppercase">{code}</span>
         </div>
-        <h4 className={`text-xs font-black leading-snug ${isUsed ? "text-zinc-500" : "text-emerald-800"}`}>
+        <h4 className={`text-xs font-black leading-snug ${isUsed ? "text-zinc-500 dark:text-zinc-400" : "text-emerald-800 dark:text-emerald-400"}`}>
           Save {isPercent ? `${value}%` : `$${value.toFixed(2)}`}
         </h4>
-        <p className="text-[9px] text-zinc-500 leading-relaxed font-semibold">
+        <p className="text-[9px] text-zinc-500 dark:text-zinc-400 leading-relaxed font-semibold">
           {minPurchase > 0 ? `Min purchase of $${minPurchase.toFixed(2)} from ${sellerShop} required` : "No minimum purchase required"}
         </p>
       </div>
@@ -121,10 +121,10 @@ export default function CouponCard({
         disabled={isUsed}
         className={`h-7 px-3.5 rounded-full text-[10px] font-bold shadow-xs active:scale-95 transition-all flex items-center justify-center shrink-0 ${
           isUsed
-            ? "bg-zinc-200 text-zinc-500 cursor-not-allowed border border-transparent font-medium"
+            ? "bg-zinc-200 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-550 cursor-not-allowed border border-transparent font-medium"
             : isClipped
             ? "bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold cursor-pointer"
-            : "bg-white border border-emerald-500 hover:bg-emerald-50 text-emerald-700 cursor-pointer"
+            : "bg-white dark:bg-zinc-950 border border-emerald-500 dark:border-emerald-700 hover:bg-emerald-50 dark:hover:bg-emerald-950/30 text-emerald-700 dark:text-emerald-450 cursor-pointer"
         }`}
       >
         {isUsed ? "✓ Used" : isClipped ? "✓ Clipped" : "Clip Coupon"}

@@ -1,0 +1,299 @@
+"use client";
+
+import React, { useState } from "react";
+import { useAuth } from "@/lib/AuthContext";
+import { useTheme } from "@/lib/ThemeContext";
+import { useRouter } from "next/navigation";
+import { useCart } from "@/lib/CartContext";
+import Link from "next/link";
+import {
+  ChevronDownIcon,
+  LogOutIcon,
+  DashboardIcon,
+  StoreIcon,
+  CartIcon,
+  TrashIcon,
+  OrdersIcon,
+  UsersIcon,
+  SettingsIcon,
+} from "@/components/icons";
+
+interface StorefrontNavbarProps {
+  vendorName: string;
+  domain: string;
+}
+
+export default function StorefrontNavbar({ vendorName, domain }: StorefrontNavbarProps) {
+  const { theme, toggleTheme } = useTheme();
+  const { user, logout, isLoading, maintenanceMode } = useAuth();
+  const router = useRouter();
+  const [showProfileMenu, setShowProfileMenu] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { cartCount, setIsCartOpen } = useCart();
+
+  // Initials for avatar profile icon
+  const getInitials = () => {
+    if (!user) return "";
+    if (user.full_name) {
+      const parts = user.full_name.trim().split(/\s+/);
+      if (parts.length > 1) {
+        return (parts[0][0] + parts[1][0]).toUpperCase();
+      }
+      return parts[0][0].toUpperCase();
+    }
+    return user.email[0].toUpperCase();
+  };
+
+  return (
+    <>
+      {maintenanceMode && (
+        <div className="w-full bg-amber-500 text-white text-center py-2 px-4 text-xs font-bold flex items-center justify-center gap-2 animate-in slide-in-from-top duration-300">
+          <span>⚠️</span>
+          <span><strong>System Under Scheduled Maintenance:</strong> We are currently upgrading our platform. Checkout and purchasing are temporarily paused. We'll be back online shortly!</span>
+        </div>
+      )}
+      
+      <nav className="w-full border-b border-zinc-200/50 dark:border-zinc-800/50 bg-white/70 dark:bg-zinc-950/70 backdrop-blur-md sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between gap-4">
+          
+          {/* Custom Storefront Logo */}
+          <Link href="/" className="flex items-center gap-3 group shrink-0">
+            <div className="w-9 h-9 rounded-xl bg-linear-to-tr from-indigo-500 to-violet-500 flex items-center justify-center font-bold text-white shadow-md shadow-indigo-500/20 group-hover:scale-105 transition-transform duration-200">
+              {vendorName[0]}
+            </div>
+            <span className="text-xl font-bold tracking-tight text-zinc-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+              {vendorName}
+            </span>
+          </Link>
+
+          {/* Navigation links (Desktop) - No Shops & No dashboard links, only relative store links */}
+          <div className="hidden md:flex items-center gap-6 text-sm font-semibold text-zinc-600 dark:text-zinc-400">
+            <Link href="/products" className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
+              Products
+            </Link>
+            <Link href="/categories" className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
+              Categories
+            </Link>
+            <Link href="/coupons" className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
+              Coupons
+            </Link>
+          </div>
+
+          {/* Search Bar */}
+          <div className="hidden lg:flex items-center flex-1 max-w-sm relative">
+            <div className="absolute left-3.5 text-zinc-400 pointer-events-none">
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+            </div>
+            <input
+              type="text"
+              placeholder={`Search in ${vendorName}...`}
+              className="w-full h-10 pl-10 pr-4 rounded-full border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50 text-sm focus:outline-none focus:border-indigo-500 focus:bg-white dark:focus:bg-zinc-950 transition-all text-zinc-800 dark:text-zinc-100 placeholder-zinc-400"
+            />
+          </div>
+
+          {/* Actions (Sign In / Register or Dynamic User Profile Menu) */}
+          <div className="flex items-center gap-3">
+            {/* Theme Toggle Button */}
+            <button
+              onClick={toggleTheme}
+              className="p-2 text-zinc-500 hover:text-indigo-600 dark:text-zinc-400 dark:hover:text-indigo-400 hover:bg-zinc-50 dark:hover:bg-zinc-900 rounded-xl transition-all duration-200 active:scale-95 cursor-pointer flex items-center justify-center mr-1"
+              aria-label="Toggle Theme"
+            >
+              {theme === "light" ? (
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                </svg>
+              ) : (
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m12.728 0l-.707-.707M6.343 6.343l-.707-.707m2.828 9.9a5 5 0 117.072-7.072 5 5 0 01-7.072 7.072z" />
+                </svg>
+              )}
+            </button>
+
+            {user && (
+              <button
+                onClick={() => setIsCartOpen(true)}
+                className="relative p-2 text-zinc-500 hover:text-indigo-600 dark:text-zinc-400 dark:hover:text-indigo-400 hover:bg-zinc-50 dark:hover:bg-zinc-900 rounded-xl transition-all duration-200 active:scale-95 cursor-pointer mr-1 flex items-center justify-center"
+                aria-label="Shopping Cart"
+              >
+                <CartIcon className="w-5.5 h-5.5" />
+                {cartCount > 0 && (
+                  <span className="absolute -top-0.5 -right-0.5 min-w-4.5 h-4.5 px-1 rounded-full bg-indigo-600 text-white font-extrabold text-[9px] flex items-center justify-center border-2 border-white dark:border-zinc-950 shadow-sm z-10">
+                    {cartCount}
+                  </span>
+                )}
+              </button>
+            )}
+
+            {isLoading ? (
+              <div className="flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-zinc-50 dark:bg-zinc-900 border border-zinc-200/60 dark:border-zinc-800 shadow-xs animate-pulse">
+                <svg className="animate-spin h-4 w-4 text-indigo-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <span className="text-xs font-semibold text-zinc-500 leading-none">Loading...</span>
+              </div>
+            ) : user ? (
+              <div className="relative">
+                {/* Profile Trigger Button */}
+                <button
+                  onClick={() => setShowProfileMenu(!showProfileMenu)}
+                  className="flex items-center gap-2.5 p-1.5 pr-3 rounded-full hover:bg-zinc-50 dark:hover:bg-zinc-900 border border-zinc-200/80 dark:border-zinc-800 transition-all duration-200 text-left cursor-pointer active:scale-[0.98]"
+                >
+                  <div className="w-8 h-8 rounded-full bg-linear-to-tr from-indigo-500 to-indigo-600 text-white flex items-center justify-center font-bold text-xs shadow-sm border border-indigo-400">
+                    {getInitials()}
+                  </div>
+                  <div className="text-left hidden sm:block">
+                    <p className="text-xs font-bold text-zinc-900 dark:text-zinc-100 leading-tight">
+                      {user.full_name || user.email.split("@")[0]}
+                    </p>
+                    <p className="text-[9px] font-extrabold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider leading-none mt-0.5">
+                      {user.role}
+                    </p>
+                  </div>
+                  <ChevronDownIcon className={`w-3.5 h-3.5 text-zinc-400 transition-transform duration-200 ${showProfileMenu ? "rotate-180" : ""}`} />
+                </button>
+
+                {/* Profile Dropdown Menu */}
+                {showProfileMenu && (
+                  <>
+                    <div
+                      onClick={() => setShowProfileMenu(false)}
+                      className="fixed inset-0 z-40"
+                    />
+                    <div className="absolute right-0 mt-2 w-56 rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 p-2 shadow-xl z-50 animate-in fade-in slide-in-from-top-3 duration-200 origin-top-right text-zinc-800 dark:text-zinc-200">
+                      <div className="px-3.5 py-2.5 border-b border-zinc-100 dark:border-zinc-800/80 mb-1">
+                        <span className="block text-[9px] font-extrabold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider">Signed in as</span>
+                        <span className="block text-xs font-bold text-zinc-900 dark:text-zinc-100 truncate">{user.full_name || "Nest User"}</span>
+                        <span className="block text-[10px] text-zinc-500 dark:text-zinc-450 truncate mt-0.5">{user.email}</span>
+                        <span className="inline-block px-1.5 py-0.5 text-[9px] font-extrabold text-indigo-700 bg-indigo-50 border border-indigo-100 rounded mt-2 uppercase tracking-wider dark:bg-indigo-950/40 dark:text-indigo-400 dark:border-indigo-900/50">
+                          {user.role}
+                        </span>
+                      </div>
+
+                      {/* Role specific Dashboard and Settings buttons */}
+                      {user.role === "admin" && (
+                        <>
+                          <button
+                            onClick={() => {
+                              setShowProfileMenu(false);
+                              router.push("/admin/dashboard");
+                            }}
+                            className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-900 hover:text-zinc-950 dark:hover:text-white transition-colors text-left"
+                          >
+                            <DashboardIcon className="w-4 h-4 text-zinc-400" />
+                            Admin Dashboard
+                          </button>
+                          <button
+                            onClick={() => {
+                              setShowProfileMenu(false);
+                              router.push("/admin/users");
+                            }}
+                            className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-900 hover:text-zinc-950 dark:hover:text-white transition-colors text-left"
+                          >
+                            <UsersIcon className="w-4 h-4 text-zinc-400" />
+                            Users Control
+                          </button>
+                          <button
+                            onClick={() => {
+                              setShowProfileMenu(false);
+                              router.push("/admin/settings");
+                            }}
+                            className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-900 hover:text-zinc-950 dark:hover:text-white transition-colors text-left"
+                          >
+                            <SettingsIcon className="w-4 h-4 text-zinc-400" />
+                            Platform Settings
+                          </button>
+                        </>
+                      )}
+
+                      {user.role === "seller" && (
+                        <>
+                          <button
+                            onClick={() => {
+                              setShowProfileMenu(false);
+                              router.push("/seller/dashboard");
+                            }}
+                            className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-900 hover:text-zinc-950 dark:hover:text-white transition-colors text-left"
+                          >
+                            <StoreIcon className="w-4 h-4 text-zinc-400" />
+                            Seller Dashboard
+                          </button>
+                          <button
+                            onClick={() => {
+                              setShowProfileMenu(false);
+                              router.push("/seller/inventory");
+                            }}
+                            className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-900 hover:text-zinc-950 dark:hover:text-white transition-colors text-left"
+                          >
+                            <OrdersIcon className="w-4 h-4 text-zinc-400" />
+                            Inventory
+                          </button>
+                          <button
+                            onClick={() => {
+                              setShowProfileMenu(false);
+                              router.push("/seller/settings");
+                            }}
+                            className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-900 hover:text-zinc-950 dark:hover:text-white transition-colors text-left"
+                          >
+                            <SettingsIcon className="w-4 h-4 text-zinc-400" />
+                            Shop Settings
+                          </button>
+                        </>
+                      )}
+
+                      {user.role === "customer" && (
+                        <button
+                          onClick={() => {
+                            setShowProfileMenu(false);
+                            router.push("/orders");
+                          }}
+                          className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-900 hover:text-zinc-950 dark:hover:text-white transition-colors text-left"
+                        >
+                          <OrdersIcon className="w-4 h-4 text-zinc-400" />
+                          My Orders
+                        </button>
+                      )}
+
+                      <div className="h-px bg-zinc-100 dark:bg-zinc-800 my-1" />
+
+                      {/* Logout Button */}
+                      <button
+                        onClick={() => {
+                          setShowProfileMenu(false);
+                          router.push("/");
+                          logout();
+                        }}
+                        className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-red-600 hover:bg-red-50 dark:hover:bg-red-950/20 hover:text-red-700 dark:hover:text-red-400 transition-colors text-left"
+                      >
+                        <LogOutIcon className="w-4 h-4 text-red-500" />
+                        Sign Out
+                      </button>
+                    </div>
+                  </>
+                )}
+              </div>
+            ) : (
+              <div className="hidden md:flex items-center gap-3">
+                <Link
+                  href="/login"
+                  className="h-9 px-4 rounded-xl text-xs font-semibold text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-900 transition-colors flex items-center justify-center"
+                >
+                  Sign In
+                </Link>
+                <Link
+                  href="/register"
+                  className="h-9 px-4 rounded-xl text-xs font-bold bg-indigo-600 hover:bg-indigo-500 text-white shadow-md shadow-indigo-600/10 transition-all flex items-center justify-center cursor-pointer active:scale-95"
+                >
+                  Register
+                </Link>
+              </div>
+            )}
+          </div>
+        </div>
+      </nav>
+    </>
+  );
+}
