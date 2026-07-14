@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import api from "@/lib/api";
 import Link from "next/link";
+import Image from "next/image";
 import Swal from "sweetalert2";
 import DynamicLoading from "@/components/dynamicLoading/DynamicLoading";
 
@@ -438,14 +439,16 @@ export default function ShopsCatalog() {
                             <Link
                               key={prod.id}
                               href={`/products?search=${encodeURIComponent(prod.name)}`}
-                              className="w-12 h-12 rounded-xl bg-zinc-50 border border-zinc-150 overflow-hidden flex items-center justify-center shrink-0 hover:border-indigo-500 hover:scale-105 transition-all"
+                              className="w-12 h-12 rounded-xl bg-zinc-50 border border-zinc-150 overflow-hidden flex items-center justify-center shrink-0 hover:border-indigo-500 hover:scale-105 transition-all relative"
                               title={prod.name}
                             >
                               {imgUrl ? (
-                                <img
+                                <Image
                                   src={imgUrl}
                                   alt={prod.name}
-                                  className="w-full h-full object-cover"
+                                  fill
+                                  sizes="48px"
+                                  className="object-cover"
                                 />
                               ) : (
                                 <svg className="w-5 h-5 text-zinc-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">

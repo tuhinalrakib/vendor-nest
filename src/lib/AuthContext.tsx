@@ -15,6 +15,7 @@ interface SellerProfile {
   business_license?: string;
   tax_id?: string;
   status: "pending" | "approved" | "rejected" | "suspended";
+  plan?: "starter" | "growth" | "enterprise";
 }
 
 interface User {

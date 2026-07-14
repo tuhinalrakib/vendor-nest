@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_HOST || "http://127.0.0.1:8000";
 import Table from "@/components/tables";
+import Image from "next/image";
 import { SearchIcon, TrashIcon, AddIcon, EditIcon } from "@/components/icons";
 import Swal from "sweetalert2";
 import api from "@/lib/api";
@@ -442,13 +443,14 @@ export default function AdminProducts() {
       header: "Product Details",
       render: (p: ModerationProduct) => (
         <div className="flex items-center gap-3.5 text-left">
-          <div className="w-12 h-12 rounded-xl bg-zinc-50 border border-zinc-150 flex items-center justify-center overflow-hidden shrink-0">
+          <div className="w-12 h-12 rounded-xl bg-zinc-50 border border-zinc-150 flex items-center justify-center overflow-hidden shrink-0 relative">
             {p.image ? (
-              <img
+              <Image
                 src={p.image}
                 alt={p.name}
-                loading="lazy"
-                className="w-full h-full object-cover"
+                fill
+                sizes="48px"
+                className="object-cover"
               />
             ) : (
               <span className="text-[10px] font-extrabold text-zinc-400">IMG</span>
@@ -759,7 +761,14 @@ export default function AdminProducts() {
                     <div className="space-y-3">
                       {imagePreview ? (
                         <div className="relative aspect-video rounded-xl border border-zinc-200 overflow-hidden group w-full h-24">
-                          <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
+                          <Image
+                            src={imagePreview}
+                            alt="Preview"
+                            fill
+                            sizes="(max-width: 768px) 100vw, 384px"
+                            unoptimized
+                            className="object-cover"
+                          />
                           <div className={`absolute inset-0 bg-black/40 opacity-0 transition-opacity flex items-center justify-center ${isSubmitting ? "" : "group-hover:opacity-100"}`}>
                             <button
                               type="button"

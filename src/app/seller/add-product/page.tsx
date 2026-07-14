@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_HOST || "http://127.0.0.1:8000";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import Swal from "sweetalert2";
 import api from "@/lib/api";
 import { API_ENDPOINTS } from "@/constants/apiEnds";
@@ -849,7 +850,14 @@ export default function SellerAddProduct() {
             <div className="space-y-3">
               {imagePreview ? (
                 <div className="relative aspect-square rounded-xl border border-zinc-200 overflow-hidden group">
-                  <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
+                  <Image
+                    src={imagePreview}
+                    alt="Preview"
+                    fill
+                    sizes="(max-width: 768px) 100vw, 384px"
+                    unoptimized
+                    className="object-cover"
+                  />
                   <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                     <button
                       type="button"

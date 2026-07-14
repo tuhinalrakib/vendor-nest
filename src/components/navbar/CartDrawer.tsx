@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { useCart } from "@/lib/CartContext";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { CartIcon, TrashIcon } from "@/components/icons";
 import Swal from "sweetalert2";
 import api from "@/lib/api";
@@ -229,12 +230,12 @@ export default function CartDrawer() {
                 {/* Product Image */}
                 <div className="w-20 h-20 rounded-xl bg-zinc-50 border border-zinc-150 overflow-hidden shrink-0 flex items-center justify-center relative">
                   {item.image ? (
-                    <img
+                    <Image
                       src={item?.image}
-                      loading="lazy"
-                      decoding="async"
                       alt={item.name}
-                      className="w-full h-full object-cover"
+                      fill
+                      sizes="80px"
+                      className="object-cover"
                     />
                   ) : (
                     <CartIcon className="w-6 h-6 text-zinc-300" />

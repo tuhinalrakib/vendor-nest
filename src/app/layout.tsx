@@ -6,13 +6,20 @@ import CartDrawer from "@/components/navbar/CartDrawer";
 import Script from "next/script";
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "https://vendor-nest.vercel.app"),
+  metadataBase: new URL("https://vendor-nest.vercel.app"),
   title: {
     default: "VendorNest - Premium Multi-Vendor SAAS Ecommerce Platform",
     template: "%s | VendorNest",
   },
   description: "Start, run, and grow your digital storefront under your own custom brand. Register as a verified merchant or shop quality products.",
-  keywords: ["multi-vendor", "ecommerce", "saas", "marketplace", "online store", "vendornest"],
+  keywords: [
+    "multi-vendor", 
+    "ecommerce", 
+    "saas", 
+    "marketplace", 
+    "online store", 
+    "vendornest"
+  ],
   icons: {
     icon: "/logo.png",
     shortcut: "/logo.png",
@@ -28,8 +35,8 @@ export const metadata: Metadata = {
     images: [
       {
         url: "/logo.png",
-        width: 800,
-        height: 800,
+        width: 1200,
+        height: 630,
         alt: "VendorNest Logo",
       },
     ],

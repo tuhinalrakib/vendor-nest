@@ -1,5 +1,6 @@
 import React from "react";
 import Link from "next/link";
+import Image from "next/image";
 
 interface LogoProps {
   className?: string;
@@ -28,9 +29,16 @@ export default function Logo({ className = "", iconOnly = false, size = "md", li
 
   const logoIcon = (
     <div
-      className={`${currentSize.box} overflow-hidden flex items-center justify-center bg-zinc-50 border border-zinc-150 shadow-xs group-hover:scale-105 transition-transform duration-200`}
+      className={`${currentSize.box} overflow-hidden flex items-center justify-center bg-zinc-50 border border-zinc-150 shadow-xs group-hover:scale-105 transition-transform duration-200 relative`}
     >
-      <img src="/logo.png" alt="VendorNest Brand Logo" className="w-full h-full object-cover" />
+      <Image
+        src="/logo.png"
+        alt="VendorNest Brand Logo"
+        fill
+        sizes="(max-width: 48px) 100vw, 48px"
+        priority
+        className="object-cover"
+      />
     </div>
   );
 

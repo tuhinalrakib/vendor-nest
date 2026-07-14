@@ -379,13 +379,28 @@ export function ProductCard({
                   {qr_code_url && (
                     <div className="flex flex-col items-center gap-1 border border-zinc-150 p-2 rounded-2xl bg-zinc-50/50">
                       <span className="text-[8px] font-black text-zinc-450 uppercase font-sans tracking-wide">Scan Details</span>
-                      <img src={qr_code_url} alt="Product QR Code" className="w-16 h-16 object-contain rounded-lg shadow-xs" />
+                      <Image
+                        src={qr_code_url}
+                        alt="Product QR Code"
+                        width={64}
+                        height={64}
+                        unoptimized
+                        className="object-contain rounded-lg shadow-xs"
+                      />
                     </div>
                   )}
                   {barcode_url && (
                     <div className="flex flex-col items-center gap-1 border border-zinc-150 p-2 rounded-2xl bg-zinc-50/50 flex-1">
                       <span className="text-[8px] font-black text-zinc-450 uppercase font-sans tracking-wide">Product Barcode</span>
-                      <img src={barcode_url} alt="Product Barcode" className="h-10 w-full object-contain rounded" />
+                      <div className="relative h-10 w-full">
+                        <Image
+                          src={barcode_url}
+                          alt="Product Barcode"
+                          fill
+                          unoptimized
+                          className="object-contain rounded"
+                        />
+                      </div>
                       <span className="text-[8px] font-bold font-mono text-zinc-550 mt-0.5">{sku || id?.substring(0, 8)}</span>
                     </div>
                   )}

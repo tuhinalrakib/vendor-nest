@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Table from "@/components/tables";
+import Image from "next/image";
 import { AddIcon, TrashIcon, EditIcon } from "@/components/icons";
 import Swal from "sweetalert2";
 import api from "@/lib/api";
@@ -337,9 +338,15 @@ export default function AdminCategories() {
       header: "Category Name",
       render: (c: PlatformCategory) => (
         <div className="flex items-center gap-3 text-left">
-          <div className="w-10 h-10 rounded-xl bg-zinc-50 border border-zinc-150 flex items-center justify-center overflow-hidden shrink-0">
+          <div className="w-10 h-10 rounded-xl bg-zinc-50 border border-zinc-150 flex items-center justify-center overflow-hidden shrink-0 relative">
             {c.image ? (
-              <img src={c.image} alt={c.name} className="w-full h-full object-cover" />
+              <Image
+                src={c.image}
+                alt={c.name}
+                fill
+                sizes="40px"
+                className="object-cover"
+              />
             ) : (
               <span className="text-[9px] font-extrabold text-zinc-400">IMG</span>
             )}
@@ -464,7 +471,14 @@ export default function AdminCategories() {
                 <div className="space-y-3">
                   {imagePreview ? (
                     <div className="relative aspect-video rounded-xl border border-zinc-200 overflow-hidden group w-full h-32">
-                      <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
+                      <Image
+                        src={imagePreview}
+                        alt="Preview"
+                        fill
+                        sizes="(max-width: 768px) 100vw, 384px"
+                        unoptimized
+                        className="object-cover"
+                      />
                       <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                         <button
                           type="button"
@@ -630,7 +644,14 @@ export default function AdminCategories() {
                 <div className="space-y-3">
                   {editImagePreview ? (
                     <div className="relative aspect-video rounded-xl border border-zinc-200 overflow-hidden group w-full h-32">
-                      <img src={editImagePreview} alt="Preview" className="w-full h-full object-cover" />
+                      <Image
+                        src={editImagePreview}
+                        alt="Preview"
+                        fill
+                        sizes="(max-width: 768px) 100vw, 384px"
+                        unoptimized
+                        className="object-cover"
+                      />
                       <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                         <button
                           type="button"

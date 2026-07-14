@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import Table from "@/components/tables";
 import { AddIcon, SearchIcon, TrashIcon, EditIcon } from "@/components/icons";
 import Swal from "sweetalert2";
@@ -536,9 +537,15 @@ export default function SellerProducts() {
       header: "Product Details",
       render: (product: Product) => (
         <div className="flex items-center gap-3.5 text-left">
-          <div className="w-12 h-12 rounded-xl bg-zinc-50 border border-zinc-150 flex items-center justify-center overflow-hidden shrink-0">
+          <div className="w-12 h-12 rounded-xl bg-zinc-50 border border-zinc-150 flex items-center justify-center overflow-hidden shrink-0 relative">
             {product.image ? (
-              <img src={product.image} alt={product.name} className="w-full h-full object-cover" />
+              <Image
+                src={product.image}
+                alt={product.name}
+                fill
+                sizes="48px"
+                className="object-cover"
+              />
             ) : (
               <span className="text-[10px] font-extrabold text-zinc-400">IMG</span>
             )}
@@ -856,7 +863,14 @@ export default function SellerProducts() {
                     <div className="space-y-3">
                       {imagePreview ? (
                         <div className="relative aspect-video rounded-xl border border-zinc-200 overflow-hidden group w-full h-24">
-                          <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
+                          <Image
+                            src={imagePreview}
+                            alt="Preview"
+                            fill
+                            sizes="(max-width: 768px) 100vw, 384px"
+                            unoptimized
+                            className="object-cover"
+                          />
                           <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                             <label className="px-3 py-1.5 bg-white text-zinc-900 rounded-lg text-[10px] font-bold cursor-pointer hover:bg-zinc-50 shadow-xs">
                               Replace Image

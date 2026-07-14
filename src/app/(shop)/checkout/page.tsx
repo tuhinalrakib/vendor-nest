@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { useCart } from "@/lib/CartContext";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import api from "@/lib/api";
 import Swal from "sweetalert2";
 import { useAuth } from "@/lib/AuthContext";
@@ -655,10 +656,15 @@ export default function CheckoutPage() {
                 <div className="divide-y divide-zinc-100 max-h-60 overflow-y-auto pr-1 space-y-0">
                   {cartItems.map((item) => (
                     <div key={item.product_id} className="py-3 first:pt-0 last:pb-0 flex items-center gap-3 text-xs group">
-                      {/* Product thumbnail */}
-                      <div className="w-12 h-12 rounded-lg bg-zinc-50 border border-zinc-150 overflow-hidden shrink-0 flex items-center justify-center">
+                      <div className="w-12 h-12 rounded-lg bg-zinc-50 border border-zinc-150 overflow-hidden shrink-0 flex items-center justify-center relative">
                         {(item as any).image ? (
-                          <img src={(item as any).image} alt={item.name} className="w-full h-full object-cover" />
+                          <Image
+                            src={(item as any).image}
+                            alt={item.name}
+                            fill
+                            sizes="48px"
+                            className="object-cover"
+                          />
                         ) : (
                           <PackageIcon className="w-5 h-5 text-zinc-300" />
                         )}
