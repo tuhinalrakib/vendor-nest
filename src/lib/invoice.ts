@@ -1,7 +1,19 @@
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 
-export const generateInvoicePDF = (order: any) => {
+// Helper to load image and return HTMLImageElement or null
+const loadImage = (url: string): Promise<HTMLImageElement | null> => {
+  return new Promise((resolve) => {
+    if (!url) return resolve(null);
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.onload = () => resolve(img);
+    img.onerror = () => resolve(null);
+    img.src = url;
+  });
+};
+
+export const generateInvoicePDF = async (order: any) => {
   const doc = new jsPDF();
 
   // Branding and Header
@@ -39,8 +51,26 @@ export const generateInvoicePDF = (order: any) => {
   doc.text("Payment Method:", 195, 50, { align: "right" });
   doc.text(order.payment_method?.toUpperCase() || "N/A", 195, 56, { align: "right" });
 
-  // Table items
+  // Preload all item images
+  const itemImages = await Promise.all(
+    (order.items || []).map(async (item: any) => {
+      const imageUrl = item.product_image || item.image || null;
+      if (imageUrl) {
+        const loadedImg = await loadImage(imageUrl);
+        return { itemId: item.id, img: loadedImg };
+      }
+      return { itemId: item.id, img: null };
+    })
+  );
+
+  const imageMap = new Map<string, HTMLImageElement | null>();
+  itemImages.forEach(({ itemId, img }) => {
+    imageMap.set(itemId, img);
+  });
+
+  // Table items - we add an empty string at column index 0 for the Image
   const tableData = (order.items || []).map((item: any) => [
+    "", // Space for image
     item.product_name || item.name || "Product",
     item.quantity,
     `$${parseFloat(item.price || "0").toFixed(2)}`,
@@ -48,21 +78,57 @@ export const generateInvoicePDF = (order: any) => {
   ]);
 
   if (tableData.length === 0) {
-    tableData.push(["Items placeholder (fetch required)", 1, "$0.00", "$0.00"]);
+    tableData.push(["", "Items placeholder (fetch required)", 1, "$0.00", "$0.00"]);
   }
 
   autoTable(doc, {
     startY: 70,
-    head: [["Product Name", "Qty", "Unit Price", "Total"]],
+    head: [["Image", "Product Name", "Qty", "Unit Price", "Total"]],
     body: tableData,
     theme: "striped",
     headStyles: { fillColor: [79, 70, 229] }, // Indigo 600
-    styles: { fontSize: 10, cellPadding: 5 },
+    styles: { fontSize: 10, cellPadding: 5, minCellHeight: 15 },
     columnStyles: {
-      0: { cellWidth: 90 },
-      1: { cellWidth: 20, halign: 'center' },
-      2: { cellWidth: 35, halign: 'right' },
-      3: { cellWidth: 35, halign: 'right' }
+      0: { cellWidth: 20, halign: 'center' },
+      1: { cellWidth: 70 },
+      2: { cellWidth: 15, halign: 'center' },
+      3: { cellWidth: 35, halign: 'right' },
+      4: { cellWidth: 35, halign: 'right' }
+    },
+    didDrawCell: (data) => {
+      // Draw product image inside first column body cells
+      if (data.section === "body" && data.column.index === 0) {
+        const item = (order.items || [])[data.row.index];
+        if (item) {
+          const img = imageMap.get(item.id);
+          if (img) {
+            // Draw image centered in cell
+            const cellWidth = data.cell.width;
+            const cellHeight = data.cell.height;
+            const imgSize = 10; // Image width/height in mm
+            const x = data.cell.x + (cellWidth - imgSize) / 2;
+            const y = data.cell.y + (cellHeight - imgSize) / 2;
+            try {
+              // Guess the format (JPEG / PNG / WEBP)
+              const src = img.src.toLowerCase();
+              let format = "JPEG";
+              if (src.includes(".png")) format = "PNG";
+              else if (src.includes(".webp")) format = "WEBP";
+              
+              doc.addImage(img, format, x, y, imgSize, imgSize);
+            } catch (err) {
+              console.error("Failed to add image to PDF:", err);
+            }
+          } else {
+            doc.setFontSize(8);
+            doc.setTextColor(150, 150, 150);
+            const x = data.cell.x + 2;
+            // Align vertically center approximately
+            const y = data.cell.y + (data.cell.height / 2) + 2;
+            doc.text("N/A", x, y, { align: "left" });
+          }
+        }
+      }
     }
   });
 

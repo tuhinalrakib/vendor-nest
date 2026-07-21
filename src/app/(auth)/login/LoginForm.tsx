@@ -13,7 +13,10 @@ export default function LoginForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [error, setError] = useState("");
+
+  const isAnyLoading = isLoading || isGoogleLoading;
   
   // OTP 2FA States for Admin
   const [otpRequired, setOtpRequired] = useState(false);
@@ -388,7 +391,10 @@ export default function LoginForm() {
         </h2>
         <p className="text-xs font-medium text-zinc-400">
           Or{" "}
-          <Link href="/register" className="text-indigo-600 hover:text-indigo-500 font-bold">
+          <Link 
+            href="/register" 
+            className={`text-indigo-600 hover:text-indigo-500 font-bold ${isAnyLoading ? "pointer-events-none opacity-50" : ""}`}
+          >
             create a new account
           </Link>
         </p>
@@ -408,6 +414,7 @@ export default function LoginForm() {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
+          disabled={isAnyLoading}
         />
 
         <div className="space-y-1">
@@ -418,11 +425,12 @@ export default function LoginForm() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
+            disabled={isAnyLoading}
           />
           <div className="flex justify-end">
             <Link
               href="/forgot-password"
-              className="text-xs font-bold text-indigo-600 hover:text-indigo-500"
+              className={`text-xs font-bold text-indigo-600 hover:text-indigo-500 ${isAnyLoading ? "pointer-events-none opacity-50" : ""}`}
             >
               Forgot password?
             </Link>
@@ -434,13 +442,14 @@ export default function LoginForm() {
             id="remember-me"
             type="checkbox"
             className="w-4 h-4 rounded border-zinc-300 text-indigo-600 focus:ring-indigo-500"
+            disabled={isAnyLoading}
           />
           <label htmlFor="remember-me" className="text-xs font-semibold text-zinc-500">
             Remember me for 30 days
           </label>
         </div>
 
-        <Button type="submit" className="w-full" isLoading={isLoading}>
+        <Button type="submit" className="w-full" isLoading={isLoading} disabled={isAnyLoading}>
           Sign In
         </Button>
       </form>
@@ -454,7 +463,11 @@ export default function LoginForm() {
         </span>
       </div>
 
-      <GoogleLoginButton role="customer" />
+      <GoogleLoginButton 
+        role="customer" 
+        onLoadingChange={setIsGoogleLoading} 
+        disabled={isAnyLoading} 
+      />
     </div>
   );
 }

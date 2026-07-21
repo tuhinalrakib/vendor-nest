@@ -93,11 +93,11 @@ function OrderSuccessContent() {
                 const { default: api } = await import("@/lib/api");
                 const res = await api.get(`/api/orders/${orderId}/`);
                 const { generateInvoicePDF } = await import("@/lib/invoice");
-                generateInvoicePDF(res.data);
+                await generateInvoicePDF(res.data);
               } catch (e) {
                 console.error("Failed to generate PDF", e);
                 const { generateInvoicePDF } = await import("@/lib/invoice");
-                generateInvoicePDF({ id: orderId, status: "PENDING", total_amount: "0" });
+                await generateInvoicePDF({ id: orderId, status: "PENDING", total_amount: "0" });
               }
             }}
             className="w-full h-11 bg-zinc-900 hover:bg-black text-white rounded-xl text-xs font-bold transition-all active:scale-[0.98] cursor-pointer flex items-center justify-center gap-2 uppercase tracking-wider"

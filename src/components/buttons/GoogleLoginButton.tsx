@@ -12,11 +12,15 @@ let activeGoogleCallback: ((response: any) => void) | null = null;
 interface GoogleLoginButtonProps {
   role?: "customer" | "seller" | "admin";
   onSuccessRedirect?: (role: string) => void;
+  onLoadingChange?: (loading: boolean) => void;
+  disabled?: boolean;
 }
 
 export default function GoogleLoginButton({
   role = "customer",
   onSuccessRedirect,
+  onLoadingChange,
+  disabled = false,
 }: GoogleLoginButtonProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const { googleLogin } = useAuth();
@@ -46,6 +50,7 @@ export default function GoogleLoginButton({
 
     const localCallback = async (response: any) => {
       setIsPending(true);
+      if (onLoadingChange) onLoadingChange(true);
       try {
         const user = await googleLogin(response.credential, role);
         
@@ -79,6 +84,7 @@ export default function GoogleLoginButton({
           confirmButtonColor: "#4f46e5",
         });
         setIsPending(false);
+        if (onLoadingChange) onLoadingChange(false);
       }
     };
 
@@ -133,7 +139,7 @@ export default function GoogleLoginButton({
         <div 
           ref={containerRef} 
           className={`w-full min-h-[44px] flex justify-center transition-opacity duration-300 ${
-            isPending ? "opacity-30 pointer-events-none" : "opacity-100"
+            (isPending || disabled) ? "opacity-30 pointer-events-none" : "opacity-100"
           }`}
         >
           {!scriptLoaded && (

@@ -1,127 +1,25 @@
 /**
- * frontend/
-│
-├── public/
-│   ├── images/
-│   ├── icons/
-│   ├── logos/
-│   └── favicon.ico
-│
+ *
+vendor-nest/
+├── public/                # Static assets, logos & branding graphics
 ├── src/
-│
-│   ├── app/
-│   │
-│   │   ├── (auth)/
-│   │   │      ├── login/
-│   │   │      ├── register/
-│   │   │      ├── forgot-password/
-│   │   │      └── reset-password/
-│   │   │
-│   │   ├── (shop)/
-│   │   │      ├── products/
-│   │   │      ├── product/
-│   │   │      ├── categories/
-│   │   │      ├── cart/
-│   │   │      ├── wishlist/
-│   │   │      ├── checkout/
-│   │   │      ├── orders/
-│   │   │      ├── order-tracking/
-│   │   │      └── profile/
-│   │   │
-│   │   ├── seller/
-│   │   │      ├── dashboard/
-│   │   │      ├── products/
-│   │   │      ├── add-product/
-│   │   │      ├── orders/
-│   │   │      ├── inventory/
-│   │   │      ├── coupons/
-│   │   │      ├── analytics/
-│   │   │      └── settings/
-│   │   │
-│   │   ├── admin/
-│   │   │      ├── dashboard/
-│   │   │      ├── users/
-│   │   │      ├── sellers/
-│   │   │      ├── products/
-│   │   │      ├── categories/
-│   │   │      ├── coupons/
-│   │   │      ├── orders/
-│   │   │      ├── reports/
-│   │   │      └── settings/
-│   │   │
-│   │   ├── page.tsx
-│   │   ├── layout.tsx
-│   │   ├── loading.tsx
-│   │   ├── error.tsx
-│   │   └── not-found.tsx
-│
-│   ├── components/
-│   │
-│   │   ├── ui/
-│   │   ├── forms/
-│   │   ├── cards/
-│   │   ├── buttons/
-│   │   ├── navbar/
-│   │   ├── footer/
-│   │   ├── sidebar/
-│   │   ├── charts/
-│   │   ├── tables/
-│   │   ├── modals/
-│   │   ├── skeleton/
-│   │   ├── pagination/
-│   │   └── common/
-│
-│   ├── features/
-│   │
-│   │   ├── auth/
-│   │   ├── product/
-│   │   ├── cart/
-│   │   ├── wishlist/
-│   │   ├── checkout/
-│   │   ├── payment/
-│   │   ├── seller/
-│   │   ├── admin/
-│   │   ├── review/
-│   │   ├── coupon/
-│   │   ├── analytics/
-│   │   └── ai/
-│
-│   ├── hooks/
-│   │
-│   ├── lib/
-│   │   ├── axios.ts
-│   │   ├── stripe.ts
-│   │   ├── cloudinary.ts
-│   │   └── utils.ts
-│
-│   ├── services/
-│   │   ├── auth.service.ts
-│   │   ├── product.service.ts
-│   │   ├── cart.service.ts
-│   │   ├── order.service.ts
-│   │   ├── review.service.ts
-│   │   └── payment.service.ts
-│
-│   ├── store/
-│   │   ├── index.ts
-│   │   ├── authSlice.ts
-│   │   ├── cartSlice.ts
-│   │   ├── wishlistSlice.ts
-│   │   └── productSlice.ts
-│
-│   ├── proxy.ts
-│   │
-│   ├── providers/
-│   │
-│   ├── types/
-│   │
-│   ├── constants/
-│   │
-│   ├── validations/
-│   │
-│   └── styles/
-│
-├── .env.local
-├── package.json
-└── next.config.ts
+│   ├── app/               # Next.js App Router Structure
+│   │   ├── (auth)/        # Authentication routes (Login, Register, Google OAuth)
+│   │   ├── (shop)/        # Customer Storefront & Marketplace routes
+│   │   ├── seller/        # Vendor / Seller Dashboard & Product Management
+│   │   ├── admin/         # Super Admin Platform Management Portal
+│   │   ├── sites/         # Dynamic Multi-Tenant Vendor Storefronts
+│   │   ├── layout.tsx     # Root App Layout & Context Providers
+│   │   ├── loading.tsx    # Global UI Skeleton Loading States
+│   │   └── error.tsx      # Global Error Boundary Component
+│   ├── components/        # Reusable UI Components, Modals & Buttons
+│   ├── store/             # Redux Store, Reducers & Slices
+│   ├── lib/               # Axios Instance (`api.ts`), Auth Helpers & Cookies
+│   ├── constants/         # Static configuration & API Endpoint Maps
+│   └── types/             # TypeScript Type Definitions & Interfaces
+├── next.config.ts         # Next.js Configuration
+├── postcss.config.mjs     # PostCSS Configuration
+├── package.json           # Frontend Dependencies & Scripts
+├── tsconfig.json          # TypeScript Compiler Rules
+└── README.md 
  */

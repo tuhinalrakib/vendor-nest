@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import CouponCard from "@/components/coupons/CouponCard";
 import api from "@/lib/api";
 import Image from "next/image";
+import { useCart } from "@/lib/CartContext";
 
 interface ProductCardProps {
   id?: string;
@@ -66,6 +67,7 @@ export function ProductCard({
   const [availableCoupons, setAvailableCoupons] = useState<any[]>([]);
   const [isAdding, setIsAdding] = useState(false);
   const [lang, setLang] = useState<"en" | "bn">("en");
+  const { isLoading: isCartLoading } = useCart();
 
   // Fetch active coupons matching this product's seller or global/sitewide coupons
   // Filter out coupons whose minimum purchase requirement exceeds the product's price
@@ -200,7 +202,7 @@ export function ProductCard({
           </div>
 
           <button
-            disabled={stock <= 0 || isAdding}
+            disabled={stock <= 0 || isAdding || isCartLoading}
             onClick={async (e) => {
               e.stopPropagation();
               if (onAddToCart) {
@@ -212,7 +214,7 @@ export function ProductCard({
                 }
               }
             }}
-            className={`w-full h-10 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer ${stock > 0 && !isAdding
+            className={`w-full h-10 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer ${stock > 0 && !isAdding && !isCartLoading
               ? "bg-indigo-50 dark:bg-indigo-950/50 hover:bg-indigo-100/80 dark:hover:bg-indigo-900/50 text-indigo-700 dark:text-indigo-400 active:scale-95"
               : "bg-zinc-100 dark:bg-zinc-800 text-zinc-400 dark:text-zinc-550 cursor-not-allowed"
               }`}
@@ -448,7 +450,7 @@ export function ProductCard({
                   </span>
 
                   <button
-                    disabled={stock <= 0 || isAdding}
+                    disabled={stock <= 0 || isAdding || isCartLoading}
                     onClick={async () => {
                       if (onAddToCart) {
                         setIsAdding(true);
@@ -459,7 +461,7 @@ export function ProductCard({
                         }
                       }
                     }}
-                    className={`h-11 px-6 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${stock > 0 && !isAdding
+                    className={`h-11 px-6 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${stock > 0 && !isAdding && !isCartLoading
                       ? "bg-indigo-600 hover:bg-indigo-700 text-white shadow-md shadow-indigo-500/10 active:scale-95"
                       : "bg-zinc-100 text-zinc-400 cursor-not-allowed"
                       }`}

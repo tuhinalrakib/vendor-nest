@@ -155,7 +155,7 @@ export default function UserOrdersPage() {
                               product_name: productMap[item.product] || "Product"
                             }))
                           };
-                          generateInvoicePDF(orderWithNames);
+                          await generateInvoicePDF(orderWithNames);
                         }}
                         className="h-8 px-3 bg-white hover:bg-zinc-100 border border-zinc-200 rounded-lg text-xs font-bold text-zinc-700 transition-colors flex items-center gap-1.5 cursor-pointer"
                         title="Download Invoice"
