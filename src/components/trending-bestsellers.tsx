@@ -84,23 +84,27 @@ export default function TrendingBestSellers() {
 
   const displayedProducts = products.length > 0 ? products : fallbackProducts[activeTab];
 
-  const handleAddToCart = (item: ProductItem) => {
-    addToCart({
-      id: item.id,
-      name: item.name,
-      price: parseFloat(item.price),
-      quantity: 1,
-      image: item.image || "",
-    });
-
-    Swal.fire({
-      toast: true,
-      position: "top-end",
-      icon: "success",
-      title: `${item.name} added to cart!`,
-      showConfirmButton: false,
-      timer: 2000,
-    });
+  const handleAddToCart = async (item: ProductItem) => {
+    try {
+      await addToCart(item.id, 1);
+      Swal.fire({
+        toast: true,
+        position: "top-end",
+        icon: "success",
+        title: `${item.name} added to cart!`,
+        showConfirmButton: false,
+        timer: 2000,
+      });
+    } catch {
+      Swal.fire({
+        toast: true,
+        position: "top-end",
+        icon: "error",
+        title: "Please login to add items to cart",
+        showConfirmButton: false,
+        timer: 2000,
+      });
+    }
   };
 
   return (

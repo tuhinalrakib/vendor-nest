@@ -106,23 +106,27 @@ export default function FlashSaleDeals() {
     },
   ];
 
-  const handleClaimDeal = (prod: FlashProduct) => {
-    addToCart({
-      id: prod.id,
-      name: prod.name,
-      price: prod.salePrice,
-      quantity: 1,
-      image: "",
-    });
-
-    Swal.fire({
-      toast: true,
-      position: "top-end",
-      icon: "success",
-      title: `${prod.name} added to cart!`,
-      showConfirmButton: false,
-      timer: 2000,
-    });
+  const handleClaimDeal = async (prod: FlashProduct) => {
+    try {
+      await addToCart(prod.id, 1);
+      Swal.fire({
+        toast: true,
+        position: "top-end",
+        icon: "success",
+        title: `${prod.name} added to cart!`,
+        showConfirmButton: false,
+        timer: 2000,
+      });
+    } catch {
+      Swal.fire({
+        toast: true,
+        position: "top-end",
+        icon: "error",
+        title: "Please login to add items to cart",
+        showConfirmButton: false,
+        timer: 2000,
+      });
+    }
   };
 
   const formatNumber = (num: number) => (num < 10 ? `0${num}` : `${num}`);
