@@ -7,11 +7,11 @@ export default function FinalCTA() {
   return (
     <section className="relative py-24 bg-zinc-950 overflow-hidden font-sans select-none">
       {/* Dynamic Background Mesh Grids & Ambient Glows */}
-      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-indigo-600/20 rounded-full blur-[120px] pointer-events-none" />
-      <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-purple-600/20 rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute top-0 right-0 w-125 h-125 bg-indigo-600/20 rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute bottom-0 left-0 w-125 h-125 bg-purple-600/20 rounded-full blur-[120px] pointer-events-none" />
       
       {/* Decorative Grid Line Patterns */}
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px] opacity-30" />
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-size-[24px_24px] opacity-30" />
 
       <div className="max-w-5xl mx-auto px-6 sm:px-8 relative z-10 text-center space-y-10">
         

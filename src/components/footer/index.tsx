@@ -45,8 +45,13 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/offers" className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
-                  Special Offers
+                <Link href="/coupons" className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
+                  Special Offers & Coupons
+                </Link>
+              </li>
+              <li>
+                <Link href="/reviews" className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
+                  বিক্রেতা ও ক্রেতাদের রিভিউ
                 </Link>
               </li>
             </ul>
@@ -89,6 +94,11 @@ export default function Footer() {
                   Seller Resources
                 </Link>
               </li>
+              <li>
+                <Link href="/ai-features" className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
+                  Integrated AI Engines
+                </Link>
+              </li>
             </ul>
           </div>
 
@@ -101,6 +111,11 @@ export default function Footer() {
               <li>
                 <Link href="/help" className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
                   Help Center
+                </Link>
+              </li>
+              <li>
+                <Link href="/faq" className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
+                  Frequently Asked Questions
                 </Link>
               </li>
               <li>
