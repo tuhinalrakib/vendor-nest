@@ -267,6 +267,12 @@ export default function LoginForm() {
         { temp_token: tempToken }
       );
       
+      // Clear OTP input fields and focus first box
+      setOtpValues(Array(6).fill(""));
+      setTimeout(() => {
+        otpRefs.current[0]?.focus();
+      }, 50);
+
       Swal.fire({
         title: "OTP Resent!",
         text: response.data.message || "A new 2FA code has been sent to your email.",
