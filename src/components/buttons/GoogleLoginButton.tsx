@@ -111,6 +111,10 @@ export default function GoogleLoginButton({
         isGoogleInitialized = true;
       }
 
+      // Measure container width dynamically to ensure responsive fit on mobile
+      const containerWidth = containerRef.current.offsetWidth || 300;
+      const buttonWidth = Math.min(Math.max(containerWidth, 200), 380);
+
       // Render the button
       (window as any).google.accounts.id.renderButton(containerRef.current, {
         theme: "outline",
@@ -118,7 +122,7 @@ export default function GoogleLoginButton({
         text: "continue_with",
         shape: "rectangular",
         logo_alignment: "left",
-        width: 380, // Matches standard form widths
+        width: buttonWidth,
       });
     } catch (e) {
       console.error("Error rendering Google Login Button:", e);
@@ -133,8 +137,8 @@ export default function GoogleLoginButton({
   }, [scriptLoaded, role, googleLogin, onSuccessRedirect]);
 
   return (
-    <div className="w-full flex justify-center py-1">
-      <div className="relative w-[380px]">
+    <div className="w-full flex justify-center py-1 overflow-hidden">
+      <div className="relative w-full max-w-[380px] flex justify-center overflow-hidden">
         {/* Target element for Google button rendering */}
         <div 
           ref={containerRef} 
