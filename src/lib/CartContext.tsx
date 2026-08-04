@@ -91,7 +91,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   }, [user]);
 
   const addToCart = async (productId: string, quantity = 1) => {
-    if (!user) return;
+    if (!user) {
+      throw new Error("Authentication required to add items to cart.");
+    }
     setIsLoading(true);
     try {
       await api.post(API_ENDPOINTS.CART, {

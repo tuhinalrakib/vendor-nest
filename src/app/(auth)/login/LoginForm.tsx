@@ -158,7 +158,11 @@ export default function LoginForm() {
     } catch (err: any) {
       setIsLoading(false);
       let msg = "Login failed. Please check your network connection.";
-      if (typeof err === "object" && err !== null) {
+
+      // Handle Axios network connection errors (e.g. ERR_CONNECTION_CLOSED, server offline or spinning up)
+      if (err?.code === "ERR_NETWORK" || err?.message === "Network Error" || (err?.isAxiosError && !err.response)) {
+        msg = "Unable to connect to the server. If using Render free tier, the backend may be spinning up from sleep. Please wait 15-30 seconds and try again.";
+      } else if (typeof err === "object" && err !== null) {
         if (err.detail === "email_not_verified") {
           Swal.fire({
             title: "Email Not Verified",
@@ -198,14 +202,19 @@ export default function LoginForm() {
           msg = err.detail;
         } else if (err.non_field_errors) {
           msg = err.non_field_errors[0];
-        } else {
-          const fieldErrors = Object.entries(err);
+        } else if (err.response?.data?.detail) {
+          msg = err.response.data.detail;
+        } else if (err.response?.data) {
+          const resData = err.response.data;
+          const fieldErrors = Object.entries(resData);
           if (fieldErrors.length > 0) {
             const [field, value] = fieldErrors[0];
             msg = `${field}: ${Array.isArray(value) ? value[0] : value}`;
           } else {
             msg = "Invalid credentials. Please try again.";
           }
+        } else {
+          msg = "Invalid credentials. Please try again.";
         }
       } else {
         msg = String(err);

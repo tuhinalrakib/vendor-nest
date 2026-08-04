@@ -322,9 +322,16 @@ export default function AdminCategories() {
           });
         } catch (err: any) {
           console.error(err);
+          const errMsg =
+            err.response?.data?.detail ||
+            err.response?.data?.error ||
+            err.response?.data?.message ||
+            (typeof err.response?.data === "string" ? err.response?.data : null) ||
+            err.message ||
+            "Could not delete category from backend.";
           Swal.fire({
             title: "Deletion Failed",
-            text: "Could not delete category from backend.",
+            text: errMsg,
             icon: "error",
             confirmButtonColor: "#4f46e5",
           });

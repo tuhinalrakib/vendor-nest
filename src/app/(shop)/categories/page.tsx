@@ -12,7 +12,17 @@ interface CategoryShowcase {
   bannerGradient: string;
   description: string;
   icon: React.ReactNode;
+  image?: string | null;
 }
+
+const getImageUrl = (imagePath?: string | null) => {
+  if (!imagePath) return null;
+  if (imagePath.startsWith("http://") || imagePath.startsWith("https://")) {
+    return imagePath;
+  }
+  const backendHost = process.env.NEXT_PUBLIC_BACKEND_HOST || "http://127.0.0.1:8000";
+  return `${backendHost}${imagePath.startsWith('/') ? '' : '/'}${imagePath}`;
+};
 
 export default function CategoriesCatalog() {
   const [categories, setCategories] = useState<CategoryShowcase[]>([]);
@@ -76,7 +86,7 @@ export default function CategoriesCatalog() {
           const productsList = prodRes.data || [];
           
           const extracted: CategoryShowcase[] = catRes.data.map((cat: any, idx: number) => {
-            const count = productsList.filter((p: any) => p.category === cat.id).length;
+            const count = cat.product_count ?? productsList.filter((p: any) => p.category === cat.id).length;
             
             // Assign gradient styles based on category slug/name
             const gradients = [
@@ -122,8 +132,9 @@ export default function CategoriesCatalog() {
               slug: cat.slug || cat.id,
               productCount: count,
               bannerGradient: selectGradient,
-              description: `Explore quality collections under the ${cat.name} marketplace department directory.`,
-              icon: iconElement
+              description: cat.description || `Explore quality collections under the ${cat.name} marketplace department directory.`,
+              icon: iconElement,
+              image: cat.image || null,
             };
           });
 
@@ -229,10 +240,18 @@ export default function CategoriesCatalog() {
                 <div className={`absolute -right-4 -top-4 w-20 h-20 bg-linear-to-tr ${cat.bannerGradient} opacity-5 group-hover:opacity-10 transition-opacity rounded-full blur-xl pointer-events-none`} />
 
                 <div className="space-y-6">
-                  {/* Category Header with Icon */}
+                  {/* Category Header with Icon / Image */}
                   <div className="flex items-center gap-4">
-                    <div className={`w-14 h-14 rounded-2xl bg-linear-to-tr ${cat.bannerGradient} text-white flex items-center justify-center shadow-md shadow-indigo-500/10 group-hover:scale-105 transition-transform duration-300`}>
-                      {cat.icon}
+                    <div className={`w-14 h-14 rounded-2xl bg-linear-to-tr ${cat.bannerGradient} text-white flex items-center justify-center shadow-md shadow-indigo-500/10 group-hover:scale-105 transition-transform duration-300 relative overflow-hidden shrink-0`}>
+                      {cat.image ? (
+                        <img
+                          src={getImageUrl(cat.image)!}
+                          alt={cat.name}
+                          className="w-full h-full object-cover rounded-2xl"
+                        />
+                      ) : (
+                        cat.icon
+                      )}
                     </div>
                     <div className="text-left space-y-0.5">
                       <h3 className="text-base font-extrabold text-zinc-955 dark:text-zinc-50 group-hover:text-indigo-650 dark:group-hover:text-indigo-400 transition-colors">

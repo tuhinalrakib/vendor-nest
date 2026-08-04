@@ -1,7 +1,18 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import api from "@/lib/api";
+
+const getCategoryIcon = (catName: string) => {
+  const nameLower = catName.toLowerCase();
+  if (nameLower.includes("elect") || nameLower.includes("tech") || nameLower.includes("phone") || nameLower.includes("comp")) return "💻";
+  if (nameLower.includes("fash") || nameLower.includes("cloth") || nameLower.includes("wear") || nameLower.includes("shoe") || nameLower.includes("jewel")) return "👗";
+  if (nameLower.includes("home") || nameLower.includes("kitc") || nameLower.includes("furn") || nameLower.includes("liv")) return "🛋️";
+  if (nameLower.includes("beaut") || nameLower.includes("health")) return "✨";
+  if (nameLower.includes("gadget") || nameLower.includes("smart")) return "⚡";
+  return "🏷️";
+};
 
 interface GridItem {
   id: string;
@@ -26,14 +37,36 @@ interface CollectionCard {
 
 export default function CategoryGridShowcase() {
   const [activeTab, setActiveTab] = useState<string>("all");
+  const [dbCategories, setDbCategories] = useState<{ id: string; label: string; icon: string }[]>([]);
 
-  const categories = [
-    { id: "all", label: "All Categories", icon: "🌐" },
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await api.get("/api/categories/");
+        if (response.data && response.data.length > 0) {
+          const mapped = response.data.map((cat: any) => ({
+            id: cat.id,
+            label: cat.name,
+            icon: getCategoryIcon(cat.name),
+          }));
+          setDbCategories(mapped);
+        }
+      } catch (err) {
+        console.warn("Failed to load categories for grid showcase", err);
+      }
+    };
+    fetchCategories();
+  }, []);
+
+  const defaultCategories = [
     { id: "electronics", label: "Electronics & Tech", icon: "💻" },
     { id: "fashion", label: "Fashion & Apparel", icon: "👗" },
     { id: "home", label: "Home & Living", icon: "🛋️" },
-    { id: "gadgets", label: "Smart Gadgets", icon: "⚡" },
-    { id: "beauty", label: "Beauty & Personal", icon: "✨" },
+  ];
+
+  const categories = [
+    { id: "all", label: "All Categories", icon: "🌐" },
+    ...(dbCategories.length > 0 ? dbCategories : defaultCategories),
   ];
 
   const collections: CollectionCard[] = [

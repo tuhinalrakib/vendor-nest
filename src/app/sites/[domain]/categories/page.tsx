@@ -13,7 +13,17 @@ interface CategoryShowcase {
   bannerGradient: string;
   description: string;
   icon: React.ReactNode;
+  image?: string | null;
 }
+
+const getImageUrl = (imagePath?: string | null) => {
+  if (!imagePath) return null;
+  if (imagePath.startsWith("http://") || imagePath.startsWith("https://")) {
+    return imagePath;
+  }
+  const backendHost = process.env.NEXT_PUBLIC_BACKEND_HOST || "http://127.0.0.1:8000";
+  return `${backendHost}${imagePath.startsWith('/') ? '' : '/'}${imagePath}`;
+};
 
 export default function TenantCategoriesCatalog() {
   const params = useParams();
@@ -28,48 +38,6 @@ export default function TenantCategoriesCatalog() {
   const [filteredCategories, setFilteredCategories] = useState<CategoryShowcase[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
-
-  const fallbackCategories: CategoryShowcase[] = [
-    {
-      id: "electronics",
-      name: "Electronics",
-      slug: "electronics",
-      productCount: 0,
-      bannerGradient: "from-blue-500 to-indigo-650",
-      description: "Laptops, high-performance headphones, charging adapters & tech tools.",
-      icon: (
-        <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-        </svg>
-      )
-    },
-    {
-      id: "fashion",
-      name: "Fashion",
-      slug: "fashion",
-      productCount: 0,
-      bannerGradient: "from-pink-500 to-rose-600",
-      description: "Apparel, waterproof urban jackets, footwear & designer accessories.",
-      icon: (
-        <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9-9c1.657 0 3 2.5 3 6s-1.343 6-3 6m0-12c-1.657 0-3 2.5-3 6s1.343 6 3 6m-9-6h9" />
-        </svg>
-      )
-    },
-    {
-      id: "home",
-      name: "Home & Living",
-      slug: "home",
-      productCount: 0,
-      bannerGradient: "from-emerald-500 to-teal-600",
-      description: "Organic hand-poured candles, LED desk lamps & room aesthetics.",
-      icon: (
-        <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-        </svg>
-      )
-    }
-  ];
 
   useEffect(() => {
     const fetchCategoriesData = async () => {
@@ -132,8 +100,9 @@ export default function TenantCategoriesCatalog() {
               slug: cat.slug || cat.id,
               productCount: count,
               bannerGradient: selectGradient,
-              description: `Explore quality collections under the ${cat.name} department in our store.`,
-              icon: iconElement
+              description: cat.description || `Explore quality collections under the ${cat.name} department in our store.`,
+              icon: iconElement,
+              image: cat.image || null,
             };
           });
 
@@ -143,13 +112,13 @@ export default function TenantCategoriesCatalog() {
           setCategories(activeCategories.length > 0 ? activeCategories : extracted);
           setFilteredCategories(activeCategories.length > 0 ? activeCategories : extracted);
         } else {
-          setCategories(fallbackCategories);
-          setFilteredCategories(fallbackCategories);
+          setCategories([]);
+          setFilteredCategories([]);
         }
       } catch (err) {
         console.warn("Backend categories offline, running local mock catalog showcase.", err);
-        setCategories(fallbackCategories);
-        setFilteredCategories(fallbackCategories);
+        setCategories([]);
+        setFilteredCategories([]);
       } finally {
         setIsLoading(false);
       }
@@ -180,8 +149,8 @@ export default function TenantCategoriesCatalog() {
       <div className="bg-white dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-800 py-12 text-left relative overflow-hidden">
         <div className="max-w-7xl mx-auto px-6 sm:px-8">
           <span className="text-[10px] font-extrabold text-indigo-600 dark:text-indigo-400 uppercase tracking-widest">Departments</span>
-          <h1 className="text-3xl font-extrabold text-zinc-950 dark:text-zinc-50 tracking-tight mt-1">{vendorName} Categories</h1>
-          <p className="text-sm font-semibold text-zinc-400 dark:text-zinc-500 mt-1 max-w-xl">
+          <h1 className="text-3xl font-extrabold text-zinc-955 dark:text-zinc-50 tracking-tight mt-1">{vendorName} Categories</h1>
+          <p className="text-sm font-semibold text-zinc-400 dark:text-zinc-550 mt-1 max-w-xl">
             Browse our curated collections of items. Filter our store catalog by department to find exactly what you need.
           </p>
         </div>
@@ -237,8 +206,17 @@ export default function TenantCategoriesCatalog() {
 
                 {/* Card Header (Icon & Badge Count) */}
                 <div className="flex justify-between items-start z-10">
-                  <div className={`p-3 rounded-2xl bg-linear-to-br ${cat.bannerGradient} text-white shadow-xs group-hover:scale-105 transition-transform duration-200`}>
-                    {cat.icon}
+                  <div className={`w-12 h-12 rounded-2xl bg-linear-to-br ${cat.bannerGradient} text-white shadow-xs group-hover:scale-105 transition-transform duration-200 flex items-center justify-center relative overflow-hidden shrink-0`}>
+                    {cat.image ? (
+                      <img
+                        src={getImageUrl(cat.image)!}
+                        alt={cat.name}
+                        loading="lazy"
+                        className="w-full h-full object-cover rounded-2xl"
+                      />
+                    ) : (
+                      cat.icon
+                    )}
                   </div>
                   <span className="px-3 py-1 rounded-full text-[10px] font-bold bg-zinc-100 dark:bg-zinc-900 border border-zinc-200/80 dark:border-zinc-800 text-zinc-650 dark:text-zinc-400 group-hover:border-indigo-200 dark:group-hover:border-indigo-900/50 group-hover:text-indigo-650 dark:group-hover:text-indigo-400 transition-colors">
                     {cat.productCount} {cat.productCount === 1 ? 'Product' : 'Products'}

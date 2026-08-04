@@ -4,6 +4,10 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useCart } from "@/lib/CartContext";
 import Swal from "sweetalert2";
+import api from "@/lib/api";
+
+import { useAuth } from "@/lib/AuthContext";
+import { useRouter } from "next/navigation";
 
 interface FlashProduct {
   id: string;
@@ -16,12 +20,27 @@ interface FlashProduct {
   reviewsCount: number;
   soldPercentage: number;
   stockLeft: number;
+  image?: string | null;
   icon: string;
   bgGradient: string;
 }
 
+const getImageUrl = (imagePath?: string | null) => {
+  if (!imagePath) return null;
+  if (imagePath.startsWith("http://") || imagePath.startsWith("https://")) {
+    return imagePath;
+  }
+  const backendHost = process.env.NEXT_PUBLIC_BACKEND_HOST || "http://127.0.0.1:8000";
+  return `${backendHost}${imagePath.startsWith('/') ? '' : '/'}${imagePath}`;
+};
+
 export default function FlashSaleDeals() {
   const { addToCart } = useCart();
+  const { user } = useAuth();
+  const router = useRouter();
+
+  const [products, setProducts] = useState<FlashProduct[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   // Timer Countdown state (8 hours, 42 minutes, 15 seconds)
   const [timeLeft, setTimeLeft] = useState({
@@ -47,7 +66,7 @@ export default function FlashSaleDeals() {
     return () => clearInterval(timer);
   }, []);
 
-  const flashProducts: FlashProduct[] = [
+  const fallbackProducts: FlashProduct[] = [
     {
       id: "flash-1",
       name: "Wireless ANC Pro Headphones",
@@ -106,7 +125,100 @@ export default function FlashSaleDeals() {
     },
   ];
 
+  useEffect(() => {
+    const fetchFlashProducts = async () => {
+      try {
+        setIsLoading(true);
+        const [prodRes, catRes] = await Promise.all([
+          api.get("/api/products/"),
+          api.get("/api/categories/")
+        ]);
+
+        const catMap: { [id: string]: string } = {};
+        if (catRes.data) {
+          catRes.data.forEach((c: any) => {
+            catMap[c.id] = c.name;
+          });
+        }
+
+        if (prodRes.data && prodRes.data.length > 0) {
+          const gradients = [
+            "from-indigo-500/10 to-purple-500/10",
+            "from-blue-500/10 to-cyan-500/10",
+            "from-emerald-500/10 to-teal-500/10",
+            "from-amber-500/10 to-orange-500/10",
+          ];
+
+          const mapped: FlashProduct[] = prodRes.data.map((p: any, idx: number) => {
+            const price = parseFloat(p.price) || 0;
+            const rawCompareAt = parseFloat(p.compare_at_price);
+
+            // Dynamic fallback multipliers if compare_at_price is not specified in database
+            const fallbackMultipliers = [1.5, 1.35, 1.6, 1.25, 1.45, 1.3];
+            const multiplier = fallbackMultipliers[idx % fallbackMultipliers.length];
+
+            const originalPrice = (rawCompareAt && rawCompareAt > price)
+              ? rawCompareAt
+              : parseFloat((price * multiplier).toFixed(2));
+
+            const discountPercentage = Math.round(((originalPrice - price) / originalPrice) * 100);
+            const catName = catMap[p.category] || p.category_name || "Featured Product";
+            const actualStock = (p.stock !== undefined && p.stock !== null && p.stock > 0) ? p.stock : (5 + ((idx * 7) % 15));
+
+            return {
+              id: p.id,
+              name: p.name,
+              category: catName,
+              originalPrice: originalPrice,
+              salePrice: price,
+              discountPercentage: discountPercentage > 0 ? discountPercentage : 25,
+              rating: p.rating || parseFloat((4.5 + (idx % 5) * 0.1).toFixed(1)),
+              reviewsCount: p.reviews_count || (45 + idx * 28),
+              soldPercentage: Math.min(95, 60 + ((idx * 11) % 30)),
+              stockLeft: actualStock,
+              image: getImageUrl(p.image),
+              icon: "⚡",
+              bgGradient: gradients[idx % gradients.length],
+            };
+          });
+
+          const sorted = mapped.sort((a, b) => b.discountPercentage - a.discountPercentage);
+          setProducts(sorted.slice(0, 4));
+        } else {
+          setProducts(fallbackProducts);
+        }
+      } catch (err) {
+        console.warn("Failed to fetch flash sale products from backend:", err);
+        setProducts(fallbackProducts);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchFlashProducts();
+  }, []);
+
+  const displayProducts = products.length > 0 ? products : fallbackProducts;
+
   const handleClaimDeal = async (prod: FlashProduct) => {
+    if (!user) {
+      Swal.fire({
+        title: "Authentication Required",
+        text: "Please sign in to add items to your shopping cart.",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#4f46e5",
+        cancelButtonColor: "#6b7280",
+        confirmButtonText: "Sign In Now",
+        cancelButtonText: "Cancel",
+      }).then((result) => {
+        if (result.isConfirmed) {
+          router.push("/login");
+        }
+      });
+      return;
+    }
+
     try {
       await addToCart(prod.id, 1);
       Swal.fire({
@@ -122,7 +234,7 @@ export default function FlashSaleDeals() {
         toast: true,
         position: "top-end",
         icon: "error",
-        title: "Please login to add items to cart",
+        title: "Failed to add item to cart",
         showConfirmButton: false,
         timer: 2000,
       });
@@ -192,7 +304,7 @@ export default function FlashSaleDeals() {
 
         {/* 4 Flash Deal Product Cards Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {flashProducts.map((prod) => (
+          {displayProducts.map((prod) => (
             <div
               key={prod.id}
               className="bg-white dark:bg-zinc-900 border border-zinc-200/80 dark:border-zinc-800 rounded-3xl p-5 flex flex-col justify-between shadow-sm hover:shadow-xl transition-all duration-300 relative group hover:-translate-y-1"
@@ -205,10 +317,20 @@ export default function FlashSaleDeals() {
 
               {/* Product Visual Mockup */}
               <div className={`w-full aspect-square rounded-2xl bg-linear-to-br ${prod.bgGradient} border border-zinc-100 dark:border-zinc-800/80 flex flex-col items-center justify-center relative overflow-hidden group-hover:scale-105 transition-transform duration-300`}>
-                <span className="text-6xl drop-shadow-md">{prod.icon}</span>
-                <span className="text-[10px] font-extrabold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest mt-2">
-                  {prod.category}
-                </span>
+                {prod.image ? (
+                  <img
+                    src={prod.image}
+                    alt={prod.name}
+                    className="w-full h-full object-cover rounded-2xl"
+                  />
+                ) : (
+                  <>
+                    <span className="text-6xl drop-shadow-md">{prod.icon}</span>
+                    <span className="text-[10px] font-extrabold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest mt-2">
+                      {prod.category}
+                    </span>
+                  </>
+                )}
               </div>
 
               {/* Product Details */}
