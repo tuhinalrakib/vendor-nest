@@ -43,9 +43,10 @@ export default function CategoryGridShowcase() {
     const fetchCategories = async () => {
       try {
         const response = await api.get("/api/categories/");
-        if (response.data && response.data.length > 0) {
-          const mapped = response.data.map((cat: any) => ({
-            id: cat.id,
+        const data = Array.isArray(response.data) ? response.data : (response.data?.results || []);
+        if (Array.isArray(data) && data.length > 0) {
+          const mapped = data.map((cat: any) => ({
+            id: cat.slug || cat.id,
             label: cat.name,
             icon: getCategoryIcon(cat.name),
           }));
@@ -58,15 +59,9 @@ export default function CategoryGridShowcase() {
     fetchCategories();
   }, []);
 
-  const defaultCategories = [
-    { id: "electronics", label: "Electronics & Tech", icon: "💻" },
-    { id: "fashion", label: "Fashion & Apparel", icon: "👗" },
-    { id: "home", label: "Home & Living", icon: "🛋️" },
-  ];
-
   const categories = [
     { id: "all", label: "All Categories", icon: "🌐" },
-    ...(dbCategories.length > 0 ? dbCategories : defaultCategories),
+    ...dbCategories,
   ];
 
   const collections: CollectionCard[] = [

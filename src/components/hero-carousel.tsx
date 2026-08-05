@@ -53,28 +53,27 @@ export default function HeroCarousel() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const [popularCategories, setPopularCategories] = useState<PopularCategoryItem[]>([]);
+  const [isLoadingCategories, setIsLoadingCategories] = useState(true);
   const autoPlayRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     const fetchPopularCategories = async () => {
       try {
+        setIsLoadingCategories(true);
         const response = await api.get("/api/categories/");
-        if (response.data && response.data.length > 0) {
-          setPopularCategories(response.data.slice(0, 3));
+        const data = Array.isArray(response.data) ? response.data : (response.data?.results || []);
+        if (Array.isArray(data)) {
+          setPopularCategories(data);
         }
       } catch (err) {
         console.warn("Failed to fetch popular categories from backend:", err);
+      } finally {
+        setIsLoadingCategories(false);
       }
     };
 
     fetchPopularCategories();
   }, []);
-
-  const displayCategories = popularCategories.length > 0 ? popularCategories : [
-    { id: "electronics", name: "Tech", slug: "electronics", image: null },
-    { id: "clothing", name: "Fashion", slug: "fashion", image: null },
-    { id: "home", name: "Home", slug: "home", image: null },
-  ];
 
   const slides: Slide[] = [
     {
@@ -333,33 +332,45 @@ export default function HeroCarousel() {
                 </Link>
               </div>
               <div className="grid grid-cols-3 gap-2">
-                {displayCategories.map((cat) => {
-                  const imgUrl = getImageUrl(cat.image);
-                  return (
-                    <Link
-                      key={cat.id}
-                      href={`/products?category=${encodeURIComponent(cat.id)}`}
-                      className="p-3 bg-zinc-50 dark:bg-zinc-950 hover:bg-indigo-50 dark:hover:bg-indigo-950/40 border border-zinc-200/60 dark:border-zinc-800 rounded-2xl text-center transition-all group flex flex-col items-center justify-center min-h-[76px]"
-                    >
-                      {imgUrl ? (
-                        <div className="w-7 h-7 relative rounded-lg overflow-hidden shrink-0 group-hover:scale-110 transition-transform">
-                          <img
-                            src={imgUrl}
-                            alt={cat.name}
-                            className="w-full h-full object-cover"
-                          />
-                        </div>
-                      ) : (
-                        <p className="text-xl group-hover:scale-110 transition-transform leading-none">
-                          {getCategoryIcon(cat.name)}
+                {isLoadingCategories ? (
+                  <>
+                    <div className="h-16 bg-zinc-100 dark:bg-zinc-800 animate-pulse rounded-2xl" />
+                    <div className="h-16 bg-zinc-100 dark:bg-zinc-800 animate-pulse rounded-2xl" />
+                    <div className="h-16 bg-zinc-100 dark:bg-zinc-800 animate-pulse rounded-2xl" />
+                  </>
+                ) : popularCategories.length > 0 ? (
+                  popularCategories.slice(0, 3).map((cat) => {
+                    const imgUrl = getImageUrl(cat.image);
+                    return (
+                      <Link
+                        key={cat.id}
+                        href={`/products?category=${encodeURIComponent(cat.slug || cat.id)}`}
+                        className="p-3 bg-zinc-50 dark:bg-zinc-950 hover:bg-indigo-50 dark:hover:bg-indigo-950/40 border border-zinc-200/60 dark:border-zinc-800 rounded-2xl text-center transition-all group flex flex-col items-center justify-center min-h-[76px]"
+                      >
+                        {imgUrl ? (
+                          <div className="w-7 h-7 relative rounded-lg overflow-hidden shrink-0 group-hover:scale-110 transition-transform">
+                            <img
+                              src={imgUrl}
+                              alt={cat.name}
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
+                        ) : (
+                          <p className="text-xl group-hover:scale-110 transition-transform leading-none">
+                            {getCategoryIcon(cat.name)}
+                          </p>
+                        )}
+                        <p className="text-[10px] font-extrabold text-zinc-700 dark:text-zinc-300 mt-1.5 truncate max-w-full">
+                          {cat.name}
                         </p>
-                      )}
-                      <p className="text-[10px] font-extrabold text-zinc-700 dark:text-zinc-300 mt-1.5 truncate max-w-full">
-                        {cat.name}
-                      </p>
-                    </Link>
-                  );
-                })}
+                      </Link>
+                    );
+                  })
+                ) : (
+                  <div className="col-span-3 text-center py-4 text-xs font-semibold text-zinc-400">
+                    No categories found
+                  </div>
+                )}
               </div>
             </div>
 

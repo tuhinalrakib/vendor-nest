@@ -120,6 +120,71 @@ export default function SellerAddProduct() {
 
   const [isGeneratingDesc, setIsGeneratingDesc] = useState(false);
   const [isGeneratingSeo, setIsGeneratingSeo] = useState(false);
+  const [isTranslatingDesc, setIsTranslatingDesc] = useState(false);
+  const [isTranslatingTitle, setIsTranslatingTitle] = useState(false);
+
+  const translateText = async (text: string): Promise<string> => {
+    if (!text || !text.trim()) return "";
+    try {
+      const response = await api.post("/api/ai/translate/", { text: text.trim(), target_lang: "bn" });
+      return response.data.translated_text || "";
+    } catch (err) {
+      console.error("Translation error:", err);
+      return "";
+    }
+  };
+
+  const handleAutoTranslateDesc = async (textToTranslate?: string) => {
+    const targetText = textToTranslate !== undefined ? textToTranslate : formData.description;
+    if (!targetText || !targetText.trim()) return;
+
+    setIsTranslatingDesc(true);
+    try {
+      const translated = await translateText(targetText);
+      if (translated) {
+        setFormData((prev) => ({ ...prev, description_bn: translated }));
+      }
+    } catch (err) {
+      console.error("Failed to translate description to Bengali:", err);
+    } finally {
+      setIsTranslatingDesc(false);
+    }
+  };
+
+  const handleAutoTranslateTitle = async (textToTranslate?: string) => {
+    const targetText = textToTranslate !== undefined ? textToTranslate : formData.name;
+    if (!targetText || !targetText.trim()) return;
+
+    setIsTranslatingTitle(true);
+    try {
+      const translated = await translateText(targetText);
+      if (translated) {
+        setFormData((prev) => ({ ...prev, name_bn: translated }));
+      }
+    } catch (err) {
+      console.error("Failed to translate title to Bengali:", err);
+    } finally {
+      setIsTranslatingTitle(false);
+    }
+  };
+
+  // Debounced auto-translation when user stops typing description or title
+  useEffect(() => {
+    if (!formData.description || !formData.description.trim()) return;
+    const timer = setTimeout(() => {
+      handleAutoTranslateDesc(formData.description);
+    }, 1200);
+    return () => clearTimeout(timer);
+  }, [formData.description]);
+
+  useEffect(() => {
+    if (!formData.name || !formData.name.trim()) return;
+    const timer = setTimeout(() => {
+      handleAutoTranslateTitle(formData.name);
+    }, 1200);
+    return () => clearTimeout(timer);
+  }, [formData.name]);
+
   const generateSKUSuggestion = (categoryName: string, priceStr: string) => {
     if (!categoryName) return "";
     const words = categoryName.split(/\s+/);
@@ -175,6 +240,10 @@ export default function SellerAddProduct() {
       });
       const data = response.data;
       setFormData((prev) => ({ ...prev, description: data.content }));
+      
+      // Auto translate AI description to Bengali
+      handleAutoTranslateDesc(data.content);
+
       Swal.fire({
         toast: true,
         position: "top-end",
@@ -565,9 +634,26 @@ export default function SellerAddProduct() {
             
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <label htmlFor="name_bn" className="text-xs font-bold text-zinc-600">
-                  Product Title (Bengali / বাংলা)
-                </label>
+                <div className="flex justify-between items-center">
+                  <label htmlFor="name_bn" className="text-xs font-bold text-zinc-600">
+                    Product Title (Bengali / বাংলা)
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => handleAutoTranslateTitle()}
+                    disabled={isTranslatingTitle}
+                    className="text-[11px] font-bold text-indigo-600 hover:text-indigo-700 flex items-center gap-1 cursor-pointer transition-colors"
+                  >
+                    {isTranslatingTitle ? (
+                      <>
+                        <span className="w-3.5 h-3.5 border border-indigo-600 border-t-transparent rounded-full animate-spin"></span>
+                        Translating...
+                      </>
+                    ) : (
+                      "✨ Auto-Translate"
+                    )}
+                  </button>
+                </div>
                 <input
                   id="name_bn"
                   name="name_bn"
@@ -595,14 +681,31 @@ export default function SellerAddProduct() {
             </div>
 
             <div className="space-y-1.5">
-              <label htmlFor="description_bn" className="text-xs font-bold text-zinc-600">
-                Product Description (Bengali / বাংলা)
-              </label>
+              <div className="flex justify-between items-center">
+                <label htmlFor="description_bn" className="text-xs font-bold text-zinc-600">
+                  Product Description (Bengali / বাংলা)
+                </label>
+                <button
+                  type="button"
+                  onClick={() => handleAutoTranslateDesc()}
+                  disabled={isTranslatingDesc}
+                  className="text-[11px] font-bold text-indigo-600 hover:text-indigo-700 flex items-center gap-1 cursor-pointer transition-colors"
+                >
+                  {isTranslatingDesc ? (
+                    <>
+                      <span className="w-3.5 h-3.5 border border-indigo-600 border-t-transparent rounded-full animate-spin"></span>
+                      Translating...
+                    </>
+                  ) : (
+                    "✨ Auto-Translate to Bengali"
+                  )}
+                </button>
+              </div>
               <textarea
                 id="description_bn"
                 name="description_bn"
                 rows={3}
-                placeholder="বাংলা ভাষায় প্রোডাক্টের বিস্তারিত বিবরণ লিখুন..."
+                placeholder="বাংলা ভাষায় প্রোডাক্টের বিস্তারিত বিবরণ (Auto-translated in Bengali)..."
                 value={formData.description_bn}
                 onChange={handleInputChange}
                 className="w-full p-4 bg-zinc-50 border border-zinc-200 focus:border-indigo-600 focus:bg-white rounded-xl text-sm font-semibold outline-none transition-all resize-none"

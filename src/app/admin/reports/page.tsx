@@ -105,14 +105,14 @@ export default function AdminReports() {
               No payout requests found in the database.
             </div>
           ) : (
-            <table className="w-full text-left text-xs font-bold text-zinc-500">
+            <table className="w-full min-w-[600px] text-left text-xs font-bold text-zinc-500">
               <thead className="bg-zinc-50 uppercase tracking-wider text-zinc-400 border-b border-zinc-150">
                 <tr>
-                  <th className="px-6 py-3.5">Seller Shop</th>
-                  <th className="px-6 py-3.5">Destination Account</th>
-                  <th className="px-6 py-3.5">Net Payout</th>
-                  <th className="px-6 py-3.5">Status</th>
-                  <th className="px-6 py-3.5">Release Date</th>
+                  <th className="px-6 py-3.5 whitespace-nowrap">Seller Shop</th>
+                  <th className="px-6 py-3.5 whitespace-nowrap">Destination Account</th>
+                  <th className="px-6 py-3.5 whitespace-nowrap">Net Payout</th>
+                  <th className="px-6 py-3.5 whitespace-nowrap">Status</th>
+                  <th className="px-6 py-3.5 whitespace-nowrap">Release Date</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-zinc-100 bg-white">
@@ -131,17 +131,17 @@ export default function AdminReports() {
                   };
                   return (
                     <tr key={row.id} className="text-zinc-700 font-semibold">
-                      <td className="px-6 py-4 font-bold text-zinc-950">{row.shop_name}</td>
-                      <td className="px-6 py-4 font-mono">{row.payout_account}</td>
-                      <td className="px-6 py-4 font-extrabold text-zinc-950">
+                      <td className="px-6 py-4 whitespace-nowrap font-bold text-zinc-950">{row.shop_name}</td>
+                      <td className="px-6 py-4 whitespace-nowrap font-mono">{row.payout_account}</td>
+                      <td className="px-6 py-4 whitespace-nowrap font-extrabold text-zinc-950">
                         ${row.amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                       </td>
-                      <td className="px-6 py-4">
+                      <td className="px-6 py-4 whitespace-nowrap">
                         <span className={`px-2 py-0.5 rounded-full text-[9px] font-extrabold border ${statusColors[row.status] || "bg-zinc-50 text-zinc-700 border-zinc-250"}`}>
                           {statusLabel[row.status] || row.status}
                         </span>
                       </td>
-                      <td className="px-6 py-4 text-zinc-400">{row.date}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-zinc-400">{row.date}</td>
                     </tr>
                   );
                 })}

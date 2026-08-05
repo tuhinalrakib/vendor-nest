@@ -30,48 +30,7 @@ export default function CategoriesCatalog() {
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
 
-  // High-fidelity fallback categories
-  const fallbackCategories: CategoryShowcase[] = [
-    {
-      id: "electronics",
-      name: "Electronics",
-      slug: "electronics",
-      productCount: 15,
-      bannerGradient: "from-blue-500 to-indigo-650",
-      description: "Laptops, high-performance headphones, charging adapters & tech tools.",
-      icon: (
-        <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-        </svg>
-      )
-    },
-    {
-      id: "fashion",
-      name: "Fashion",
-      slug: "fashion",
-      productCount: 28,
-      bannerGradient: "from-pink-500 to-rose-600",
-      description: "Apparel, waterproof urban jackets, footwear & designer accessories.",
-      icon: (
-        <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9-9c1.657 0 3 2.5 3 6s-1.343 6-3 6m0-12c-1.657 0-3 2.5-3 6s1.343 6 3 6m-9-6h9" />
-        </svg>
-      )
-    },
-    {
-      id: "home",
-      name: "Home & Living",
-      slug: "home",
-      productCount: 12,
-      bannerGradient: "from-emerald-500 to-teal-600",
-      description: "Organic hand-poured candles, LED desk lamps & room aesthetics.",
-      icon: (
-        <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-        </svg>
-      )
-    }
-  ];
+
 
   useEffect(() => {
     const fetchCategoriesData = async () => {
@@ -79,14 +38,16 @@ export default function CategoriesCatalog() {
         setIsLoading(true);
         const [catRes, prodRes] = await Promise.all([
           api.get("/api/categories/"),
-          api.get("/api/products/")
+          api.get("/api/products/").catch(() => ({ data: [] }))
         ]);
 
-        if (catRes.data && catRes.data.length > 0) {
-          const productsList = prodRes.data || [];
+        const catData = Array.isArray(catRes.data) ? catRes.data : (catRes.data?.results || []);
+
+        if (catData && catData.length > 0) {
+          const productsList = Array.isArray(prodRes.data) ? prodRes.data : (prodRes.data?.results || []);
           
-          const extracted: CategoryShowcase[] = catRes.data.map((cat: any, idx: number) => {
-            const count = cat.product_count ?? productsList.filter((p: any) => p.category === cat.id).length;
+          const extracted: CategoryShowcase[] = catData.map((cat: any, idx: number) => {
+            const count = cat.product_count ?? productsList.filter((p: any) => p.category === cat.id || p.category?.id === cat.id).length;
             
             // Assign gradient styles based on category slug/name
             const gradients = [
@@ -132,7 +93,7 @@ export default function CategoriesCatalog() {
               slug: cat.slug || cat.id,
               productCount: count,
               bannerGradient: selectGradient,
-              description: cat.description || `Explore quality collections under the ${cat.name} marketplace department directory.`,
+              description: cat.description || `Explore quality collections under the ${cat.name} department directory.`,
               icon: iconElement,
               image: cat.image || null,
             };
@@ -141,13 +102,13 @@ export default function CategoriesCatalog() {
           setCategories(extracted);
           setFilteredCategories(extracted);
         } else {
-          setCategories(fallbackCategories);
-          setFilteredCategories(fallbackCategories);
+          setCategories([]);
+          setFilteredCategories([]);
         }
       } catch (err) {
-        console.warn("Backend categories offline, running local mock catalog showcase.", err);
-        setCategories(fallbackCategories);
-        setFilteredCategories(fallbackCategories);
+        console.warn("Backend categories offline or empty.", err);
+        setCategories([]);
+        setFilteredCategories([]);
       } finally {
         setIsLoading(false);
       }

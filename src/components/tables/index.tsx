@@ -11,6 +11,7 @@ interface TableProps<T> {
   columns: TableColumn<T>[];
   title?: string;
   subtitle?: string;
+  minWidth?: string;
 }
 
 export default function Table<T>({
@@ -18,6 +19,7 @@ export default function Table<T>({
   columns,
   title,
   subtitle,
+  minWidth = "min-w-[650px]",
 }: TableProps<T>) {
   return (
     <div className="rounded-2xl border border-zinc-200 bg-white overflow-hidden shadow-sm hover:shadow-md transition-shadow">
@@ -30,12 +32,12 @@ export default function Table<T>({
       )}
 
       {/* Table Wrapper */}
-      <div className="w-full overflow-x-auto">
-        <table className="w-full border-collapse text-left text-sm text-zinc-500">
+      <div className="w-full overflow-x-auto scrollbar-thin">
+        <table className={`w-full ${minWidth} border-collapse text-left text-sm text-zinc-500`}>
           <thead className="bg-zinc-50 border-b border-zinc-100 text-xs font-bold text-zinc-400 uppercase tracking-wider">
             <tr>
               {columns.map((col, idx) => (
-                <th key={idx} scope="col" className={`px-4 py-3 ${col.className || ""}`}>
+                <th key={idx} scope="col" className={`px-4 py-3.5 whitespace-nowrap ${col.className || ""}`}>
                   {col.header}
                 </th>
               ))}
@@ -46,7 +48,7 @@ export default function Table<T>({
               data.map((item, rowIdx) => (
                 <tr key={rowIdx} className="hover:bg-zinc-50/50 transition-colors">
                   {columns.map((col, colIdx) => (
-                    <td key={colIdx} className={`px-4 py-3 text-zinc-700 font-semibold ${col.className || ""}`}>
+                    <td key={colIdx} className={`px-4 py-3.5 whitespace-nowrap text-zinc-700 font-semibold ${col.className || ""}`}>
                       {col.render(item, rowIdx)}
                     </td>
                   ))}

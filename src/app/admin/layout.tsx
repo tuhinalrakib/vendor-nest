@@ -20,6 +20,7 @@ import {
   ChevronDownIcon,
   LogOutIcon,
   StoreIcon,
+  MenuIcon,
 } from "@/components/icons";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -30,6 +31,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [notifications, setNotifications] = useState<any[]>([]);
   const [showNotifications, setShowNotifications] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  useEffect(() => {
+    setMobileMenuOpen(false);
+  }, [pathname]);
 
   const fetchNotifications = async () => {
     try {
@@ -199,16 +205,29 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   return (
     <div className="flex min-h-screen bg-zinc-50/60 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-50 transition-colors duration-300 font-sans">
       {/* Sidebar Panel */}
-      <Sidebar items={sidebarItems} title="VendorNest Admin" footer={sidebarFooter} />
+      <Sidebar
+        items={sidebarItems}
+        title="VendorNest Admin"
+        footer={sidebarFooter}
+        isMobileOpen={mobileMenuOpen}
+        onClose={() => setMobileMenuOpen(false)}
+      />
 
       {/* Workspace Panel */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* Header */}
-        <header className="h-16 px-8 border-b border-zinc-200/80 dark:border-zinc-800/80 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-md sticky top-0 z-30 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="text-xs font-bold text-red-500 tracking-wide uppercase">Admin Console</span>
-            <span className="text-xs font-extrabold text-zinc-300">/</span>
-            <span className="text-sm font-bold text-zinc-900 dark:text-zinc-50">{getPageTitle()}</span>
+        <header className="h-16 px-4 sm:px-6 lg:px-8 border-b border-zinc-200/80 dark:border-zinc-800/80 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-md sticky top-0 z-30 flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <button
+              onClick={() => setMobileMenuOpen(true)}
+              className="p-2 -ml-1 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-xl transition-colors lg:hidden shrink-0 cursor-pointer"
+              aria-label="Open mobile menu"
+            >
+              <MenuIcon className="w-5 h-5" />
+            </button>
+            <span className="text-xs font-bold text-red-500 tracking-wide uppercase hidden sm:inline">Admin Console</span>
+            <span className="text-xs font-extrabold text-zinc-300 hidden sm:inline">/</span>
+            <span className="text-sm font-bold text-zinc-900 dark:text-zinc-50 truncate">{getPageTitle()}</span>
           </div>
 
           <div className="flex items-center gap-5">
@@ -363,7 +382,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </header>
 
         {/* Workspace details */}
-        <main className="flex-1 p-8 overflow-y-auto max-w-7xl mx-auto w-full">
+        <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto max-w-7xl mx-auto w-full">
           {children}
         </main>
       </div>
