@@ -3,6 +3,7 @@ import "./globals.css";
 import { AuthProvider } from "@/lib/AuthContext";
 import { CartProvider } from "@/lib/CartContext";
 import { ThemeProvider } from "@/lib/ThemeContext";
+import { LanguageProvider } from "@/lib/LanguageContext";
 import CartDrawer from "@/components/navbar/CartDrawer";
 import { AIChatSupport } from "@/components/ai-storefront";
 import Script from "next/script";
@@ -62,15 +63,17 @@ export default function RootLayout({
       className="h-full antialiased"
     >
       <body className="min-h-full flex flex-col">
-        <ThemeProvider>
-          <AuthProvider>
-            <CartProvider>
-              {children}
-              <CartDrawer />
-              <AIChatSupport />
-            </CartProvider>
-          </AuthProvider>
-        </ThemeProvider>
+        <LanguageProvider>
+          <ThemeProvider>
+            <AuthProvider>
+              <CartProvider>
+                {children}
+                <CartDrawer />
+                <AIChatSupport />
+              </CartProvider>
+            </AuthProvider>
+          </ThemeProvider>
+        </LanguageProvider>
         <Script src="https://accounts.google.com/gsi/client" strategy="afterInteractive" />
       </body>
     </html>

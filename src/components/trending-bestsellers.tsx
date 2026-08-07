@@ -5,10 +5,14 @@ import Link from "next/link";
 import api from "@/lib/api";
 import { useCart } from "@/lib/CartContext";
 import Swal from "sweetalert2";
+import { useLanguage } from "@/lib/LanguageContext";
 
 interface ProductItem {
   id: string;
   name: string;
+  name_bn?: string;
+  description?: string;
+  description_bn?: string;
   price: string;
   compare_at_price?: string | null;
   seller_shop?: string;
@@ -21,6 +25,7 @@ interface ProductItem {
 
 export default function TrendingBestSellers() {
   const { addToCart } = useCart();
+  const { lang, tp, t } = useLanguage();
   const [activeTab, setActiveTab] = useState<"bestsellers" | "new" | "rated">("bestsellers");
   const [products, setProducts] = useState<ProductItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -60,6 +65,9 @@ export default function TrendingBestSellers() {
           const formatted = res.data.map((p: any, idx: number) => ({
             id: p.id || `api-${idx}`,
             name: p.name,
+            name_bn: p.name_bn,
+            description: p.description,
+            description_bn: p.description_bn,
             price: p.price,
             compare_at_price: p.compare_at_price,
             seller_shop: p.seller_shop || "Verified Merchant",
@@ -199,7 +207,7 @@ export default function TrendingBestSellers() {
 
                 {/* Title */}
                 <h3 className="text-sm font-extrabold text-zinc-950 dark:text-zinc-50 leading-snug line-clamp-2 min-h-[40px] group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
-                  {prod.name}
+                  {tp({ name: prod.name, name_bn: prod.name_bn }, "name")}
                 </h3>
 
                 {/* Rating Stars */}
@@ -239,7 +247,7 @@ export default function TrendingBestSellers() {
                   onClick={() => handleAddToCart(prod)}
                   className="w-full h-11 rounded-2xl bg-white dark:bg-zinc-800 hover:bg-indigo-600 hover:text-white dark:hover:bg-indigo-600 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100 font-extrabold text-xs shadow-xs transition-all cursor-pointer flex items-center justify-center gap-2 mt-2"
                 >
-                  <span>🛒 Add to Cart</span>
+                  <span>🛒 {t("btn.addToCart")}</span>
                 </button>
               </div>
 

@@ -18,9 +18,11 @@ import {
   UsersIcon,
   SettingsIcon,
 } from "@/components/icons";
+import { useLanguage } from "@/lib/LanguageContext";
 
 export default function Navbar() {
   const { theme, toggleTheme } = useTheme();
+  const { lang, toggleLang, t } = useLanguage();
   const { user, logout, isLoading, maintenanceMode } = useAuth();
   const router = useRouter();
   const [showProfileMenu, setShowProfileMenu] = useState(false);
@@ -56,16 +58,16 @@ export default function Navbar() {
         {/* Navigation links (Desktop) */}
         <div className="hidden md:flex items-center gap-6 text-sm font-semibold text-zinc-650 dark:text-zinc-400">
           <Link href="/shops" className="hover:text-indigo-650 dark:hover:text-indigo-400 transition-colors">
-            Shops
+            {t("nav.shops")}
           </Link>
           <Link href="/products" className="hover:text-indigo-650 dark:hover:text-indigo-400 transition-colors">
-            Products
+            {t("nav.products")}
           </Link>
           <Link href="/categories" className="hover:text-indigo-650 dark:hover:text-indigo-400 transition-colors">
-            Categories
+            {t("nav.categories")}
           </Link>
           <Link href="/coupons" className="hover:text-indigo-650 dark:hover:text-indigo-400 transition-colors">
-            Coupons
+            {t("nav.coupons")}
           </Link>
 
           {/* Dynamic Action Link depending on User Role */}
@@ -74,16 +76,16 @@ export default function Navbar() {
           ) : user ? (
             user.role === "admin" ? (
               <Link href="/admin/dashboard" className="text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-350 transition-colors font-bold">
-                Admin Dashboard
+                {t("nav.adminDashboard")}
               </Link>
             ) : user.role === "seller" ? (
               <Link href="/seller/dashboard" className="text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-350 transition-colors font-bold">
-                Seller Dashboard
+                {t("nav.sellerDashboard")}
               </Link>
             ) : null
           ) : (
             <Link href="/become-seller" className="text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-350 transition-colors font-bold">
-              Become a Seller
+              {t("nav.becomeSeller")}
             </Link>
           )}
         </div>
@@ -107,7 +109,7 @@ export default function Navbar() {
           </div>
           <input
             type="text"
-            placeholder="Search products, brands, shops..."
+            placeholder={t("nav.searchPlaceholder")}
             className="w-full h-10 pl-10 pr-4 rounded-full border border-zinc-200 bg-zinc-50 text-sm focus:outline-none focus:border-indigo-500 focus:bg-white transition-all text-zinc-800 placeholder-zinc-400"
           />
         </div>
@@ -117,7 +119,7 @@ export default function Navbar() {
           {/* Theme Toggle Button */}
           <button
             onClick={toggleTheme}
-            className="p-2 text-zinc-500 hover:text-indigo-600 dark:text-zinc-400 dark:hover:text-indigo-400 hover:bg-zinc-50 dark:hover:bg-zinc-900 rounded-xl transition-all duration-200 active:scale-95 cursor-pointer flex items-center justify-center mr-1"
+            className="p-2 text-zinc-500 hover:text-indigo-600 dark:text-zinc-400 dark:hover:text-indigo-400 hover:bg-zinc-50 dark:hover:bg-zinc-900 rounded-xl transition-all duration-200 active:scale-95 cursor-pointer flex items-center justify-center"
             aria-label="Toggle Theme"
           >
             {theme === "light" ? (
@@ -129,6 +131,26 @@ export default function Navbar() {
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m12.728 0l-.707-.707M6.343 6.343l-.707-.707m2.828 9.9a5 5 0 117.072-7.072 5 5 0 01-7.072 7.072z" />
               </svg>
             )}
+          </button>
+
+          {/* Language Switcher Pill */}
+          <button
+            onClick={toggleLang}
+            title={lang === "en" ? "Switch to Bengali (বাংলা)" : "Switch to English"}
+            className="flex items-center gap-1.5 p-1 pl-2.5 pr-2.5 rounded-full bg-zinc-100/90 dark:bg-zinc-900/90 hover:bg-white dark:hover:bg-zinc-850 border border-zinc-200/80 dark:border-zinc-800 shadow-2xs hover:shadow-sm transition-all duration-300 cursor-pointer active:scale-95 group mr-1"
+          >
+            <svg className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400 group-hover:rotate-45 transition-transform duration-300 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
+            </svg>
+            <div className="flex items-center gap-1 text-[11px] font-bold">
+              <span className={`px-1.5 py-0.5 rounded-md transition-all duration-200 ${lang === "en" ? "bg-indigo-600 text-white font-black shadow-xs" : "text-zinc-500 dark:text-zinc-400 group-hover:text-zinc-800 dark:group-hover:text-zinc-200"}`}>
+                EN
+              </span>
+              <span className="text-zinc-300 dark:text-zinc-700 font-extralight text-[9px]">•</span>
+              <span className={`px-1.5 py-0.5 rounded-md transition-all duration-200 ${lang === "bn" ? "bg-indigo-600 text-white font-black shadow-xs" : "text-zinc-500 dark:text-zinc-400 group-hover:text-zinc-800 dark:group-hover:text-zinc-200"}`}>
+                বাংলা
+              </span>
+            </div>
           </button>
 
           {user && (
@@ -169,7 +191,7 @@ export default function Navbar() {
                     {user.full_name || user.email.split("@")[0]}
                   </p>
                   <p className="text-[9px] font-extrabold text-indigo-600 uppercase tracking-wider leading-none mt-0.5">
-                    {user.role}
+                    {t(`role.${user.role}`, user.role)}
                   </p>
                 </div>
                 <ChevronDownIcon className={`w-3.5 h-3.5 text-zinc-400 transition-transform duration-200 ${showProfileMenu ? "rotate-180" : ""}`} />

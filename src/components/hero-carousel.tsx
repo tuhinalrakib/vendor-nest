@@ -49,7 +49,10 @@ interface Slide {
   floatingWidgetValue: string;
 }
 
+import { useLanguage } from "@/lib/LanguageContext";
+
 export default function HeroCarousel() {
+  const { lang, t } = useLanguage();
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const [popularCategories, setPopularCategories] = useState<PopularCategoryItem[]>([]);
@@ -166,28 +169,121 @@ export default function HeroCarousel() {
     },
   ];
 
+  const bnSlides: Slide[] = [
+    {
+      id: "slide-1",
+      badge: "🔥 টেক অফার • ৪০% পর্যন্ত ছাড়",
+      badgeBg: "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20",
+      title: "আপনার লাইফস্টাইল উন্নত করুন",
+      highlightText: "নেক্সট-জেন গ্যাজেটস দিয়ে",
+      subtitle: "সেরা ব্র্যান্ডের স্মার্ট ডিভাইস, হেডফোন এবং আধুনিক ইলেকট্রনিক্স কিনুন তাত্পক্ষণিক ডেলিভারিতে।",
+      primaryCtaText: "টেক অফার দেখুন",
+      primaryCtaLink: "/products?category=electronics",
+      secondaryCtaText: "স্টোরসমূহ দেখুন",
+      secondaryCtaLink: "/shops",
+      discountTag: "১৫০ ডলার ছাড়",
+      gradient: "from-indigo-600 via-purple-600 to-indigo-700",
+      imageBgGradient: "from-indigo-500/20 to-purple-500/20",
+      iconSvg: (
+        <svg className="w-20 h-20 text-indigo-600 dark:text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+        </svg>
+      ),
+      floatingWidgetTitle: "সেরা রেটেড টেক",
+      floatingWidgetValue: "৪.৯ ★ (১,২৮০+ রিভিউ)",
+    },
+    {
+      id: "slide-2",
+      badge: "✨ সামার ফ্যাশন কালেকশন",
+      badgeBg: "bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20",
+      title: "আপনার স্টাইল তৈরি করুন",
+      highlightText: "প্রিমিয়াম ব্র্যান্ডের পোশাকে",
+      subtitle: "বিশ্বস্ত বুটিক ও মার্চেন্টদের থেকে হাতের তৈরি পোশাক, জুতা ও লাইফস্টাইল কালেকশন।",
+      primaryCtaText: "ফ্যাশন কালেকশন দেখুন",
+      primaryCtaLink: "/products?category=clothing",
+      secondaryCtaText: "ব্র্যান্ডসমূহ দেখুন",
+      secondaryCtaLink: "/shops",
+      discountTag: "ফ্ল্যাট ৩০% ছাড়",
+      gradient: "from-rose-600 via-pink-600 to-purple-600",
+      imageBgGradient: "from-rose-500/20 to-pink-500/20",
+      iconSvg: (
+        <svg className="w-20 h-20 text-rose-600 dark:text-rose-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+        </svg>
+      ),
+      floatingWidgetTitle: "জনপ্রিয় কালেকশন",
+      floatingWidgetValue: "সীমিত স্টক অফার",
+    },
+    {
+      id: "slide-3",
+      badge: "🏷️ মার্চেন্ট কুপন ও ভাউচার",
+      badgeBg: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20",
+      title: "কুপন ক্লেইম করুন ও পান",
+      highlightText: "তাত্ক্ষণিক বিশেষ মূল্যছাড়",
+      subtitle: "মার্চেন্টদের অফার ভাউচার ও ডিসকাউন্ট কুপন দিয়ে চেকআউটে সরাসরি সাশ্রয় করুন।",
+      primaryCtaText: "কুপন ক্লেইম করুন",
+      primaryCtaLink: "/coupons",
+      secondaryCtaText: "বিশেষ অফার",
+      secondaryCtaLink: "/products",
+      discountTag: "তাত্ক্ষণিক ছাড়",
+      gradient: "from-emerald-600 via-teal-600 to-indigo-600",
+      imageBgGradient: "from-emerald-500/20 to-teal-500/20",
+      iconSvg: (
+        <svg className="w-20 h-20 text-emerald-600 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 7h.01M7 11h.01M7 15h.01M13 7h.01M13 11h.01M13 15h.01M17 7h.01M17 11h.01M17 15h.01M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h14a2 2 0 012 2v14a2 2 0 01-2 2z" />
+        </svg>
+      ),
+      floatingWidgetTitle: "আজকের কুপন ব্যবহার",
+      floatingWidgetValue: "৫,০০০+ কুপন সংগৃহীত",
+    },
+    {
+      id: "slide-4",
+      badge: "🚀 ভেন্ডরনেস্টে বিক্রি করুন",
+      badgeBg: "bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-indigo-500/20",
+      title: "আপনার ব্যবসা বৃদ্ধি করুন",
+      highlightText: "নিজের অনলাইন শপে",
+      subtitle: "এআই টুলস, রিয়েল-টাইম অর্ডার ট্র্যাকিং এবং ইন্সট্যান্ট পে-আউটের সুবিধা নিয়ে আজই শপ শুরু করুন।",
+      primaryCtaText: "মার্চেন্ট শপ খুলুন",
+      primaryCtaLink: "/become-seller",
+      secondaryCtaText: "প্রাইসিং প্ল্যান দেখুন",
+      secondaryCtaLink: "/seller/pricing",
+      discountTag: "জিরো সেটআপ ফি",
+      gradient: "from-indigo-600 via-blue-600 to-violet-600",
+      imageBgGradient: "from-blue-500/20 to-indigo-500/20",
+      iconSvg: (
+        <svg className="w-20 h-20 text-indigo-600 dark:text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5m0 0h4m-4 0V10m0 0V5m0 5h4" />
+        </svg>
+      ),
+      floatingWidgetTitle: "পে-আউট সিস্টেম",
+      floatingWidgetValue: "রিয়েল-টাইম স্ট্রাইপ স্প্লিট",
+    },
+  ];
+
+  const activeSlides = lang === "bn" ? bnSlides : slides;
+
   // Auto-play timer effect (Infinite Loop every 5 seconds)
   useEffect(() => {
     autoPlayRef.current = setInterval(() => {
       if (!isPaused) {
-        setCurrentSlide((prev) => (prev + 1) % slides.length);
+        setCurrentSlide((prev) => (prev + 1) % activeSlides.length);
       }
     }, 4000);
 
     return () => {
       if (autoPlayRef.current) clearInterval(autoPlayRef.current);
     };
-  }, [isPaused, slides.length]);
+  }, [isPaused, activeSlides.length]);
 
   const handleNext = () => {
-    setCurrentSlide((prev) => (prev + 1) % slides.length);
+    setCurrentSlide((prev) => (prev + 1) % activeSlides.length);
   };
 
   const handlePrev = () => {
-    setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
+    setCurrentSlide((prev) => (prev - 1 + activeSlides.length) % activeSlides.length);
   };
 
-  const slide = slides[currentSlide];
+  const slide = activeSlides[currentSlide];
 
   return (
     <section
@@ -325,10 +421,10 @@ export default function HeroCarousel() {
             <div className="bg-white dark:bg-zinc-900 border border-zinc-200/80 dark:border-zinc-800 rounded-3xl p-5 shadow-sm flex flex-col justify-between space-y-4">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-black text-zinc-900 dark:text-zinc-100 uppercase tracking-wider flex items-center gap-1.5">
-                  📁 Popular Categories
+                  📁 {t("sidebar.popularCategories", "Popular Categories")}
                 </span>
                 <Link href="/categories" className="text-[11px] font-bold text-indigo-600 dark:text-indigo-400 hover:underline">
-                  View All →
+                  {t("sidebar.viewAll", "View All →")}
                 </Link>
               </div>
               <div className="grid grid-cols-3 gap-2">
@@ -341,6 +437,7 @@ export default function HeroCarousel() {
                 ) : popularCategories.length > 0 ? (
                   popularCategories.slice(0, 3).map((cat) => {
                     const imgUrl = getImageUrl(cat.image);
+                    const catName = t(`cat.${cat.slug}`, cat.name);
                     return (
                       <Link
                         key={cat.id}
@@ -351,7 +448,7 @@ export default function HeroCarousel() {
                           <div className="w-7 h-7 relative rounded-lg overflow-hidden shrink-0 group-hover:scale-110 transition-transform">
                             <img
                               src={imgUrl}
-                              alt={cat.name}
+                              alt={catName}
                               className="w-full h-full object-cover"
                             />
                           </div>
@@ -360,8 +457,8 @@ export default function HeroCarousel() {
                             {getCategoryIcon(cat.name)}
                           </p>
                         )}
-                        <p className="text-[10px] font-extrabold text-zinc-700 dark:text-zinc-300 mt-1.5 truncate max-w-full">
-                          {cat.name}
+                        <p className="text-[10px] font-extrabold text-zinc-700 dark:text-zinc-300 mt-1.5 truncate max-w-full" title={catName}>
+                          {catName}
                         </p>
                       </Link>
                     );
@@ -378,13 +475,13 @@ export default function HeroCarousel() {
             <div className="bg-linear-to-br from-indigo-900 to-purple-950 text-white rounded-3xl p-5 shadow-lg flex flex-col justify-between space-y-4 relative overflow-hidden">
               <div className="space-y-1 relative z-10">
                 <span className="px-2.5 py-0.5 rounded-full bg-white/20 text-[10px] font-black uppercase tracking-wider">
-                  🚀 Merchant Hub
+                  🚀 {t("hub.badge", "Merchant Hub")}
                 </span>
                 <h3 className="text-base font-extrabold tracking-tight pt-1">
-                  Start Selling Globally
+                  {t("hub.title", "Start Selling Globally")}
                 </h3>
                 <p className="text-xs text-indigo-200 leading-relaxed font-medium">
-                  Create your store in under 2 minutes with AI description generators & zero setup fee.
+                  {t("hub.subtitle", "Create your store in under 2 minutes with AI description generators & zero setup fee.")}
                 </p>
               </div>
               <div className="pt-2 relative z-10 flex gap-2">
@@ -392,7 +489,7 @@ export default function HeroCarousel() {
                   href="/become-seller"
                   className="w-full h-10 bg-white text-indigo-950 hover:bg-zinc-100 rounded-xl text-xs font-black flex items-center justify-center shadow-md transition-all cursor-pointer"
                 >
-                  Register Store Now
+                  {t("hub.registerBtn", "Register Store Now")}
                 </Link>
               </div>
             </div>

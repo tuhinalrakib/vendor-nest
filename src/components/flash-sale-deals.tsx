@@ -7,11 +7,15 @@ import Swal from "sweetalert2";
 import api from "@/lib/api";
 
 import { useAuth } from "@/lib/AuthContext";
+import { useLanguage } from "@/lib/LanguageContext";
 import { useRouter } from "next/navigation";
 
 interface FlashProduct {
   id: string;
   name: string;
+  name_bn?: string;
+  description?: string;
+  description_bn?: string;
   category: string;
   originalPrice: number;
   salePrice: number;
@@ -37,6 +41,7 @@ const getImageUrl = (imagePath?: string | null) => {
 export default function FlashSaleDeals() {
   const { addToCart } = useCart();
   const { user } = useAuth();
+  const { lang, tp, t } = useLanguage();
   const router = useRouter();
 
   const [products, setProducts] = useState<FlashProduct[]>([]);
@@ -168,6 +173,9 @@ export default function FlashSaleDeals() {
             return {
               id: p.id,
               name: p.name,
+              name_bn: p.name_bn,
+              description: p.description,
+              description_bn: p.description_bn,
               category: catName,
               originalPrice: originalPrice,
               salePrice: price,
@@ -338,12 +346,12 @@ export default function FlashSaleDeals() {
                 {/* Title & Rating */}
                 <div>
                   <h3 className="text-sm font-extrabold text-zinc-950 dark:text-zinc-50 leading-snug line-clamp-1 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
-                    {prod.name}
+                    {tp({ name: prod.name, name_bn: prod.name_bn }, "name")}
                   </h3>
                   <div className="flex items-center gap-1 mt-1">
                     <span className="text-xs font-bold text-amber-500">★ {prod.rating}</span>
                     <span className="text-[10px] font-semibold text-zinc-400 dark:text-zinc-500">
-                      ({prod.reviewsCount} reviews)
+                      ({prod.reviewsCount} {lang === "bn" ? "রিভিউ" : "reviews"})
                     </span>
                   </div>
                 </div>
@@ -362,10 +370,10 @@ export default function FlashSaleDeals() {
                 <div className="space-y-1.5 pt-1">
                   <div className="flex justify-between items-center text-[10px] font-extrabold">
                     <span className="text-zinc-500 dark:text-zinc-400">
-                      {prod.soldPercentage}% Claimed
+                      {prod.soldPercentage}% {lang === "bn" ? "সংগৃহীত" : "Claimed"}
                     </span>
                     <span className="text-rose-600 dark:text-rose-400">
-                      Only {prod.stockLeft} left!
+                      {lang === "bn" ? `মজুদ আছে ${prod.stockLeft} টি!` : `Only ${prod.stockLeft} left!`}
                     </span>
                   </div>
                   <div className="w-full h-2 rounded-full bg-zinc-100 dark:bg-zinc-800 overflow-hidden">
@@ -381,7 +389,7 @@ export default function FlashSaleDeals() {
                   onClick={() => handleClaimDeal(prod)}
                   className="w-full h-11 rounded-2xl bg-indigo-600 hover:bg-indigo-700 active:scale-98 text-white font-extrabold text-xs shadow-md shadow-indigo-600/20 transition-all cursor-pointer flex items-center justify-center gap-2 mt-2"
                 >
-                  <span>⚡ Claim Deal</span>
+                  <span>⚡ {lang === "bn" ? "অফারটি নিন" : "Claim Deal"}</span>
                 </button>
               </div>
 

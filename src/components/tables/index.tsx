@@ -37,7 +37,7 @@ export default function Table<T>({
           <thead className="bg-zinc-50 border-b border-zinc-100 text-xs font-bold text-zinc-400 uppercase tracking-wider">
             <tr>
               {columns.map((col, idx) => (
-                <th key={idx} scope="col" className={`px-4 py-3.5 whitespace-nowrap ${col.className || ""}`}>
+                <th key={idx} scope="col" className={`px-2.5 py-3 whitespace-nowrap ${col.className || ""}`}>
                   {col.header}
                 </th>
               ))}
@@ -48,7 +48,7 @@ export default function Table<T>({
               data.map((item, rowIdx) => (
                 <tr key={rowIdx} className="hover:bg-zinc-50/50 transition-colors">
                   {columns.map((col, colIdx) => (
-                    <td key={colIdx} className={`px-4 py-3.5 whitespace-nowrap text-zinc-700 font-semibold ${col.className || ""}`}>
+                    <td key={colIdx} className={`px-2.5 py-3 whitespace-nowrap text-zinc-700 font-semibold ${col.className || ""}`}>
                       {col.render(item, rowIdx)}
                     </td>
                   ))}

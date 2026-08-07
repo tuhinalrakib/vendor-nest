@@ -40,6 +40,8 @@ const fetchAllActiveCouponsCached = () => {
   return globalCouponsPromise;
 };
 
+import { useLanguage } from "@/lib/LanguageContext";
+
 export function ProductCard({
   id,
   image,
@@ -66,8 +68,11 @@ export function ProductCard({
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [availableCoupons, setAvailableCoupons] = useState<any[]>([]);
   const [isAdding, setIsAdding] = useState(false);
-  const [lang, setLang] = useState<"en" | "bn">("en");
+  const { lang, tp, t } = useLanguage();
   const { isLoading: isCartLoading } = useCart();
+
+  const displayTitle = tp({ name: title, name_bn }, "name") || title;
+  const displayDescription = tp({ description, description_bn }, "description") || description || (lang === "bn" ? "কোন বিস্তারিত বিবরণ দেওয়া হয়নি।" : "No description provided.");
 
   // Fetch active coupons matching this product's seller or global/sitewide coupons
   // Filter out coupons whose minimum purchase requirement exceeds the product's price
@@ -149,10 +154,10 @@ export function ProductCard({
               {category && <span className="text-indigo-650 dark:text-indigo-400 lowercase">{category}</span>}
             </div>
             <h3 className="text-sm font-bold text-zinc-950 dark:text-zinc-50 line-clamp-1 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
-              {title}
+              {displayTitle}
             </h3>
             <p className="text-[11px] text-zinc-450 dark:text-zinc-400 line-clamp-2 leading-relaxed h-8">
-              {description || "No description provided."}
+              {displayDescription}
             </p>
           </div>
 
@@ -328,7 +333,7 @@ export function ProductCard({
                 </div>
 
                 <h2 className="text-xl md:text-2xl font-black text-zinc-955 leading-tight">
-                  {lang === "en" ? title : (name_bn || title)}
+                  {displayTitle}
                 </h2>
 
                 {/* Rating stars */}
@@ -354,9 +359,7 @@ export function ProductCard({
                 <div className="space-y-1.5">
                   <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest font-mono">Product Information</span>
                   <p className="text-xs md:text-sm text-zinc-500 font-semibold leading-relaxed max-h-[100px] overflow-y-auto pr-2">
-                    {lang === "en" 
-                      ? (description || "No description provided.") 
-                      : (description_bn || description || "কোনো বিবরণ প্রদান করা হয়নি।")}
+                    {displayDescription}
                   </p>
                 </div>
 

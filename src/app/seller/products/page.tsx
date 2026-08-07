@@ -591,6 +591,27 @@ export default function SellerProducts() {
     {
       header: "Status",
       render: (product: Product) => {
+        const appStatus = (product as any).approval_status;
+        if (appStatus === "pending") {
+          return (
+            <span
+              className="px-2.5 py-1 rounded-full text-xs font-bold border bg-amber-50 text-amber-700 border-amber-250 whitespace-nowrap"
+              title="Waiting for Admin Approval"
+            >
+              Pending Approval
+            </span>
+          );
+        }
+        if (appStatus === "rejected") {
+          return (
+            <span
+              className="px-2.5 py-1 rounded-full text-xs font-bold border bg-red-50 text-red-700 border-red-250 whitespace-nowrap"
+              title="Rejected by Admin"
+            >
+              Rejected
+            </span>
+          );
+        }
         const badges = {
           Active: "bg-emerald-50 text-emerald-700 border-emerald-200",
           "Out of Stock": "bg-red-50 text-red-700 border-red-200",
@@ -598,7 +619,7 @@ export default function SellerProducts() {
         };
         return (
           <span
-            className={`px-2.5 py-1 rounded-full text-xs font-bold border ${badges[product.status]}`}
+            className={`px-2.5 py-1 rounded-full text-xs font-bold border ${badges[product.status] || badges.Active}`}
           >
             {product.status}
           </span>

@@ -18,6 +18,8 @@ import {
   SettingsIcon,
 } from "@/components/icons";
 
+import { useLanguage } from "@/lib/LanguageContext";
+
 interface StorefrontNavbarProps {
   vendorName: string;
   domain: string;
@@ -25,6 +27,7 @@ interface StorefrontNavbarProps {
 
 export default function StorefrontNavbar({ vendorName, domain }: StorefrontNavbarProps) {
   const { theme, toggleTheme } = useTheme();
+  const { lang, toggleLang, t } = useLanguage();
   const { user, logout, isLoading, maintenanceMode } = useAuth();
   const router = useRouter();
   const [showProfileMenu, setShowProfileMenu] = useState(false);
@@ -98,7 +101,7 @@ export default function StorefrontNavbar({ vendorName, domain }: StorefrontNavba
             {/* Theme Toggle Button */}
             <button
               onClick={toggleTheme}
-              className="p-2 text-zinc-500 hover:text-indigo-600 dark:text-zinc-400 dark:hover:text-indigo-400 hover:bg-zinc-50 dark:hover:bg-zinc-900 rounded-xl transition-all duration-200 active:scale-95 cursor-pointer flex items-center justify-center mr-1"
+              className="p-2 text-zinc-500 hover:text-indigo-600 dark:text-zinc-400 dark:hover:text-indigo-400 hover:bg-zinc-50 dark:hover:bg-zinc-900 rounded-xl transition-all duration-200 active:scale-95 cursor-pointer flex items-center justify-center"
               aria-label="Toggle Theme"
             >
               {theme === "light" ? (
@@ -110,6 +113,26 @@ export default function StorefrontNavbar({ vendorName, domain }: StorefrontNavba
                   <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m12.728 0l-.707-.707M6.343 6.343l-.707-.707m2.828 9.9a5 5 0 117.072-7.072 5 5 0 01-7.072 7.072z" />
                 </svg>
               )}
+            </button>
+
+            {/* Language Switcher Pill */}
+            <button
+              onClick={toggleLang}
+              title={lang === "en" ? "Switch to Bengali (বাংলা)" : "Switch to English"}
+              className="flex items-center gap-1.5 p-1 pl-2.5 pr-2.5 rounded-full bg-zinc-100/90 dark:bg-zinc-900/90 hover:bg-white dark:hover:bg-zinc-850 border border-zinc-200/80 dark:border-zinc-800 shadow-2xs hover:shadow-sm transition-all duration-300 cursor-pointer active:scale-95 group mr-1"
+            >
+              <svg className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400 group-hover:rotate-45 transition-transform duration-300 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
+              </svg>
+              <div className="flex items-center gap-1 text-[11px] font-bold">
+                <span className={`px-1.5 py-0.5 rounded-md transition-all duration-200 ${lang === "en" ? "bg-indigo-600 text-white font-black shadow-xs" : "text-zinc-500 dark:text-zinc-400 group-hover:text-zinc-800 dark:group-hover:text-zinc-200"}`}>
+                  EN
+                </span>
+                <span className="text-zinc-300 dark:text-zinc-700 font-extralight text-[9px]">•</span>
+                <span className={`px-1.5 py-0.5 rounded-md transition-all duration-200 ${lang === "bn" ? "bg-indigo-600 text-white font-black shadow-xs" : "text-zinc-500 dark:text-zinc-400 group-hover:text-zinc-800 dark:group-hover:text-zinc-200"}`}>
+                  বাংলা
+                </span>
+              </div>
             </button>
 
             {user && (
@@ -150,7 +173,7 @@ export default function StorefrontNavbar({ vendorName, domain }: StorefrontNavba
                       {user.full_name || user.email.split("@")[0]}
                     </p>
                     <p className="text-[9px] font-extrabold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider leading-none mt-0.5">
-                      {user.role}
+                      {t(`role.${user.role}`, user.role)}
                     </p>
                   </div>
                   <ChevronDownIcon className={`w-3.5 h-3.5 text-zinc-400 transition-transform duration-200 ${showProfileMenu ? "rotate-180" : ""}`} />

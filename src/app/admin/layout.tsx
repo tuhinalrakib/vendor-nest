@@ -66,6 +66,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         router.push("/admin/sellers");
       } else if (type === "payout_request") {
         router.push("/admin/payouts");
+      } else if (type === "product_submission") {
+        router.push("/admin/products");
       }
       setShowNotifications(false);
     } catch (err) {

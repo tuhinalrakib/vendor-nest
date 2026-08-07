@@ -23,12 +23,19 @@ interface ModerationProduct {
   compareAtPrice?: number;
   sku?: string;
   category?: string;
+  categoryId?: string;
+  color?: string;
+  sizes?: string;
+  seoTitle?: string;
+  seoDescription?: string;
+  tags?: string;
 }
 
 export default function AdminProducts() {
   const [products, setProducts] = useState<ModerationProduct[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState<"All" | "Approved" | "Pending Moderation" | "Flagged">("All");
   const [showAddModal, setShowAddModal] = useState(false);
   const [editProductId, setEditProductId] = useState<string | null>(null);
   const [categories, setCategories] = useState<{ id: string; name: string }[]>([]);
@@ -48,6 +55,12 @@ export default function AdminProducts() {
     sizes: "",
     seoTitle: "",
     seoDescription: "",
+    is_digital: false,
+    digital_file_url: "",
+    license_keys: "",
+    publish_at: "",
+    name_bn: "",
+    description_bn: "",
   });
 
   const [isFeatured, setIsFeatured] = useState(false);
@@ -56,7 +69,54 @@ export default function AdminProducts() {
 
   const [isGeneratingDesc, setIsGeneratingDesc] = useState(false);
   const [isGeneratingSeo, setIsGeneratingSeo] = useState(false);
+  const [isTranslatingDesc, setIsTranslatingDesc] = useState(false);
+  const [isTranslatingTitle, setIsTranslatingTitle] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const translateText = async (text: string): Promise<string> => {
+    if (!text || !text.trim()) return "";
+    try {
+      const response = await api.post("/api/ai/translate/", { text: text.trim(), target_lang: "bn" });
+      return response.data.translated_text || "";
+    } catch (err) {
+      console.error("Translation error:", err);
+      return "";
+    }
+  };
+
+  const handleAutoTranslateDesc = async (textToTranslate?: string) => {
+    const targetText = textToTranslate !== undefined ? textToTranslate : newProduct.description;
+    if (!targetText || !targetText.trim()) return;
+
+    setIsTranslatingDesc(true);
+    try {
+      const translated = await translateText(targetText);
+      if (translated) {
+        setNewProduct((prev) => ({ ...prev, description_bn: translated }));
+      }
+    } catch (err) {
+      console.error("Failed to translate description to Bengali:", err);
+    } finally {
+      setIsTranslatingDesc(false);
+    }
+  };
+
+  const handleAutoTranslateTitle = async (textToTranslate?: string) => {
+    const targetText = textToTranslate !== undefined ? textToTranslate : newProduct.name;
+    if (!targetText || !targetText.trim()) return;
+
+    setIsTranslatingTitle(true);
+    try {
+      const translated = await translateText(targetText);
+      if (translated) {
+        setNewProduct((prev) => ({ ...prev, name_bn: translated }));
+      }
+    } catch (err) {
+      console.error("Failed to translate title to Bengali:", err);
+    } finally {
+      setIsTranslatingTitle(false);
+    }
+  };
 
   const generateSKUSuggestion = (categoryName: string, priceStr: string) => {
     if (!categoryName) return "";
@@ -112,6 +172,12 @@ export default function AdminProducts() {
         sizes: "",
         seoTitle: "",
         seoDescription: "",
+        is_digital: false,
+        digital_file_url: "",
+        license_keys: "",
+        publish_at: "",
+        name_bn: "",
+        description_bn: "",
       });
       setIsFeatured(false);
       setIsPopular(false);
@@ -146,6 +212,18 @@ export default function AdminProducts() {
         compareAtPrice: p.compare_at_price ? parseFloat(p.compare_at_price) : undefined,
         sku: p.sku || "",
         category: p.category ? (catMap[p.category] || "Unknown") : "Uncategorized",
+        categoryId: p.category || "",
+        color: p.color || "",
+        sizes: p.sizes || "",
+        seoTitle: p.seo_title || "",
+        seoDescription: p.seo_description || "",
+        tags: p.tags || "",
+        is_digital: p.is_digital || false,
+        digital_file_url: p.digital_file_url || "",
+        license_keys: p.license_keys || "",
+        publish_at: p.publish_at || "",
+        name_bn: p.name_bn || "",
+        description_bn: p.description_bn || "",
       }));
       setProducts(mapped);
     } catch (err: any) {
@@ -164,8 +242,6 @@ export default function AdminProducts() {
   useEffect(() => {
     fetchProducts();
   }, []);
-
-
 
   const handleGenerateDescription = async () => {
     if (!newProduct.name) {
@@ -289,6 +365,12 @@ export default function AdminProducts() {
       if (newProduct.sizes) data.append("sizes", newProduct.sizes);
       if (newProduct.seoTitle) data.append("seo_title", newProduct.seoTitle);
       if (newProduct.seoDescription) data.append("seo_description", newProduct.seoDescription);
+      if (newProduct.is_digital) data.append("is_digital", "true");
+      if (newProduct.digital_file_url) data.append("digital_file_url", newProduct.digital_file_url);
+      if (newProduct.license_keys) data.append("license_keys", newProduct.license_keys);
+      if (newProduct.publish_at) data.append("publish_at", newProduct.publish_at);
+      if (newProduct.name_bn) data.append("name_bn", newProduct.name_bn);
+      if (newProduct.description_bn) data.append("description_bn", newProduct.description_bn);
       if (imageUrl) {
         data.append("image", imageUrl);
       }
@@ -348,6 +430,12 @@ export default function AdminProducts() {
         sizes: "",
         seoTitle: "",
         seoDescription: "",
+        is_digital: false,
+        digital_file_url: "",
+        license_keys: "",
+        publish_at: "",
+        name_bn: "",
+        description_bn: "",
       });
 
       fetchProducts();
@@ -366,34 +454,44 @@ export default function AdminProducts() {
   };
 
   const handleToggleStatus = async (id: string, currentStatus: ModerationProduct["status"]) => {
-    const nextAction = currentStatus === "Approved" ? "reject" : "approve";
-    const actionLabel = nextAction === "reject" ? "Reject/Flag" : "Approve";
-    
     Swal.fire({
-      title: `${actionLabel} Product?`,
-      text: `Are you sure you want to set this product listing to ${nextAction === "reject" ? "Rejected" : "Approved"}?`,
-      icon: "warning",
+      title: "Update Verification Status",
+      text: `Current status: ${currentStatus}. Choose new approval state:`,
+      icon: "question",
       showCancelButton: true,
-      confirmButtonColor: nextAction === "reject" ? "#ef4444" : "#10b981",
-      cancelButtonColor: "#6b7280",
-      confirmButtonText: `Yes, ${actionLabel}`,
+      showDenyButton: true,
+      confirmButtonColor: "#10b981",
+      denyButtonColor: "#f59e0b",
+      cancelButtonColor: "#ef4444",
+      confirmButtonText: "🟢 Approve",
+      denyButtonText: "⏳ Pending Moderation",
+      cancelButtonText: "🔴 Reject / Flag",
     }).then(async (result) => {
+      let endpoint = "";
       if (result.isConfirmed) {
-        try {
-          Swal.fire({
-            title: 'Updating status...',
-            allowOutsideClick: false,
-            didOpen: () => { Swal.showLoading(); }
-          });
-          await api.post(`/api/products/${id}/${nextAction}/`);
-          Swal.close();
-          Swal.fire("Updated", `Product verification status is now set to ${nextAction === "reject" ? "Rejected" : "Approved"}.`, "success");
-          fetchProducts();
-        } catch (err) {
-          Swal.close();
-          console.error("Status toggle failed:", err);
-          Swal.fire("Error", "Could not update approval status.", "error");
-        }
+        endpoint = `/api/products/${id}/approve/`;
+      } else if (result.isDenied) {
+        endpoint = `/api/products/${id}/set_pending/`;
+      } else if (result.dismiss === Swal.DismissReason.cancel) {
+        endpoint = `/api/products/${id}/reject/`;
+      } else {
+        return;
+      }
+
+      try {
+        Swal.fire({
+          title: 'Updating status...',
+          allowOutsideClick: false,
+          didOpen: () => { Swal.showLoading(); }
+        });
+        await api.post(endpoint);
+        Swal.close();
+        Swal.fire("Updated", "Product verification status updated successfully.", "success");
+        fetchProducts();
+      } catch (err) {
+        Swal.close();
+        console.error("Status update failed:", err);
+        Swal.fire("Error", "Could not update approval status.", "error");
       }
     });
   };
@@ -431,36 +529,48 @@ export default function AdminProducts() {
     });
   };
 
+  const countAll = products.length;
+  const countApproved = products.filter((p) => p.status === "Approved").length;
+  const countPending = products.filter((p) => p.status === "Pending Moderation").length;
+  const countFlagged = products.filter((p) => p.status === "Flagged").length;
 
-  const filteredProducts = products.filter(
-    (p) =>
+  const filteredProducts = products.filter((p) => {
+    const matchesSearch =
       p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      p.sellerShop.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+      p.sellerShop.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (p.sku && p.sku.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      (p.category && p.category.toLowerCase().includes(searchQuery.toLowerCase()));
+
+    const matchesStatus =
+      statusFilter === "All" ? true : p.status === statusFilter;
+
+    return matchesSearch && matchesStatus;
+  });
 
   const columns = [
     {
       header: "Product Details",
+      className: "pl-4 pr-2 max-w-[180px]",
       render: (p: ModerationProduct) => (
-        <div className="flex items-center gap-3.5 text-left">
-          <div className="w-12 h-12 rounded-xl bg-zinc-50 border border-zinc-150 flex items-center justify-center overflow-hidden shrink-0 relative">
+        <div className="flex items-center gap-2.5 text-left min-w-0">
+          <div className="w-8 h-8 rounded-lg bg-zinc-50 border border-zinc-150 flex items-center justify-center overflow-hidden shrink-0 relative">
             {p.image ? (
               <Image
                 src={p.image}
                 alt={p.name}
                 fill
-                sizes="48px"
+                sizes="32px"
                 className="object-cover"
               />
             ) : (
-              <span className="text-[10px] font-extrabold text-zinc-400">IMG</span>
+              <span className="text-[9px] font-extrabold text-zinc-400">IMG</span>
             )}
           </div>
-          <div>
-            <h4 className="text-sm font-bold text-zinc-950 leading-tight">{p.name}</h4>
+          <div className="min-w-0 flex-1">
+            <h4 className="text-xs font-bold text-zinc-950 leading-tight truncate" title={p.name}>{p.name}</h4>
             {p.sku && (
-              <div className="flex items-center gap-2 mt-0.5">
-                <span className="text-[10px] font-mono font-bold text-zinc-500 bg-zinc-100 px-1.5 py-0.5 rounded">{p.sku}</span>
+              <div className="flex items-center gap-1 mt-0.5">
+                <span className="text-[9px] font-mono font-bold text-zinc-500 bg-zinc-100 px-1 py-0.2 rounded truncate">{p.sku}</span>
               </div>
             )}
           </div>
@@ -469,40 +579,46 @@ export default function AdminProducts() {
     },
     {
       header: "Seller Shop",
+      className: "px-2 max-w-[130px]",
       render: (p: ModerationProduct) => (
-        <span className="text-zinc-700 font-bold">{p.sellerShop}</span>
+        <span className="text-zinc-700 font-bold text-xs truncate block" title={p.sellerShop}>{p.sellerShop}</span>
       ),
     },
     {
       header: "Category",
+      className: "px-2 max-w-[130px]",
       render: (p: ModerationProduct) => (
-        <span className="text-zinc-500 text-xs font-semibold">{p.category}</span>
+        <span className="text-zinc-500 text-xs font-semibold truncate block" title={p.category}>{p.category}</span>
       ),
     },
     {
       header: "Price",
+      className: "px-2 whitespace-nowrap",
       render: (p: ModerationProduct) => (
-        <span className="text-zinc-950 font-extrabold">${p.price.toFixed(2)}</span>
+        <span className="text-zinc-950 font-extrabold text-xs whitespace-nowrap">${p.price.toFixed(2)}</span>
       ),
     },
     {
       header: "Stock",
+      className: "px-2 whitespace-nowrap",
       render: (p: ModerationProduct) => (
-        <span className="text-zinc-550 font-semibold">{p.stock} units</span>
+        <span className="text-zinc-600 font-semibold text-xs whitespace-nowrap">{p.stock} units</span>
       ),
     },
     {
       header: "Status",
+      className: "px-2 whitespace-nowrap",
       render: (p: ModerationProduct) => {
         const colors = {
-          Approved: "bg-emerald-50 text-emerald-700 border-emerald-250",
-          Flagged: "bg-red-50 text-red-700 border-red-250",
-          "Pending Moderation": "bg-amber-50 text-amber-700 border-amber-250",
+          Approved: "bg-emerald-50 text-emerald-700 border-emerald-250 hover:bg-emerald-100",
+          Flagged: "bg-red-50 text-red-700 border-red-250 hover:bg-red-100",
+          "Pending Moderation": "bg-amber-50 text-amber-700 border-amber-250 hover:bg-amber-100",
         };
         return (
           <button
             onClick={() => handleToggleStatus(p.id, p.status)}
-            className={`px-2.5 py-1 rounded-full text-xs font-bold border cursor-pointer transition-colors ${colors[p.status]}`}
+            title="Click to toggle status (Approve/Reject)"
+            className={`px-2 py-0.5 rounded-full text-[11px] font-bold border cursor-pointer transition-colors whitespace-nowrap ${colors[p.status]}`}
           >
             {p.status}
           </button>
@@ -511,19 +627,22 @@ export default function AdminProducts() {
     },
     {
       header: "Actions",
+      className: "text-right pr-4 pl-1 min-w-[90px]",
       render: (p: ModerationProduct) => (
-        <div className="flex gap-2">
+        <div className="flex items-center justify-end gap-1.5 whitespace-nowrap">
           <button
+            title="Edit Product"
             onClick={() => handleEdit(p)}
-            className="p-1.5 hover:bg-indigo-50 rounded-lg text-zinc-450 hover:text-indigo-600 transition-colors cursor-pointer"
+            className="p-1.5 hover:bg-indigo-50 rounded-lg text-indigo-600 border border-indigo-200 hover:border-indigo-300 transition-all cursor-pointer flex items-center justify-center shadow-2xs"
           >
-            <EditIcon className="w-4.5 h-4.5" />
+            <EditIcon className="w-4 h-4" />
           </button>
           <button
+            title="Delete Product"
             onClick={() => handleDelete(p.id)}
-            className="p-1.5 hover:bg-red-50 rounded-lg text-zinc-450 hover:text-red-655 transition-colors cursor-pointer"
+            className="p-1.5 hover:bg-red-50 rounded-lg text-red-600 border border-red-200 hover:border-red-300 transition-all cursor-pointer flex items-center justify-center shadow-2xs"
           >
-            <TrashIcon className="w-4.5 h-4.5" />
+            <TrashIcon className="w-4 h-4" />
           </button>
         </div>
       ),
@@ -532,7 +651,7 @@ export default function AdminProducts() {
 
   const handleEdit = (product: ModerationProduct) => {
     setEditProductId(product.id);
-    const selectedCat = categories.find(c => c.name === product.category);
+    const catId = product.categoryId || categories.find(c => c.name === product.category)?.id || "";
     setNewProduct({
       name: product.name || "",
       sellerShop: product.sellerShop || "Platform Direct (Admin)",
@@ -541,12 +660,18 @@ export default function AdminProducts() {
       sku: product.sku || "",
       stock: product.stock?.toString() || "",
       status: product.status || "Approved",
-      category: selectedCat ? selectedCat.id : "",
+      category: catId,
       description: product.description || "",
-      color: (product as any).color || "",
-      sizes: (product as any).sizes || "",
-      seoTitle: (product as any).seoTitle || "",
-      seoDescription: (product as any).seoDescription || "",
+      color: product.color || "",
+      sizes: product.sizes || "",
+      seoTitle: product.seoTitle || "",
+      seoDescription: product.seoDescription || "",
+      is_digital: (product as any).is_digital || false,
+      digital_file_url: (product as any).digital_file_url || "",
+      license_keys: (product as any).license_keys || "",
+      publish_at: (product as any).publish_at ? (product as any).publish_at.substring(0, 16) : "",
+      name_bn: (product as any).name_bn || "",
+      description_bn: (product as any).description_bn || "",
     });
     setImagePreview(product.image || null);
     setImageFile(null);
@@ -559,9 +684,9 @@ export default function AdminProducts() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="text-left">
-          <h1 className="text-2xl font-extrabold tracking-tight text-zinc-950">Moderate Catalog Listings</h1>
+          <h1 className="text-2xl font-extrabold tracking-tight text-zinc-950">All Products & Catalog Management</h1>
           <p className="text-xs font-semibold text-zinc-400 mt-1">
-            Review, flag, and remove listings violating policies across the entire network.
+            Manage, review, edit, approve, or remove product listings across all network sellers.
           </p>
         </div>
         <button
@@ -573,20 +698,175 @@ export default function AdminProducts() {
         </button>
       </div>
 
-      <div className="flex p-4 bg-white border border-zinc-200 rounded-2xl">
-        <div className="relative w-full sm:max-w-xs">
-          <SearchIcon className="w-4.5 h-4.5 text-zinc-400 absolute left-3.5 top-3.5" />
-          <input
-            type="text"
-            placeholder="Search by title, seller..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full h-11 pl-10 pr-4 bg-zinc-50 border border-zinc-200 focus:border-indigo-650 focus:bg-white rounded-xl text-sm font-semibold outline-none transition-all"
-          />
+      <div className="flex flex-col gap-4 p-4 bg-white border border-zinc-200 rounded-2xl shadow-xs">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+          <div className="relative w-full sm:max-w-xs">
+            <SearchIcon className="w-4.5 h-4.5 text-zinc-400 absolute left-3.5 top-3.5" />
+            <input
+              type="text"
+              placeholder="Search by title, seller, SKU..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full h-11 pl-10 pr-4 bg-zinc-50 border border-zinc-200 focus:border-indigo-650 focus:bg-white rounded-xl text-sm font-semibold outline-none transition-all"
+            />
+          </div>
+        </div>
+
+        {/* Filter Tabs */}
+        <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-zinc-100">
+          <button
+            onClick={() => setStatusFilter("All")}
+            className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2 ${
+              statusFilter === "All"
+                ? "bg-zinc-950 text-white shadow-xs"
+                : "bg-zinc-50 text-zinc-600 hover:bg-zinc-100 border border-zinc-200"
+            }`}
+          >
+            All Products
+            <span className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold ${
+              statusFilter === "All" ? "bg-zinc-800 text-zinc-200" : "bg-zinc-200 text-zinc-700"
+            }`}>
+              {countAll}
+            </span>
+          </button>
+
+          <button
+            onClick={() => setStatusFilter("Approved")}
+            className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2 ${
+              statusFilter === "Approved"
+                ? "bg-emerald-600 text-white shadow-xs"
+                : "bg-zinc-50 text-emerald-700 hover:bg-emerald-50 border border-emerald-200"
+            }`}
+          >
+            Approved
+            <span className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold ${
+              statusFilter === "Approved" ? "bg-emerald-700 text-emerald-100" : "bg-emerald-100 text-emerald-800"
+            }`}>
+              {countApproved}
+            </span>
+          </button>
+
+          <button
+            onClick={() => setStatusFilter("Pending Moderation")}
+            className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2 ${
+              statusFilter === "Pending Moderation"
+                ? "bg-amber-500 text-white shadow-xs"
+                : "bg-zinc-50 text-amber-700 hover:bg-amber-50 border border-amber-200"
+            }`}
+          >
+            Pending Moderation
+            <span className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold ${
+              statusFilter === "Pending Moderation" ? "bg-amber-600 text-amber-100" : "bg-amber-100 text-amber-800"
+            }`}>
+              {countPending}
+            </span>
+          </button>
+
+          <button
+            onClick={() => setStatusFilter("Flagged")}
+            className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2 ${
+              statusFilter === "Flagged"
+                ? "bg-red-600 text-white shadow-xs"
+                : "bg-zinc-50 text-red-700 hover:bg-red-50 border border-red-200"
+            }`}
+          >
+            Flagged / Rejected
+            <span className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold ${
+              statusFilter === "Flagged" ? "bg-red-700 text-red-100" : "bg-red-100 text-red-800"
+            }`}>
+              {countFlagged}
+            </span>
+          </button>
         </div>
       </div>
 
-      <Table data={filteredProducts} columns={columns} />
+      {/* Desktop Table View */}
+      <div className="hidden sm:block">
+        <Table data={filteredProducts} columns={columns} minWidth="w-full min-w-[720px]" />
+      </div>
+
+      {/* Mobile Responsive Card List View */}
+      <div className="block sm:hidden space-y-3">
+        {filteredProducts.length > 0 ? (
+          filteredProducts.map((p) => (
+            <div key={p.id} className="bg-white border border-zinc-200 rounded-2xl p-4 shadow-xs space-y-3 text-left">
+              <div className="flex items-start gap-3">
+                <div className="w-12 h-12 rounded-xl bg-zinc-50 border border-zinc-150 flex items-center justify-center overflow-hidden shrink-0 relative">
+                  {p.image ? (
+                    <Image
+                      src={p.image}
+                      alt={p.name}
+                      fill
+                      sizes="48px"
+                      className="object-cover"
+                    />
+                  ) : (
+                    <span className="text-[10px] font-extrabold text-zinc-400">IMG</span>
+                  )}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h4 className="text-sm font-bold text-zinc-950 leading-tight truncate">{p.name}</h4>
+                  <div className="flex flex-wrap items-center gap-2 mt-1">
+                    {p.sku && (
+                      <span className="text-[9px] font-mono font-bold text-zinc-500 bg-zinc-100 px-1.5 py-0.5 rounded">{p.sku}</span>
+                    )}
+                    <span className="text-[10px] font-semibold text-zinc-500">{p.category}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2 text-xs pt-2 border-t border-zinc-100">
+                <div>
+                  <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider block">Seller Shop</span>
+                  <span className="font-bold text-zinc-800 truncate block">{p.sellerShop}</span>
+                </div>
+                <div>
+                  <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider block">Price & Stock</span>
+                  <span className="font-extrabold text-zinc-950">${p.price.toFixed(2)}</span>
+                  <span className="text-zinc-500 font-semibold ml-1">({p.stock} units)</span>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between pt-3 border-t border-zinc-100">
+                <div>
+                  <button
+                    onClick={() => handleToggleStatus(p.id, p.status)}
+                    className={`px-2.5 py-1 rounded-full text-xs font-bold border cursor-pointer transition-colors ${
+                      p.status === "Approved"
+                        ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                        : p.status === "Flagged"
+                        ? "bg-red-50 text-red-700 border-red-200"
+                        : "bg-amber-50 text-amber-700 border-amber-200"
+                    }`}
+                  >
+                    {p.status}
+                  </button>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => handleEdit(p)}
+                    className="px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-600 border border-indigo-200 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer"
+                  >
+                    <EditIcon className="w-3.5 h-3.5" />
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => handleDelete(p.id)}
+                    className="px-3 py-1.5 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer"
+                  >
+                    <TrashIcon className="w-3.5 h-3.5" />
+                    Delete
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))
+        ) : (
+          <div className="p-8 text-center bg-white border border-zinc-200 rounded-2xl text-zinc-400 text-sm font-medium">
+            No records found
+          </div>
+        )}
+      </div>
 
       {showAddModal && (
         <>
@@ -800,6 +1080,142 @@ export default function AdminProducts() {
                 </div>
               </div>
 
+              {/* Digital Product Settings */}
+              <div className="bg-zinc-50 border border-zinc-250 rounded-2xl p-4 space-y-3">
+                <div className="flex items-center justify-between">
+                  <h4 className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider">Digital Product Settings</h4>
+                  <label className="flex items-center gap-2 text-xs font-bold text-zinc-700 cursor-pointer select-none">
+                    <input
+                      type="checkbox"
+                      checked={newProduct.is_digital}
+                      onChange={(e) => setNewProduct((prev) => ({ ...prev, is_digital: e.target.checked }))}
+                      disabled={isSubmitting}
+                      className="w-4 h-4 rounded border-zinc-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+                    />
+                    Is Digital Product
+                  </label>
+                </div>
+
+                {newProduct.is_digital && (
+                  <div className="space-y-3 pt-2 border-t border-zinc-200 animate-in fade-in duration-200">
+                    <div className="space-y-1.5">
+                      <label htmlFor="digital_file_url" className="text-xs font-bold text-zinc-650">
+                        Digital Product Download URL (ZIP, PDF, Software etc.)
+                      </label>
+                      <input
+                        id="digital_file_url"
+                        type="url"
+                        placeholder="https://example.com/download.zip"
+                        value={newProduct.digital_file_url}
+                        onChange={(e) => setNewProduct((prev) => ({ ...prev, digital_file_url: e.target.value }))}
+                        disabled={isSubmitting}
+                        className="w-full h-9 px-3 bg-white border border-zinc-200 focus:border-indigo-650 rounded-lg text-xs font-semibold outline-none disabled:opacity-60 disabled:cursor-not-allowed"
+                      />
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <label htmlFor="license_keys" className="text-xs font-bold text-zinc-650">
+                        Pre-generated License Keys (One per line)
+                      </label>
+                      <textarea
+                        id="license_keys"
+                        rows={3}
+                        placeholder="LIC-XXXX-XXXX&#10;LIC-YYYY-YYYY"
+                        value={newProduct.license_keys}
+                        onChange={(e) => setNewProduct((prev) => ({ ...prev, license_keys: e.target.value }))}
+                        disabled={isSubmitting}
+                        className="w-full p-3 bg-white border border-zinc-200 focus:border-indigo-650 rounded-lg text-xs font-semibold outline-none resize-none disabled:opacity-60 disabled:cursor-not-allowed"
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Translation & Scheduled Publishing */}
+              <div className="bg-zinc-50 border border-zinc-250 rounded-2xl p-4 space-y-3">
+                <h4 className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider">Translation & Scheduled Publishing</h4>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-1.5">
+                    <div className="flex justify-between items-center">
+                      <label htmlFor="name_bn" className="text-xs font-bold text-zinc-650">
+                        Product Title (Bengali / বাংলা)
+                      </label>
+                      <button
+                        type="button"
+                        onClick={() => handleAutoTranslateTitle()}
+                        disabled={isTranslatingTitle || isSubmitting}
+                        className="text-[11px] font-bold text-indigo-600 hover:text-indigo-700 disabled:text-zinc-400 flex items-center gap-1 cursor-pointer transition-colors"
+                      >
+                        {isTranslatingTitle ? (
+                          <>
+                            <span className="w-3.5 h-3.5 border border-indigo-600 border-t-transparent rounded-full animate-spin"></span>
+                            Translating...
+                          </>
+                        ) : (
+                          "✨ Auto-Translate"
+                        )}
+                      </button>
+                    </div>
+                    <input
+                      id="name_bn"
+                      type="text"
+                      placeholder="যেমন: ওয়্যারলেস হেডফোন প্র"
+                      value={newProduct.name_bn}
+                      onChange={(e) => setNewProduct((prev) => ({ ...prev, name_bn: e.target.value }))}
+                      disabled={isSubmitting}
+                      className="w-full h-9 px-3 bg-white border border-zinc-200 focus:border-indigo-650 rounded-lg text-xs font-semibold outline-none disabled:opacity-60 disabled:cursor-not-allowed"
+                    />
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label htmlFor="publish_at" className="text-xs font-bold text-zinc-650">
+                      Scheduled Publishing Date & Time
+                    </label>
+                    <input
+                      id="publish_at"
+                      type="datetime-local"
+                      value={newProduct.publish_at}
+                      onChange={(e) => setNewProduct((prev) => ({ ...prev, publish_at: e.target.value }))}
+                      disabled={isSubmitting}
+                      className="w-full h-9 px-3 bg-white border border-zinc-200 focus:border-indigo-650 rounded-lg text-xs font-semibold outline-none cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <div className="flex justify-between items-center">
+                    <label htmlFor="description_bn" className="text-xs font-bold text-zinc-650">
+                      Product Description (Bengali / বাংলা)
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() => handleAutoTranslateDesc()}
+                      disabled={isTranslatingDesc || isSubmitting}
+                      className="text-[11px] font-bold text-indigo-600 hover:text-indigo-700 disabled:text-zinc-400 flex items-center gap-1 cursor-pointer transition-colors"
+                    >
+                      {isTranslatingDesc ? (
+                        <>
+                          <span className="w-3.5 h-3.5 border border-indigo-600 border-t-transparent rounded-full animate-spin"></span>
+                          Translating...
+                        </>
+                      ) : (
+                        "✨ Auto-Translate to Bengali"
+                      )}
+                    </button>
+                  </div>
+                  <textarea
+                    id="description_bn"
+                    rows={2}
+                    placeholder="বাংলা ভাষায় প্রোডাক্টের বিস্তারিত বিবরণ (Auto-translated in Bengali)..."
+                    value={newProduct.description_bn}
+                    onChange={(e) => setNewProduct((prev) => ({ ...prev, description_bn: e.target.value }))}
+                    disabled={isSubmitting}
+                    className="w-full p-3 bg-white border border-zinc-200 focus:border-indigo-650 rounded-lg text-xs font-semibold outline-none resize-none disabled:opacity-60 disabled:cursor-not-allowed"
+                  />
+                </div>
+              </div>
+
               {/* Product Options (Optional) */}
               <div className="bg-zinc-50 border border-zinc-250 rounded-2xl p-4 space-y-3">
                 <h4 className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider">Product Options (Optional)</h4>
@@ -962,8 +1378,8 @@ export default function AdminProducts() {
                 </button>
                 <button
                   type="submit"
-                  disabled={isSubmitting}
-                  className="flex-1 h-11 bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400 text-white rounded-xl text-xs font-bold shadow-md shadow-indigo-500/10 transition-colors cursor-pointer disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  disabled={isSubmitting || isTranslatingTitle || isTranslatingDesc || isGeneratingDesc || isGeneratingSeo}
+                  className="flex-1 h-11 bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-300 disabled:cursor-not-allowed text-white rounded-xl text-xs font-bold shadow-md shadow-indigo-500/10 transition-colors cursor-pointer flex items-center justify-center gap-2"
                 >
                   {isSubmitting ? (
                     <>
@@ -972,6 +1388,11 @@ export default function AdminProducts() {
                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                       </svg>
                       {editProductId ? "Updating..." : "Adding..."}
+                    </>
+                  ) : (isTranslatingTitle || isTranslatingDesc || isGeneratingDesc || isGeneratingSeo) ? (
+                    <>
+                      <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                      Translating / AI Working...
                     </>
                   ) : (
                     editProductId ? "Update Product" : "Add Product"

@@ -1013,11 +1013,16 @@ export default function SellerAddProduct() {
             </button>
             <button
               type="submit"
-              disabled={isSubmitting || sellerStatus !== "approved" || maintenanceMode}
-              className="flex-1 h-11 bg-indigo-600 hover:bg-indigo-700 disabled:bg-zinc-300 disabled:text-zinc-500 disabled:cursor-not-allowed text-white rounded-xl text-xs font-bold shadow-md shadow-indigo-500/10 flex items-center justify-center transition-all cursor-pointer"
+              disabled={isSubmitting || sellerStatus !== "approved" || maintenanceMode || isTranslatingTitle || isTranslatingDesc || isGeneratingDesc || isGeneratingSeo}
+              className="flex-1 h-11 bg-indigo-600 hover:bg-indigo-700 disabled:bg-zinc-300 disabled:text-zinc-500 disabled:cursor-not-allowed text-white rounded-xl text-xs font-bold shadow-md shadow-indigo-500/10 flex items-center justify-center gap-2 transition-all cursor-pointer"
             >
               {isSubmitting ? (
                 <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+              ) : (isTranslatingTitle || isTranslatingDesc || isGeneratingDesc || isGeneratingSeo) ? (
+                <>
+                  <span className="w-4 h-4 border-2 border-zinc-600 border-t-transparent rounded-full animate-spin"></span>
+                  Translating / AI Working...
+                </>
               ) : sellerStatus !== "approved" ? (
                 "Locked (Pending Approval)"
               ) : maintenanceMode ? (
