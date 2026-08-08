@@ -7,9 +7,11 @@ import { useAuth } from "@/lib/AuthContext";
 import { useRouter } from "next/navigation";
 import Swal from "sweetalert2";
 import Link from "next/link";
+import { useLanguage } from "@/lib/LanguageContext";
 
 export default function RegisterForm() {
   const router = useRouter();
+  const { lang } = useLanguage();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -44,11 +46,11 @@ export default function RegisterForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name || !email || !password || !confirmPassword) {
-      setError("Please fill in all fields.");
+      setError(lang === "bn" ? "অনুগ্রহ করে সকল ঘর পূরণ করুন।" : "Please fill in all fields.");
       return;
     }
     if (password !== confirmPassword) {
-      setError("Passwords do not match.");
+      setError(lang === "bn" ? "পাসওয়ার্ড দুটি মেলেনি।" : "Passwords do not match.");
       return;
     }
     setError("");
@@ -60,8 +62,10 @@ export default function RegisterForm() {
       setIsLoading(false);
       
       Swal.fire({
-        title: "Registration Successful!",
-        text: `A verification link has been sent to your email (${email}). Please verify your email before logging in.`,
+        title: lang === "bn" ? "রেজিস্ট্রেশন সফল হয়েছে!" : "Registration Successful!",
+        text: lang === "bn"
+          ? `আপনার ইমেইল ঠিকানা (${email}) এ একটি ভেরিফিকেশন লিঙ্ক পাঠানো হয়েছে। লগইন করার আগে অনুগ্রহ করে ইমেইল ভেরিফাই করুন।`
+          : `A verification link has been sent to your email (${email}). Please verify your email before logging in.`,
         icon: "success",
         confirmButtonColor: "#4f46e5",
       }).then(() => {
@@ -69,7 +73,7 @@ export default function RegisterForm() {
       });
     } catch (err: any) {
       setIsLoading(false);
-      let msg = "Registration failed. Please check your connection.";
+      let msg = lang === "bn" ? "রেজিস্ট্রেশন ব্যর্থ হয়েছে। ইন্টারনেট সংযোগ পরীক্ষা করুন।" : "Registration failed. Please check your connection.";
       if (typeof err === "object" && err !== null) {
         if (err.detail) {
           msg = err.detail;
@@ -81,7 +85,7 @@ export default function RegisterForm() {
             const [field, value] = fieldErrors[0];
             msg = `${field}: ${Array.isArray(value) ? value[0] : value}`;
           } else {
-            msg = "Registration failed. Please check your inputs.";
+            msg = lang === "bn" ? "রেজিস্ট্রেশন ব্যর্থ হয়েছে। তথ্যগুলো পুনরায় পরীক্ষা করুন।" : "Registration failed. Please check your inputs.";
           }
         }
       } else {
@@ -89,7 +93,7 @@ export default function RegisterForm() {
       }
       setError(msg);
       Swal.fire({
-        title: "Registration Failed",
+        title: lang === "bn" ? "রেজিস্ট্রেশন ব্যর্থ হয়েছে" : "Registration Failed",
         text: msg,
         icon: "error",
         confirmButtonColor: "#4f46e5",
@@ -101,12 +105,12 @@ export default function RegisterForm() {
     <div className="space-y-6">
       <div className="text-center space-y-1.5">
         <h2 className="text-xl font-bold tracking-tight text-zinc-900">
-          Create a new account
+          {lang === "bn" ? "নতুন অ্যাকাউন্ট তৈরি করুন" : "Create a new account"}
         </h2>
         <p className="text-xs font-medium text-zinc-400">
-          Already have an account?{" "}
+          {lang === "bn" ? "ইতিমধ্যে অ্যাকাউন্ট আছে? " : "Already have an account? "}
           <Link href="/login" className="text-indigo-600 hover:text-indigo-500 font-bold">
-            Sign in
+            {lang === "bn" ? "লগইন করুন" : "Sign in"}
           </Link>
         </p>
       </div>
@@ -123,7 +127,7 @@ export default function RegisterForm() {
                 : "text-zinc-500 hover:text-zinc-900"
             }`}
           >
-            Customer
+            {lang === "bn" ? "গ্রাহক" : "Customer"}
           </button>
           <button
             type="button"
@@ -134,7 +138,7 @@ export default function RegisterForm() {
                 : "text-zinc-500 hover:text-zinc-900"
             }`}
           >
-            Become a Seller
+            {lang === "bn" ? "বিক্রেতা হিসেবে যোগ দিন" : "Become a Seller"}
           </button>
         </div>
       )}
@@ -147,7 +151,7 @@ export default function RegisterForm() {
         )}
 
         <Input
-          label="Full Name"
+          label={lang === "bn" ? "সম্পূর্ণ নাম" : "Full Name"}
           type="text"
           placeholder="John Doe"
           value={name}
@@ -156,7 +160,7 @@ export default function RegisterForm() {
         />
 
         <Input
-          label="Email address"
+          label={lang === "bn" ? "ইমেইল অ্যাড্রেস" : "Email address"}
           type="email"
           placeholder="name@example.com"
           value={email}
@@ -165,7 +169,7 @@ export default function RegisterForm() {
         />
 
         <Input
-          label="Password"
+          label={lang === "bn" ? "পাসওয়ার্ড" : "Password"}
           type="password"
           placeholder="••••••••"
           value={password}
@@ -174,7 +178,7 @@ export default function RegisterForm() {
         />
 
         <Input
-          label="Confirm Password"
+          label={lang === "bn" ? "পাসওয়ার্ড নিশ্চিত করুন" : "Confirm Password"}
           type="password"
           placeholder="••••••••"
           value={confirmPassword}
@@ -190,19 +194,35 @@ export default function RegisterForm() {
             required
           />
           <label htmlFor="terms" className="text-xs font-semibold text-zinc-500 leading-normal">
-            I agree to the{" "}
-            <Link href="/terms" className="text-indigo-600 hover:text-indigo-500">
-              Terms of Service
-            </Link>{" "}
-            and{" "}
-            <Link href="/privacy" className="text-indigo-600 hover:text-indigo-500">
-              Privacy Policy
-            </Link>.
+            {lang === "bn" ? (
+              <>
+                আমি{" "}
+                <Link href="/terms" className="text-indigo-600 hover:text-indigo-500">
+                  সেবা নীতিমালার শর্তাবলী
+                </Link>{" "}
+                এবং{" "}
+                <Link href="/privacy" className="text-indigo-600 hover:text-indigo-500">
+                  গোপনীয়তা নীতি
+                </Link>{" "}
+                মেনে নিচ্ছি।
+              </>
+            ) : (
+              <>
+                I agree to the{" "}
+                <Link href="/terms" className="text-indigo-600 hover:text-indigo-500">
+                  Terms of Service
+                </Link>{" "}
+                and{" "}
+                <Link href="/privacy" className="text-indigo-600 hover:text-indigo-500">
+                  Privacy Policy
+                </Link>.
+              </>
+            )}
           </label>
         </div>
 
         <Button type="submit" className="w-full" isLoading={isLoading}>
-          Create Account
+          {lang === "bn" ? "অ্যাকাউন্ট তৈরি করুন" : "Create Account"}
         </Button>
       </form>
     </div>

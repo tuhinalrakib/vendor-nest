@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { useAuth } from "@/lib/AuthContext";
 import { useTheme } from "@/lib/ThemeContext";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { useCart } from "@/lib/CartContext";
 import Link from "next/link";
 import {
@@ -30,9 +30,15 @@ export default function StorefrontNavbar({ vendorName, domain }: StorefrontNavba
   const { lang, toggleLang, t } = useLanguage();
   const { user, logout, isLoading, maintenanceMode } = useAuth();
   const router = useRouter();
+  const pathname = usePathname();
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { cartCount, setIsCartOpen } = useCart();
+
+  const isActive = (path: string) => {
+    if (!pathname) return false;
+    return pathname === path || (path !== "/" && pathname.startsWith(path));
+  };
 
   // Initials for avatar profile icon
   const getInitials = () => {
@@ -48,7 +54,7 @@ export default function StorefrontNavbar({ vendorName, domain }: StorefrontNavba
   };
 
   return (
-    <>
+    <header className="fixed top-0 left-0 right-0 z-50 w-full">
       {maintenanceMode && (
         <div className="w-full bg-amber-500 text-white text-center py-2 px-4 text-xs font-bold flex items-center justify-center gap-2 animate-in slide-in-from-top duration-300">
           <span>⚠️</span>
@@ -56,8 +62,8 @@ export default function StorefrontNavbar({ vendorName, domain }: StorefrontNavba
         </div>
       )}
       
-      <nav className="w-full border-b border-zinc-200/50 dark:border-zinc-800/50 bg-white/70 dark:bg-zinc-950/70 backdrop-blur-md sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between gap-4">
+      <nav className="w-full border-b border-zinc-200/70 dark:border-zinc-800/70 bg-white/80 dark:bg-zinc-950/80 backdrop-blur-xl backdrop-saturate-150 shadow-xs transition-all duration-300">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 h-16 flex items-center justify-between gap-2 sm:gap-4">
           
           {/* Custom Storefront Logo */}
           <Link href="/" className="flex items-center gap-3 group shrink-0">
@@ -70,15 +76,36 @@ export default function StorefrontNavbar({ vendorName, domain }: StorefrontNavba
           </Link>
 
           {/* Navigation links (Desktop) - No Shops & No dashboard links, only relative store links */}
-          <div className="hidden md:flex items-center gap-6 text-sm font-semibold text-zinc-600 dark:text-zinc-400">
-            <Link href="/products" className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
-              Products
+          <div className="hidden md:flex items-center gap-2 text-sm font-semibold text-zinc-600 dark:text-zinc-400">
+            <Link
+              href="/products"
+              className={`px-3 py-1.5 rounded-full text-xs font-extrabold transition-all duration-200 ${
+                isActive("/products")
+                  ? "bg-indigo-50 dark:bg-indigo-950/60 text-indigo-650 dark:text-indigo-400 border border-indigo-200/80 dark:border-indigo-800/60 shadow-xs"
+                  : "text-zinc-700 dark:text-zinc-300 hover:text-indigo-650 dark:hover:text-indigo-400 hover:bg-zinc-100/60 dark:hover:bg-zinc-900/60"
+              }`}
+            >
+              {t("nav.products")}
             </Link>
-            <Link href="/categories" className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
-              Categories
+            <Link
+              href="/categories"
+              className={`px-3 py-1.5 rounded-full text-xs font-extrabold transition-all duration-200 ${
+                isActive("/categories")
+                  ? "bg-indigo-50 dark:bg-indigo-950/60 text-indigo-650 dark:text-indigo-400 border border-indigo-200/80 dark:border-indigo-800/60 shadow-xs"
+                  : "text-zinc-700 dark:text-zinc-300 hover:text-indigo-650 dark:hover:text-indigo-400 hover:bg-zinc-100/60 dark:hover:bg-zinc-900/60"
+              }`}
+            >
+              {t("nav.categories")}
             </Link>
-            <Link href="/coupons" className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
-              Coupons
+            <Link
+              href="/coupons"
+              className={`px-3 py-1.5 rounded-full text-xs font-extrabold transition-all duration-200 ${
+                isActive("/coupons")
+                  ? "bg-indigo-50 dark:bg-indigo-950/60 text-indigo-650 dark:text-indigo-400 border border-indigo-200/80 dark:border-indigo-800/60 shadow-xs"
+                  : "text-zinc-700 dark:text-zinc-300 hover:text-indigo-650 dark:hover:text-indigo-400 hover:bg-zinc-100/60 dark:hover:bg-zinc-900/60"
+              }`}
+            >
+              {t("nav.coupons")}
             </Link>
           </div>
 
@@ -97,11 +124,11 @@ export default function StorefrontNavbar({ vendorName, domain }: StorefrontNavba
           </div>
 
           {/* Actions (Sign In / Register or Dynamic User Profile Menu) */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-1 sm:gap-2.5 shrink-0">
             {/* Theme Toggle Button */}
             <button
               onClick={toggleTheme}
-              className="p-2 text-zinc-500 hover:text-indigo-600 dark:text-zinc-400 dark:hover:text-indigo-400 hover:bg-zinc-50 dark:hover:bg-zinc-900 rounded-xl transition-all duration-200 active:scale-95 cursor-pointer flex items-center justify-center"
+              className="p-1.5 sm:p-2 text-zinc-500 hover:text-indigo-600 dark:text-zinc-400 dark:hover:text-indigo-400 hover:bg-zinc-50 dark:hover:bg-zinc-900 rounded-xl transition-all duration-200 active:scale-95 cursor-pointer flex items-center justify-center shrink-0"
               aria-label="Toggle Theme"
             >
               {theme === "light" ? (
@@ -115,16 +142,16 @@ export default function StorefrontNavbar({ vendorName, domain }: StorefrontNavba
               )}
             </button>
 
-            {/* Language Switcher Pill */}
+            {/* Language Switcher Pill (Desktop / Tablet) */}
             <button
               onClick={toggleLang}
               title={lang === "en" ? "Switch to Bengali (বাংলা)" : "Switch to English"}
-              className="flex items-center gap-1.5 p-1 pl-2.5 pr-2.5 rounded-full bg-zinc-100/90 dark:bg-zinc-900/90 hover:bg-white dark:hover:bg-zinc-850 border border-zinc-200/80 dark:border-zinc-800 shadow-2xs hover:shadow-sm transition-all duration-300 cursor-pointer active:scale-95 group mr-1"
+              className="hidden sm:flex items-center gap-1 sm:gap-1.5 p-1 pl-2 pr-2 sm:pl-2.5 sm:pr-2.5 rounded-full bg-zinc-100/90 dark:bg-zinc-900/90 hover:bg-white dark:hover:bg-zinc-850 border border-zinc-200/80 dark:border-zinc-800 shadow-2xs hover:shadow-sm transition-all duration-300 cursor-pointer active:scale-95 group shrink-0"
             >
               <svg className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400 group-hover:rotate-45 transition-transform duration-300 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
               </svg>
-              <div className="flex items-center gap-1 text-[11px] font-bold">
+              <div className="flex items-center gap-1 text-[10px] sm:text-[11px] font-bold">
                 <span className={`px-1.5 py-0.5 rounded-md transition-all duration-200 ${lang === "en" ? "bg-indigo-600 text-white font-black shadow-xs" : "text-zinc-500 dark:text-zinc-400 group-hover:text-zinc-800 dark:group-hover:text-zinc-200"}`}>
                   EN
                 </span>
@@ -138,10 +165,10 @@ export default function StorefrontNavbar({ vendorName, domain }: StorefrontNavba
             {user && (
               <button
                 onClick={() => setIsCartOpen(true)}
-                className="relative p-2 text-zinc-500 hover:text-indigo-600 dark:text-zinc-400 dark:hover:text-indigo-400 hover:bg-zinc-50 dark:hover:bg-zinc-900 rounded-xl transition-all duration-200 active:scale-95 cursor-pointer mr-1 flex items-center justify-center"
+                className="relative p-1.5 sm:p-2 text-zinc-500 hover:text-indigo-600 dark:text-zinc-400 dark:hover:text-indigo-400 hover:bg-zinc-50 dark:hover:bg-zinc-900 rounded-xl transition-all duration-200 active:scale-95 cursor-pointer flex items-center justify-center shrink-0"
                 aria-label="Shopping Cart"
               >
-                <CartIcon className="w-5.5 h-5.5" />
+                <CartIcon className="w-5 h-5 sm:w-5.5 sm:h-5.5" />
                 {cartCount > 0 && (
                   <span className="absolute -top-0.5 -right-0.5 min-w-4.5 h-4.5 px-1 rounded-full bg-indigo-600 text-white font-extrabold text-[9px] flex items-center justify-center border-2 border-white dark:border-zinc-950 shadow-sm z-10">
                     {cartCount}
@@ -151,21 +178,21 @@ export default function StorefrontNavbar({ vendorName, domain }: StorefrontNavba
             )}
 
             {isLoading ? (
-              <div className="flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-zinc-50 dark:bg-zinc-900 border border-zinc-200/60 dark:border-zinc-800 shadow-xs animate-pulse">
-                <svg className="animate-spin h-4 w-4 text-indigo-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <div className="flex items-center gap-2 px-2.5 sm:px-3.5 py-1.5 rounded-full bg-zinc-50 dark:bg-zinc-900 border border-zinc-200/60 dark:border-zinc-800 shadow-xs animate-pulse shrink-0">
+                <svg className="animate-spin h-3.5 w-3.5 text-indigo-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>
-                <span className="text-xs font-semibold text-zinc-500 leading-none">Loading...</span>
+                <span className="text-xs font-semibold text-zinc-500 leading-none hidden sm:inline">Loading...</span>
               </div>
             ) : user ? (
-              <div className="relative">
+              <div className="relative shrink-0">
                 {/* Profile Trigger Button */}
                 <button
                   onClick={() => setShowProfileMenu(!showProfileMenu)}
-                  className="flex items-center gap-2.5 p-1.5 pr-3 rounded-full hover:bg-zinc-50 dark:hover:bg-zinc-900 border border-zinc-200/80 dark:border-zinc-800 transition-all duration-200 text-left cursor-pointer active:scale-[0.98]"
+                  className="flex items-center gap-1.5 sm:gap-2.5 p-1 sm:p-1.5 sm:pr-3 rounded-full hover:bg-zinc-50 dark:hover:bg-zinc-900 border border-zinc-200/80 dark:border-zinc-800 transition-all duration-200 text-left cursor-pointer active:scale-[0.98] shrink-0"
                 >
-                  <div className="w-8 h-8 rounded-full bg-linear-to-tr from-indigo-500 to-indigo-600 text-white flex items-center justify-center font-bold text-xs shadow-sm border border-indigo-400">
+                  <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-linear-to-tr from-indigo-500 to-indigo-600 text-white flex items-center justify-center font-bold text-xs shadow-sm border border-indigo-400 shrink-0">
                     {getInitials()}
                   </div>
                   <div className="text-left hidden sm:block">
@@ -176,7 +203,7 @@ export default function StorefrontNavbar({ vendorName, domain }: StorefrontNavba
                       {t(`role.${user.role}`, user.role)}
                     </p>
                   </div>
-                  <ChevronDownIcon className={`w-3.5 h-3.5 text-zinc-400 transition-transform duration-200 ${showProfileMenu ? "rotate-180" : ""}`} />
+                  <ChevronDownIcon className={`w-3.5 h-3.5 text-zinc-400 transition-transform duration-200 hidden sm:block ${showProfileMenu ? "rotate-180" : ""}`} />
                 </button>
 
                 {/* Profile Dropdown Menu */}
@@ -317,6 +344,6 @@ export default function StorefrontNavbar({ vendorName, domain }: StorefrontNavba
           </div>
         </div>
       </nav>
-    </>
+    </header>
   );
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { useLanguage } from "@/lib/LanguageContext";
 
 interface Step {
   number: string;
@@ -12,6 +13,7 @@ interface Step {
 }
 
 export default function HowItWorks() {
+  const { lang } = useLanguage();
   const [activeTab, setActiveTab] = useState<"seller" | "shopper">("seller");
 
   const sellerSteps: Step[] = [
@@ -104,13 +106,18 @@ export default function HowItWorks() {
         {/* Header Block */}
         <div className="text-center max-w-2xl mx-auto space-y-4 mb-16">
           <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-zinc-950 dark:text-zinc-50">
-            How It Works <br />
-            <span className="bg-linear-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
-              কিভাবে এটি কাজ করে
-            </span>
+            {lang === "bn" ? (
+              <span className="bg-linear-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+                কিভাবে এটি কাজ করে
+              </span>
+            ) : (
+              "How It Works"
+            )}
           </h2>
           <p className="text-sm sm:text-base text-zinc-550 dark:text-zinc-400 font-medium">
-            Scale your business as a vendor or enjoy a premium shopping experience as a buyer using the VendorNest platform.
+            {lang === "bn"
+              ? "ভেন্ডরনেস্ট প্ল্যাটফর্ম ব্যবহার করে ভেন্ডর হিসেবে আপনার ব্যবসা প্রসার করুন অথবা গ্রাহক হিসেবে কেনাকাটা উপভোগ করুন।"
+              : "Scale your business as a vendor or enjoy a premium shopping experience as a buyer using the VendorNest platform."}
           </p>
 
           {/* Toggle Switcher */}
@@ -123,7 +130,7 @@ export default function HowItWorks() {
                   : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-zinc-100"
               }`}
             >
-              💼 Open Shop (বিক্রেতা)
+              {lang === "bn" ? "💼 দোকান খুলুন (বিক্রেতা)" : "💼 Open Shop (Seller)"}
             </button>
             <button
               onClick={() => setActiveTab("shopper")}
@@ -133,7 +140,7 @@ export default function HowItWorks() {
                   : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-zinc-100"
               }`}
             >
-              🛍️ Shop Online (ক্রেতা)
+              {lang === "bn" ? "🛍️ কেনাকাটা করুন (ক্রেতা)" : "🛍️ Shop Online (Shopper)"}
             </button>
           </div>
         </div>
@@ -163,14 +170,10 @@ export default function HowItWorks() {
               {/* Step Text Details */}
               <div className="space-y-2 max-w-sm px-4">
                 <h3 className="text-lg font-bold text-zinc-900 dark:text-zinc-100 transition-colors group-hover:text-indigo-600 dark:group-hover:text-indigo-400">
-                  {step.title} <br className="hidden sm:inline" />
-                  <span className="text-xs font-semibold text-zinc-400 dark:text-zinc-500">({step.titleBn})</span>
+                  {lang === "bn" ? step.titleBn : step.title}
                 </h3>
-                <p className="text-xs text-zinc-500 dark:text-zinc-400 font-medium leading-relaxed">
-                  {step.desc}
-                </p>
-                <p className="text-[11px] text-zinc-700 dark:text-zinc-300 leading-relaxed italic bg-zinc-50 dark:bg-zinc-900 p-2.5 rounded-xl border border-zinc-100 dark:border-zinc-800 group-hover:bg-indigo-50/20 dark:group-hover:bg-indigo-950/20 group-hover:border-indigo-100/30 dark:group-hover:border-indigo-900/30 transition-all font-semibold">
-                  {step.descBn}
+                <p className="text-xs sm:text-sm text-zinc-500 dark:text-zinc-400 font-medium leading-relaxed">
+                  {lang === "bn" ? step.descBn : step.desc}
                 </p>
               </div>
               

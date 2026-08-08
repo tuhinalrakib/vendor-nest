@@ -3,10 +3,12 @@
 import { useEffect, useRef, useState } from "react";
 import { useAuth } from "@/lib/AuthContext";
 import Swal from "sweetalert2";
+import { useLanguage } from "@/lib/LanguageContext";
 
 // Track Google client initialization state and active login callback globally/module-wide
 // to prevent "google.accounts.id.initialize() is called multiple times" warnings.
 let isGoogleInitialized = false;
+let currentGoogleLocale: string | null = null;
 let activeGoogleCallback: ((response: any) => void) | null = null;
 
 interface GoogleLoginButtonProps {
@@ -24,8 +26,11 @@ export default function GoogleLoginButton({
 }: GoogleLoginButtonProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const { googleLogin } = useAuth();
+  const { lang } = useLanguage();
   const [scriptLoaded, setScriptLoaded] = useState(false);
   const [isPending, setIsPending] = useState(false);
+
+  const targetLocale = lang === "bn" ? "bn" : "en";
 
   useEffect(() => {
     // Check if the script is already loaded
@@ -55,8 +60,10 @@ export default function GoogleLoginButton({
         const user = await googleLogin(response.credential, role);
         
         Swal.fire({
-          title: "Login Successful!",
-          text: `Welcome back, ${user.full_name || (user.role === 'admin' ? 'Admin' : (user.role === 'seller' ? 'Seller' : 'User'))}!`,
+          title: lang === "bn" ? "লগইন সফল হয়েছে!" : "Login Successful!",
+          text: lang === "bn"
+            ? `স্বাগতম, ${user.full_name || (user.role === 'admin' ? 'অ্যাডমিন' : (user.role === 'seller' ? 'বিক্রেতা' : 'গ্রাহক'))}!`
+            : `Welcome back, ${user.full_name || (user.role === 'admin' ? 'Admin' : (user.role === 'seller' ? 'Seller' : 'User'))}!`,
           icon: "success",
           timer: 1500,
           showConfirmButton: false,
@@ -76,9 +83,9 @@ export default function GoogleLoginButton({
         });
       } catch (err: any) {
         console.error("Google Login Backend Error:", err);
-        const msg = err.error || err.detail || "Google authentication failed. Please try again.";
+        const msg = err.error || err.detail || (lang === "bn" ? "গুগল লগইন ব্যর্থ হয়েছে। পুনরায় চেষ্টা করুন।" : "Google authentication failed. Please try again.");
         Swal.fire({
-          title: "Authentication Failed",
+          title: lang === "bn" ? "লগইন ব্যর্থ হয়েছে" : "Authentication Failed",
           text: msg,
           icon: "error",
           confirmButtonColor: "#4f46e5",
@@ -98,10 +105,11 @@ export default function GoogleLoginButton({
         return;
       }
 
-      // Initialize the Google Identity client only once
-      if (!isGoogleInitialized) {
+      // Initialize or re-initialize if locale changed
+      if (!isGoogleInitialized || currentGoogleLocale !== targetLocale) {
         (window as any).google.accounts.id.initialize({
           client_id: clientId,
+          locale: targetLocale,
           callback: (response: any) => {
             if (activeGoogleCallback) {
               activeGoogleCallback(response);
@@ -109,10 +117,16 @@ export default function GoogleLoginButton({
           },
         });
         isGoogleInitialized = true;
+        currentGoogleLocale = targetLocale;
+      }
+
+      // Clear container before re-rendering button for new locale
+      if (containerRef.current) {
+        containerRef.current.innerHTML = "";
       }
 
       // Measure container width dynamically to ensure responsive fit on mobile
-      const containerWidth = containerRef.current.offsetWidth || 300;
+      const containerWidth = containerRef.current?.offsetWidth || 300;
       const buttonWidth = Math.min(Math.max(containerWidth, 200), 380);
 
       // Render the button
@@ -123,6 +137,7 @@ export default function GoogleLoginButton({
         shape: "rectangular",
         logo_alignment: "left",
         width: buttonWidth,
+        locale: targetLocale,
       });
     } catch (e) {
       console.error("Error rendering Google Login Button:", e);
@@ -134,7 +149,7 @@ export default function GoogleLoginButton({
         activeGoogleCallback = null;
       }
     };
-  }, [scriptLoaded, role, googleLogin, onSuccessRedirect]);
+  }, [scriptLoaded, role, googleLogin, onSuccessRedirect, lang, targetLocale]);
 
   return (
     <div className="w-full flex justify-center py-1 overflow-hidden">
@@ -148,7 +163,7 @@ export default function GoogleLoginButton({
         >
           {!scriptLoaded && (
             <div className="w-full h-[44px] animate-pulse bg-zinc-100 rounded-xl border border-zinc-200 flex items-center justify-center text-xs font-semibold text-zinc-400">
-              Loading Google Sign-in...
+              {lang === "bn" ? "গুগল সাইন-ইন লোড হচ্ছে..." : "Loading Google Sign-in..."}
             </div>
           )}
         </div>
@@ -158,7 +173,9 @@ export default function GoogleLoginButton({
           <div className="absolute inset-0 flex items-center justify-center bg-white/60 backdrop-blur-[1px] rounded-xl border border-zinc-200">
             <div className="flex items-center gap-3">
               <div className="w-5 h-5 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
-              <span className="text-sm font-semibold text-zinc-700 animate-pulse">Authenticating...</span>
+              <span className="text-sm font-semibold text-zinc-700 animate-pulse">
+                {lang === "bn" ? "যাচাই করা হচ্ছে..." : "Authenticating..."}
+              </span>
             </div>
           </div>
         )}

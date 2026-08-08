@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import api from "@/lib/api";
 import Link from "next/link";
+import { useLanguage } from "@/lib/LanguageContext";
 
 interface CategoryShowcase {
   id: string;
@@ -25,12 +26,11 @@ const getImageUrl = (imagePath?: string | null) => {
 };
 
 export default function CategoriesCatalog() {
+  const { lang } = useLanguage();
   const [categories, setCategories] = useState<CategoryShowcase[]>([]);
   const [filteredCategories, setFilteredCategories] = useState<CategoryShowcase[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
-
-
 
   useEffect(() => {
     const fetchCategoriesData = async () => {
@@ -132,6 +132,16 @@ export default function CategoriesCatalog() {
     }
   }, [searchQuery, categories]);
 
+  const translateCategoryName = (name: string) => {
+    if (lang !== "bn") return name;
+    const lower = name.toLowerCase();
+    if (lower.includes("electronics")) return "ইলেকট্রনিক্স";
+    if (lower.includes("fashion") || lower.includes("clothing")) return "ফ্যাশন";
+    if (lower.includes("home") || lower.includes("living")) return "হোম ও লিভিং";
+    if (lower.includes("smart") || lower.includes("gadget")) return "স্মার্ট টেকনোলজি";
+    return name;
+  };
+
   return (
     <div className="bg-zinc-50 dark:bg-zinc-950 min-h-screen font-sans pb-20 transition-colors duration-300">
       {/* Background glowing decorations */}
@@ -141,9 +151,13 @@ export default function CategoriesCatalog() {
       {/* Hero Banner Header */}
       <div className="bg-white dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-800 py-12 text-left relative overflow-hidden">
         <div className="max-w-7xl mx-auto px-6 sm:px-8">
-          <h1 className="text-3xl font-extrabold text-zinc-955 dark:text-zinc-50 tracking-tight">Marketplace Departments</h1>
+          <h1 className="text-3xl font-extrabold text-zinc-955 dark:text-zinc-50 tracking-tight">
+            {lang === "bn" ? "মার্কেটপ্লেস ক্যাটাগরি ডিপার্টমেন্ট" : "Marketplace Departments"}
+          </h1>
           <p className="text-sm font-semibold text-zinc-400 dark:text-zinc-550 mt-1 max-w-xl">
-            Browse our curated collections of items. Filter the marketplace by focus area to find exactly what you need.
+            {lang === "bn"
+              ? "আমাদের কিউরেটেড কালেকশন ব্রাউজ করুন। ক্যাটাগরি ফিল্টার করে আপনার প্রয়োজনীয় পণ্য বেছে নিন।"
+              : "Browse our curated collections of items. Filter the marketplace by focus area to find exactly what you need."}
           </p>
         </div>
       </div>
@@ -161,7 +175,7 @@ export default function CategoriesCatalog() {
             </span>
             <input
               type="text"
-              placeholder="Search category departments..."
+              placeholder={lang === "bn" ? "ক্যাটাগরি বা বিভাগ খুঁজুন..." : "Search category departments..."}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full h-11 pl-11 pr-4 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 focus:border-indigo-650 focus:bg-white dark:focus:bg-zinc-900 text-zinc-900 dark:text-zinc-50 rounded-2xl text-sm font-semibold outline-none transition-all"
@@ -173,7 +187,9 @@ export default function CategoriesCatalog() {
         {isLoading ? (
           <div className="py-24 flex flex-col items-center justify-center space-y-4">
             <div className="w-10 h-10 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
-            <span className="text-xs text-zinc-550 dark:text-zinc-400 font-bold">Querying catalog departments...</span>
+            <span className="text-xs text-zinc-550 dark:text-zinc-400 font-bold">
+              {lang === "bn" ? "ক্যাটাগরি ডিপার্টমেন্টসমূহ লোড হচ্ছে..." : "Querying catalog departments..."}
+            </span>
           </div>
         ) : filteredCategories.length === 0 ? (
           <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl p-16 text-center mt-8 shadow-xs max-w-xl mx-auto space-y-4">
@@ -183,9 +199,13 @@ export default function CategoriesCatalog() {
               </svg>
             </div>
             <div className="space-y-1">
-              <h3 className="text-base font-extrabold text-zinc-955 dark:text-zinc-50">No categories found</h3>
+              <h3 className="text-base font-extrabold text-zinc-955 dark:text-zinc-50">
+                {lang === "bn" ? "কোনো ক্যাটাগরি পাওয়া যায়নি" : "No categories found"}
+              </h3>
               <p className="text-xs font-semibold text-zinc-400 dark:text-zinc-500">
-                We couldn't find any category department matching your search keywords.
+                {lang === "bn"
+                  ? "আপনার অনুসন্ধানের সাথে মেলে এমন কোনো ক্যাটাগরি বিভাগ খুঁজে পাওয়া যায়নি।"
+                  : "We couldn't find any category department matching your search keywords."}
               </p>
             </div>
           </div>
@@ -216,10 +236,10 @@ export default function CategoriesCatalog() {
                     </div>
                     <div className="text-left space-y-0.5">
                       <h3 className="text-base font-extrabold text-zinc-955 dark:text-zinc-50 group-hover:text-indigo-650 dark:group-hover:text-indigo-400 transition-colors">
-                        {cat.name}
+                        {translateCategoryName(cat.name)}
                       </h3>
                       <p className="text-[10px] font-bold text-zinc-400 dark:text-zinc-550 uppercase tracking-widest">
-                        {cat.productCount} Active Items
+                        {cat.productCount} {lang === "bn" ? "টি একটিভ আইটেম" : "Active Items"}
                       </p>
                     </div>
                   </div>
@@ -236,7 +256,7 @@ export default function CategoriesCatalog() {
                     href={`/products?category=${encodeURIComponent(cat.id)}`}
                     className="w-full h-11 rounded-2xl bg-zinc-50 dark:bg-zinc-950 hover:bg-indigo-650 hover:text-white dark:hover:bg-indigo-600 text-zinc-800 dark:text-zinc-300 border border-zinc-205 dark:border-zinc-800 hover:border-transparent dark:hover:border-transparent font-bold text-xs flex items-center justify-center gap-2 transition-all cursor-pointer shadow-sm hover:shadow-md active:scale-[0.98]"
                   >
-                    <span>Browse Collection</span>
+                    <span>{lang === "bn" ? "কালেকশন দেখুন" : "Browse Collection"}</span>
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M14 5l7 7m0 0l-7 7m7-7H3" />
                     </svg>

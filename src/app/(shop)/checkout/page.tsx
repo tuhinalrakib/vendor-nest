@@ -7,6 +7,7 @@ import Image from "next/image";
 import api from "@/lib/api";
 import Swal from "sweetalert2";
 import { useAuth } from "@/lib/AuthContext";
+import { useLanguage } from "@/lib/LanguageContext";
 
 /* ─── SVG Icon Components ─── */
 const LockIcon = ({ className = "w-4 h-4" }: { className?: string }) => (
@@ -101,17 +102,36 @@ const SpinnerIcon = ({ className = "w-4 h-4" }: { className?: string }) => (
   </svg>
 );
 
-/* ─── Checkout Stepper ─── */
-const steps = [
-  { label: "Cart", icon: CartBagIcon },
-  { label: "Shipping & Payment", icon: TruckIcon },
-  { label: "Confirmation", icon: CheckCircleIcon },
-];
-
 export default function CheckoutPage() {
   const router = useRouter();
+  const { lang, t, tp } = useLanguage();
   const { cartItems, fetchCart, clearCart } = useCart();
   const { maintenanceMode } = useAuth();
+
+  /* ─── Checkout Stepper ─── */
+  const steps = [
+    { label: lang === "bn" ? "কার্ট" : "Cart", icon: CartBagIcon },
+    { label: lang === "bn" ? "শিপিং ও পেমেন্ট" : "Shipping & Payment", icon: TruckIcon },
+    { label: lang === "bn" ? "কনফার্মেশন" : "Confirmation", icon: CheckCircleIcon },
+  ];
+
+  const translateProductName = (item: any) => {
+    if (lang !== "bn") return item.name;
+    if (item.name_bn) return item.name_bn;
+
+    const nameMap: Record<string, string> = {
+      "20W USB-C Fast Charger": "২০W ইউএসবি-সি ফাস্ট চার্জার",
+      "Amazon Echo Dot (5th Gen) Smart Speaker": "অ্যামাজন ইকো ডট (৫ম জেন) স্মার্ট স্পিকার",
+      "Wireless Noise-Canceling Headphones": "ওয়্যারলেস নয়েজ-ক্যানসেলিং হেডফোন",
+      "Smart Fitness Watch Series 7": "স্মার্ট ফিটনেস ওয়াচ সিরিজ ৭",
+      "Ergonomic Leather Gaming Chair": "অ্যারগোনমিক লেদার গেমিং চেয়ার",
+      "Ultra-Thin Mechanical Keyboard": "আল্ট্রা-থিন মেকানিক্যাল কীবোর্ড",
+      "4K Ultra HD Smart LED TV 55\"": "৪কে আল্ট্রা এইচডি স্মার্ট এলইডি টিভি ৫৫\"",
+      "Stainless Steel Water Bottle": "স্টেইনলেস স্টিল ওয়াটার বোতল"
+    };
+
+    return nameMap[item.name] || tp(item, "name") || item.name;
+  };
 
   // Form States
   const [fullName, setFullName] = useState("");
@@ -221,15 +241,15 @@ export default function CheckoutPage() {
       if (checkoutSuccess === "false") {
         if (paymentStatus === "cancel") {
           Swal.fire({
-            title: "Payment Cancelled",
-            text: "Your SSLCommerz transaction was cancelled. You can try checkout again.",
+            title: lang === "bn" ? "পেমেন্ট বাতিল হয়েছে" : "Payment Cancelled",
+            text: lang === "bn" ? "আপনার লেনদেন বাতিল করা হয়েছে।" : "Your SSLCommerz transaction was cancelled. You can try checkout again.",
             icon: "info",
             confirmButtonColor: "#4f46e5"
           });
         } else {
           Swal.fire({
-            title: "Payment Failed",
-            text: "Your payment transaction could not be processed. Please try again.",
+            title: lang === "bn" ? "পেমেন্ট ব্যর্থ হয়েছে" : "Payment Failed",
+            text: lang === "bn" ? "আপনার পেমেন্ট সম্পন্ন করা যায়নি। অনুগ্রহ করে আবার চেষ্টা করুন।" : "Your payment transaction could not be processed. Please try again.",
             icon: "error",
             confirmButtonColor: "#ef4444"
           });
@@ -240,12 +260,16 @@ export default function CheckoutPage() {
         window.history.replaceState({}, document.title, newUrl);
       }
     }
-  }, []);
+  }, [lang]);
 
   const handleCheckoutSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!fullName || !phoneNumber || !address || !city || !zipCode) {
-      Swal.fire("Missing Fields", "Please complete your delivery address details.", "warning");
+      Swal.fire(
+        lang === "bn" ? "তথ্য অসম্পূর্ণ" : "Missing Fields",
+        lang === "bn" ? "অনুগ্রহ করে আপনার ডেলিভারি ঠিকানার তথ্যগুলো পূরণ করুন।" : "Please complete your delivery address details.",
+        "warning"
+      );
       return;
     }
 
@@ -301,8 +325,8 @@ export default function CheckoutPage() {
 
         // Show confirmation popup before redirect
         Swal.fire({
-          title: "Order Confirmed!",
-          text: "Your order has been placed successfully.",
+          title: lang === "bn" ? "অর্ডার কনফার্ম হয়েছে!" : "Order Confirmed!",
+          text: lang === "bn" ? "আপনার অর্ডারটি সফলভাবে প্লেস করা হয়েছে।" : "Your order has been placed successfully.",
           icon: "success",
           timer: 1500,
           showConfirmButton: false,
@@ -314,7 +338,11 @@ export default function CheckoutPage() {
 
     } catch (err: any) {
       console.error("Checkout execution error:", err);
-      Swal.fire("Checkout Failed", "Failed to process your checkout order. Please try again.", "error");
+      Swal.fire(
+        lang === "bn" ? "চেকআউট ব্যর্থ হয়েছে" : "Checkout Failed",
+        lang === "bn" ? "আপনার অর্ডার প্রসেস করতে সমস্যা হয়েছে। আবার চেষ্টা করুন।" : "Failed to process your checkout order. Please try again.",
+        "error"
+      );
       setIsSubmitting(false);
     }
   };
@@ -323,7 +351,7 @@ export default function CheckoutPage() {
     <div className="min-h-screen bg-linear-to-br from-slate-50 via-white to-indigo-50/30 font-sans text-left">
 
       {/* ─── Premium Secure Checkout Header ─── */}
-      <div className="bg-white/80 backdrop-blur-sm border-b border-zinc-100 sticky top-0 z-30">
+      <div className="bg-white/80 dark:bg-zinc-900/80 backdrop-blur-sm border-b border-zinc-100 dark:border-zinc-800 sticky top-0 z-30">
         <div className="max-w-5xl mx-auto px-6 py-4">
           {/* Top row: branding + security */}
           <div className="flex items-center justify-between mb-5">
@@ -332,13 +360,17 @@ export default function CheckoutPage() {
                 <LockIcon className="w-4 h-4 text-white" />
               </div>
               <div>
-                <h1 className="text-sm font-extrabold text-zinc-900 tracking-tight">Secure Checkout</h1>
-                <p className="text-[10px] font-semibold text-zinc-400">256-bit SSL Encrypted</p>
+                <h1 className="text-sm font-extrabold text-zinc-900 dark:text-zinc-50 tracking-tight">
+                  {lang === "bn" ? "সুরক্ষিত চেকআউট" : "Secure Checkout"}
+                </h1>
+                <p className="text-[10px] font-semibold text-zinc-400 dark:text-zinc-500">
+                  {lang === "bn" ? "২৫৬-বিট এসএসএল এনক্রিপ্টেড" : "256-bit SSL Encrypted"}
+                </p>
               </div>
             </div>
-            <div className="hidden sm:flex items-center gap-1.5 text-[10px] font-bold text-emerald-600 bg-emerald-50 px-3 py-1.5 rounded-full border border-emerald-100">
+            <div className="hidden sm:flex items-center gap-1.5 text-[10px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-3 py-1.5 rounded-full border border-emerald-100 dark:border-emerald-900/40">
               <ShieldCheckIcon className="w-3.5 h-3.5" />
-              <span>Verified & Secure</span>
+              <span>{lang === "bn" ? "ভেরিফায়েড ও সিকিউর" : "Verified & Secure"}</span>
             </div>
           </div>
 
@@ -348,7 +380,6 @@ export default function CheckoutPage() {
               const StepIcon = step.icon;
               const isActive = i === 1;
               const isCompleted = i === 0;
-              const isFuture = i === 2;
 
               return (
                 <React.Fragment key={step.label}>
@@ -358,8 +389,8 @@ export default function CheckoutPage() {
                         isCompleted
                           ? "bg-emerald-500 shadow-md shadow-emerald-500/25"
                           : isActive
-                          ? "bg-linear-to-br from-indigo-600 to-violet-600 shadow-lg shadow-indigo-500/30 ring-4 ring-indigo-100"
-                          : "bg-zinc-100 border border-zinc-200"
+                          ? "bg-linear-to-br from-indigo-600 to-violet-600 shadow-lg shadow-indigo-500/30 ring-4 ring-indigo-100 dark:ring-indigo-950"
+                          : "bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700"
                       }`}
                     >
                       {isCompleted ? (
@@ -372,7 +403,7 @@ export default function CheckoutPage() {
                     </div>
                     <span
                       className={`text-[10px] font-bold whitespace-nowrap ${
-                        isCompleted ? "text-emerald-600" : isActive ? "text-indigo-700" : "text-zinc-400"
+                        isCompleted ? "text-emerald-600 dark:text-emerald-400" : isActive ? "text-indigo-700 dark:text-indigo-400" : "text-zinc-400 dark:text-zinc-500"
                       }`}
                     >
                       {step.label}
@@ -382,7 +413,7 @@ export default function CheckoutPage() {
                   {/* Connector line */}
                   {i < steps.length - 1 && (
                     <div className="flex-1 mx-3 h-0.5 rounded-full relative -mt-5 overflow-hidden">
-                      <div className="absolute inset-0 bg-zinc-200 rounded-full" />
+                      <div className="absolute inset-0 bg-zinc-200 dark:bg-zinc-800 rounded-full" />
                       <div
                         className={`absolute inset-y-0 left-0 rounded-full transition-all duration-500 ${
                           isCompleted ? "w-full bg-emerald-500" : isActive ? "w-1/2 bg-linear-to-r from-indigo-500 to-violet-500" : "w-0"
@@ -405,31 +436,35 @@ export default function CheckoutPage() {
           <form onSubmit={handleCheckoutSubmit} className="lg:col-span-7 space-y-6">
 
             {/* ── Section: Shipping & Delivery ── */}
-            <div className="bg-white border border-zinc-200/80 rounded-2xl shadow-sm shadow-zinc-200/50 overflow-hidden transition-shadow hover:shadow-md">
+            <div className="bg-white dark:bg-zinc-900 border border-zinc-200/80 dark:border-zinc-800 rounded-2xl shadow-sm shadow-zinc-200/50 dark:shadow-none overflow-hidden transition-shadow hover:shadow-md">
               {/* Section header with accent stripe */}
-              <div className="flex items-center gap-3 px-6 pt-5 pb-4 border-b border-zinc-100">
-                <div className="w-9 h-9 rounded-xl bg-indigo-50 flex items-center justify-center shrink-0">
-                  <TruckIcon className="w-[18px] h-[18px] text-indigo-600" />
+              <div className="flex items-center gap-3 px-6 pt-5 pb-4 border-b border-zinc-100 dark:border-zinc-800">
+                <div className="w-9 h-9 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 flex items-center justify-center shrink-0">
+                  <TruckIcon className="w-[18px] h-[18px] text-indigo-600 dark:text-indigo-400" />
                 </div>
                 <div>
-                  <h2 className="text-[13px] font-extrabold text-zinc-900">Shipping & Delivery</h2>
-                  <p className="text-[10px] font-medium text-zinc-400 mt-0.5">Where should we deliver your order?</p>
+                  <h2 className="text-[13px] font-extrabold text-zinc-900 dark:text-zinc-50">
+                    {lang === "bn" ? "শিপিং ও ডেলিভারি" : "Shipping & Delivery"}
+                  </h2>
+                  <p className="text-[10px] font-medium text-zinc-400 dark:text-zinc-500 mt-0.5">
+                    {lang === "bn" ? "আপনার অর্ডার কোথায় পৌঁছে দেব?" : "Where should we deliver your order?"}
+                  </p>
                 </div>
               </div>
 
               <div className="p-6 space-y-4">
                 {/* Full Name */}
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider flex items-center gap-1.5">
+                  <label className="text-[10px] font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider flex items-center gap-1.5">
                     <UserIcon className="w-3 h-3 text-zinc-400" />
-                    Full Name
+                    {lang === "bn" ? "সম্পূর্ণ নাম" : "Full Name"}
                   </label>
                   <input
                     type="text"
-                    placeholder="e.g. John Doe"
+                    placeholder={lang === "bn" ? "যেমন: জন ডো" : "e.g. John Doe"}
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
-                    className="w-full h-11 px-4 bg-zinc-50/70 border border-zinc-200 rounded-xl text-xs font-semibold outline-none text-zinc-800 placeholder:text-zinc-300 transition-all duration-200 focus:border-indigo-400 focus:bg-white focus:ring-2 focus:ring-indigo-500/10 focus:shadow-sm"
+                    className="w-full h-11 px-4 bg-zinc-50/70 dark:bg-zinc-950/70 border border-zinc-200 dark:border-zinc-800 rounded-xl text-xs font-semibold outline-none text-zinc-800 dark:text-zinc-100 placeholder:text-zinc-300 dark:placeholder:text-zinc-600 transition-all duration-200 focus:border-indigo-400 focus:bg-white dark:focus:bg-zinc-900 focus:ring-2 focus:ring-indigo-500/10 focus:shadow-sm"
                     required
                   />
                 </div>
@@ -437,30 +472,30 @@ export default function CheckoutPage() {
                 {/* Phone + Zip */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-1.5">
-                    <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider flex items-center gap-1.5">
+                    <label className="text-[10px] font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider flex items-center gap-1.5">
                       <PhoneIcon className="w-3 h-3 text-zinc-400" />
-                      Phone Number
+                      {lang === "bn" ? "ফোন নম্বর" : "Phone Number"}
                     </label>
                     <input
                       type="tel"
-                      placeholder="e.g. +8801700000000"
+                      placeholder={lang === "bn" ? "যেমন: +৮৮০১৭০০০০০০০০" : "e.g. +8801700000000"}
                       value={phoneNumber}
                       onChange={(e) => setPhoneNumber(e.target.value)}
-                      className="w-full h-11 px-4 bg-zinc-50/70 border border-zinc-200 rounded-xl text-xs font-semibold outline-none text-zinc-800 placeholder:text-zinc-300 transition-all duration-200 focus:border-indigo-400 focus:bg-white focus:ring-2 focus:ring-indigo-500/10 focus:shadow-sm"
+                      className="w-full h-11 px-4 bg-zinc-50/70 dark:bg-zinc-950/70 border border-zinc-200 dark:border-zinc-800 rounded-xl text-xs font-semibold outline-none text-zinc-800 dark:text-zinc-100 placeholder:text-zinc-300 dark:placeholder:text-zinc-600 transition-all duration-200 focus:border-indigo-400 focus:bg-white dark:focus:bg-zinc-900 focus:ring-2 focus:ring-indigo-500/10 focus:shadow-sm"
                       required
                     />
                   </div>
                   <div className="space-y-1.5">
-                    <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider flex items-center gap-1.5">
+                    <label className="text-[10px] font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider flex items-center gap-1.5">
                       <HashIcon className="w-3 h-3 text-zinc-400" />
-                      Zip Code
+                      {lang === "bn" ? "পোস্টাল কোড" : "Zip Code"}
                     </label>
                     <input
                       type="text"
-                      placeholder="e.g. 1207"
+                      placeholder={lang === "bn" ? "যেমন: ১২০৭" : "e.g. 1207"}
                       value={zipCode}
                       onChange={(e) => setZipCode(e.target.value)}
-                      className="w-full h-11 px-4 bg-zinc-50/70 border border-zinc-200 rounded-xl text-xs font-semibold outline-none text-zinc-800 placeholder:text-zinc-300 transition-all duration-200 focus:border-indigo-400 focus:bg-white focus:ring-2 focus:ring-indigo-500/10 focus:shadow-sm"
+                      className="w-full h-11 px-4 bg-zinc-50/70 dark:bg-zinc-950/70 border border-zinc-200 dark:border-zinc-800 rounded-xl text-xs font-semibold outline-none text-zinc-800 dark:text-zinc-100 placeholder:text-zinc-300 dark:placeholder:text-zinc-600 transition-all duration-200 focus:border-indigo-400 focus:bg-white dark:focus:bg-zinc-900 focus:ring-2 focus:ring-indigo-500/10 focus:shadow-sm"
                       required
                     />
                   </div>
@@ -469,30 +504,30 @@ export default function CheckoutPage() {
                 {/* Address + City */}
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <div className="sm:col-span-2 space-y-1.5">
-                    <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider flex items-center gap-1.5">
+                    <label className="text-[10px] font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider flex items-center gap-1.5">
                       <MapPinIcon className="w-3 h-3 text-zinc-400" />
-                      Delivery Address
+                      {lang === "bn" ? "ডেলিভারি ঠিকানা" : "Delivery Address"}
                     </label>
                     <input
                       type="text"
-                      placeholder="House, Street, Area..."
+                      placeholder={lang === "bn" ? "বাসা, রোড, এলাকা..." : "House, Street, Area..."}
                       value={address}
                       onChange={(e) => setAddress(e.target.value)}
-                      className="w-full h-11 px-4 bg-zinc-50/70 border border-zinc-200 rounded-xl text-xs font-semibold outline-none text-zinc-800 placeholder:text-zinc-300 transition-all duration-200 focus:border-indigo-400 focus:bg-white focus:ring-2 focus:ring-indigo-500/10 focus:shadow-sm"
+                      className="w-full h-11 px-4 bg-zinc-50/70 dark:bg-zinc-950/70 border border-zinc-200 dark:border-zinc-800 rounded-xl text-xs font-semibold outline-none text-zinc-800 dark:text-zinc-100 placeholder:text-zinc-300 dark:placeholder:text-zinc-600 transition-all duration-200 focus:border-indigo-400 focus:bg-white dark:focus:bg-zinc-900 focus:ring-2 focus:ring-indigo-500/10 focus:shadow-sm"
                       required
                     />
                   </div>
                   <div className="space-y-1.5">
-                    <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider flex items-center gap-1.5">
+                    <label className="text-[10px] font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider flex items-center gap-1.5">
                       <BuildingIcon className="w-3 h-3 text-zinc-400" />
-                      City
+                      {lang === "bn" ? "শহর / জেলা" : "City"}
                     </label>
                     <input
                       type="text"
-                      placeholder="e.g. Dhaka"
+                      placeholder={lang === "bn" ? "যেমন: ঢাকা" : "e.g. Dhaka"}
                       value={city}
                       onChange={(e) => setCity(e.target.value)}
-                      className="w-full h-11 px-4 bg-zinc-50/70 border border-zinc-200 rounded-xl text-xs font-semibold outline-none text-zinc-800 placeholder:text-zinc-300 transition-all duration-200 focus:border-indigo-400 focus:bg-white focus:ring-2 focus:ring-indigo-500/10 focus:shadow-sm"
+                      className="w-full h-11 px-4 bg-zinc-50/70 dark:bg-zinc-950/70 border border-zinc-200 dark:border-zinc-800 rounded-xl text-xs font-semibold outline-none text-zinc-800 dark:text-zinc-100 placeholder:text-zinc-300 dark:placeholder:text-zinc-600 transition-all duration-200 focus:border-indigo-400 focus:bg-white dark:focus:bg-zinc-900 focus:ring-2 focus:ring-indigo-500/10 focus:shadow-sm"
                       required
                     />
                   </div>
@@ -501,15 +536,19 @@ export default function CheckoutPage() {
             </div>
 
             {/* ── Section: Payment Method ── */}
-            <div className="bg-white border border-zinc-200/80 rounded-2xl shadow-sm shadow-zinc-200/50 overflow-hidden transition-shadow hover:shadow-md">
+            <div className="bg-white dark:bg-zinc-900 border border-zinc-200/80 dark:border-zinc-800 rounded-2xl shadow-sm shadow-zinc-200/50 dark:shadow-none overflow-hidden transition-shadow hover:shadow-md">
               {/* Section header */}
-              <div className="flex items-center gap-3 px-6 pt-5 pb-4 border-b border-zinc-100">
-                <div className="w-9 h-9 rounded-xl bg-violet-50 flex items-center justify-center shrink-0">
-                  <CreditCardIcon className="w-[18px] h-[18px] text-violet-600" />
+              <div className="flex items-center gap-3 px-6 pt-5 pb-4 border-b border-zinc-100 dark:border-zinc-800">
+                <div className="w-9 h-9 rounded-xl bg-violet-50 dark:bg-violet-950/60 flex items-center justify-center shrink-0">
+                  <CreditCardIcon className="w-[18px] h-[18px] text-violet-600 dark:text-violet-400" />
                 </div>
                 <div>
-                  <h2 className="text-[13px] font-extrabold text-zinc-900">Payment Method</h2>
-                  <p className="text-[10px] font-medium text-zinc-400 mt-0.5">Choose how you'd like to pay</p>
+                  <h2 className="text-[13px] font-extrabold text-zinc-900 dark:text-zinc-50">
+                    {lang === "bn" ? "পেমেন্ট পদ্ধতি" : "Payment Method"}
+                  </h2>
+                  <p className="text-[10px] font-medium text-zinc-400 dark:text-zinc-500 mt-0.5">
+                    {lang === "bn" ? "আপনার পছন্দের পেমেন্ট মাধ্যম বেছে নিন" : "Choose how you'd like to pay"}
+                  </p>
                 </div>
               </div>
 
@@ -521,8 +560,8 @@ export default function CheckoutPage() {
                     onClick={() => setPaymentMethod("stripe")}
                     className={`relative border-2 rounded-xl p-4 cursor-pointer flex flex-col justify-between h-[100px] transition-all duration-200 group ${
                       paymentMethod === "stripe"
-                        ? "border-indigo-500 bg-indigo-50/40 shadow-md shadow-indigo-500/10"
-                        : "border-zinc-200 hover:border-zinc-300 hover:bg-zinc-50/50 hover:shadow-sm hover:-translate-y-0.5"
+                        ? "border-indigo-500 bg-indigo-50/40 dark:bg-indigo-950/40 shadow-md shadow-indigo-500/10"
+                        : "border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 hover:bg-zinc-50/50 dark:hover:bg-zinc-950/50 hover:shadow-sm hover:-translate-y-0.5"
                     }`}
                   >
                     {/* Selection checkmark badge */}
@@ -535,13 +574,15 @@ export default function CheckoutPage() {
                     )}
                     <div className="flex items-center gap-2.5">
                       <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors ${
-                        paymentMethod === "stripe" ? "bg-indigo-100" : "bg-zinc-100 group-hover:bg-zinc-150"
+                        paymentMethod === "stripe" ? "bg-indigo-100 dark:bg-indigo-900/60" : "bg-zinc-100 dark:bg-zinc-800 group-hover:bg-zinc-150"
                       }`}>
-                        <CreditCardIcon className={`w-4 h-4 ${paymentMethod === "stripe" ? "text-indigo-600" : "text-zinc-500"}`} />
+                        <CreditCardIcon className={`w-4 h-4 ${paymentMethod === "stripe" ? "text-indigo-600 dark:text-indigo-400" : "text-zinc-500"}`} />
                       </div>
-                      <span className="text-xs font-extrabold text-zinc-900">Stripe</span>
+                      <span className="text-xs font-extrabold text-zinc-900 dark:text-zinc-100">Stripe</span>
                     </div>
-                    <span className="text-[10px] font-semibold text-zinc-400">Visa, MasterCard, Amex</span>
+                    <span className="text-[10px] font-semibold text-zinc-400 dark:text-zinc-500">
+                      {lang === "bn" ? "ভিসা, মাস্টারকার্ড, আমেক্স" : "Visa, MasterCard, Amex"}
+                    </span>
                   </div>
 
                   {/* SSLCommerz Card */}
@@ -549,8 +590,8 @@ export default function CheckoutPage() {
                     onClick={() => setPaymentMethod("sslcommerz")}
                     className={`relative border-2 rounded-xl p-4 cursor-pointer flex flex-col justify-between h-[100px] transition-all duration-200 group ${
                       paymentMethod === "sslcommerz"
-                        ? "border-indigo-500 bg-indigo-50/40 shadow-md shadow-indigo-500/10"
-                        : "border-zinc-200 hover:border-zinc-300 hover:bg-zinc-50/50 hover:shadow-sm hover:-translate-y-0.5"
+                        ? "border-indigo-500 bg-indigo-50/40 dark:bg-indigo-950/40 shadow-md shadow-indigo-500/10"
+                        : "border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 hover:bg-zinc-50/50 dark:hover:bg-zinc-950/50 hover:shadow-sm hover:-translate-y-0.5"
                     }`}
                   >
                     {paymentMethod === "sslcommerz" && (
@@ -562,13 +603,15 @@ export default function CheckoutPage() {
                     )}
                     <div className="flex items-center gap-2.5">
                       <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors ${
-                        paymentMethod === "sslcommerz" ? "bg-indigo-100" : "bg-zinc-100 group-hover:bg-zinc-150"
+                        paymentMethod === "sslcommerz" ? "bg-indigo-100 dark:bg-indigo-900/60" : "bg-zinc-100 dark:bg-zinc-800 group-hover:bg-zinc-150"
                       }`}>
-                        <WalletIcon className={`w-4 h-4 ${paymentMethod === "sslcommerz" ? "text-indigo-600" : "text-zinc-500"}`} />
+                        <WalletIcon className={`w-4 h-4 ${paymentMethod === "sslcommerz" ? "text-indigo-600 dark:text-indigo-400" : "text-zinc-500"}`} />
                       </div>
-                      <span className="text-xs font-extrabold text-zinc-900">SSLCommerz</span>
+                      <span className="text-xs font-extrabold text-zinc-900 dark:text-zinc-100">SSLCommerz</span>
                     </div>
-                    <span className="text-[10px] font-semibold text-zinc-400">bKash, Nagad, Cards, Net Banking</span>
+                    <span className="text-[10px] font-semibold text-zinc-400 dark:text-zinc-500">
+                      {lang === "bn" ? "বিকাশ, নগদ, কার্ড, নেট ব্যাংকিং" : "bKash, Nagad, Cards, Net Banking"}
+                    </span>
                   </div>
 
                   {/* Cash on Delivery Card */}
@@ -576,8 +619,8 @@ export default function CheckoutPage() {
                     onClick={() => setPaymentMethod("cod")}
                     className={`relative border-2 rounded-xl p-4 cursor-pointer flex flex-col justify-between h-[100px] transition-all duration-200 group ${
                       paymentMethod === "cod"
-                        ? "border-indigo-500 bg-indigo-50/40 shadow-md shadow-indigo-500/10"
-                        : "border-zinc-200 hover:border-zinc-300 hover:bg-zinc-50/50 hover:shadow-sm hover:-translate-y-0.5"
+                        ? "border-indigo-500 bg-indigo-50/40 dark:bg-indigo-950/40 shadow-md shadow-indigo-500/10"
+                        : "border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 hover:bg-zinc-50/50 dark:hover:bg-zinc-950/50 hover:shadow-sm hover:-translate-y-0.5"
                     }`}
                   >
                     {paymentMethod === "cod" && (
@@ -589,46 +632,56 @@ export default function CheckoutPage() {
                     )}
                     <div className="flex items-center gap-2.5">
                       <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors ${
-                        paymentMethod === "cod" ? "bg-indigo-100" : "bg-zinc-100 group-hover:bg-zinc-150"
+                        paymentMethod === "cod" ? "bg-indigo-100 dark:bg-indigo-900/60" : "bg-zinc-100 dark:bg-zinc-800 group-hover:bg-zinc-150"
                       }`}>
-                        <BanknotesIcon className={`w-4 h-4 ${paymentMethod === "cod" ? "text-indigo-600" : "text-zinc-500"}`} />
+                        <BanknotesIcon className={`w-4 h-4 ${paymentMethod === "cod" ? "text-indigo-600 dark:text-indigo-400" : "text-zinc-500"}`} />
                       </div>
-                      <span className="text-xs font-extrabold text-zinc-900">Cash on Delivery</span>
+                      <span className="text-xs font-extrabold text-zinc-900 dark:text-zinc-100">
+                        {lang === "bn" ? "ক্যাশ অন ডেলিভারি" : "Cash on Delivery"}
+                      </span>
                     </div>
-                    <span className="text-[10px] font-semibold text-zinc-400">Pay on Hand Delivery</span>
+                    <span className="text-[10px] font-semibold text-zinc-400 dark:text-zinc-500">
+                      {lang === "bn" ? "হাতে পেয়ে মূল্য পরিশোধ" : "Pay on Hand Delivery"}
+                    </span>
                   </div>
                 </div>
 
                 {/* Dynamic Payment Info Panel */}
                 {paymentMethod === "stripe" && (
-                  <div className="bg-linear-to-r from-indigo-50/60 to-violet-50/40 border border-indigo-100 p-4 rounded-xl flex items-start gap-3 animate-in fade-in slide-in-from-top-2 duration-200">
-                    <div className="w-7 h-7 rounded-lg bg-indigo-100 flex items-center justify-center shrink-0 mt-0.5">
-                      <ShieldCheckIcon className="w-3.5 h-3.5 text-indigo-600" />
+                  <div className="bg-linear-to-r from-indigo-50/60 to-violet-50/40 dark:from-indigo-950/40 dark:to-violet-950/30 border border-indigo-100 dark:border-indigo-900/40 p-4 rounded-xl flex items-start gap-3 animate-in fade-in slide-in-from-top-2 duration-200">
+                    <div className="w-7 h-7 rounded-lg bg-indigo-100 dark:bg-indigo-900/60 flex items-center justify-center shrink-0 mt-0.5">
+                      <ShieldCheckIcon className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
                     </div>
-                    <p className="text-xs font-semibold text-indigo-800/80 leading-relaxed">
-                      You will be redirected to Stripe's <span className="font-bold text-indigo-900">secure hosted checkout</span> to safely enter your card credentials. Your card details never touch our servers.
+                    <p className="text-xs font-semibold text-indigo-800/80 dark:text-indigo-300 leading-relaxed">
+                      {lang === "bn"
+                        ? "নিরাপদে কার্ডের তথ্য ইনপুট দিতে আপনাকে স্ট্রাইপ সিকিউর চেকআউটে নিয়ে যাওয়া হবে।"
+                        : "You will be redirected to Stripe's secure hosted checkout to safely enter your card credentials. Your card details never touch our servers."}
                     </p>
                   </div>
                 )}
 
                 {paymentMethod === "sslcommerz" && (
-                  <div className="bg-linear-to-r from-violet-50/50 to-pink-50/30 border border-violet-100 p-5 rounded-xl space-y-2 animate-in fade-in slide-in-from-top-2 duration-200">
-                    <span className="text-[10px] font-extrabold text-zinc-500 uppercase tracking-widest block">
-                      Pay securely with SSLCOMMERZ gateway
+                  <div className="bg-linear-to-r from-violet-50/50 to-pink-50/30 dark:from-violet-950/40 dark:to-pink-950/30 border border-violet-100 dark:border-violet-900/40 p-5 rounded-xl space-y-2 animate-in fade-in slide-in-from-top-2 duration-200">
+                    <span className="text-[10px] font-extrabold text-zinc-500 dark:text-zinc-400 uppercase tracking-widest block">
+                      {lang === "bn" ? "এসএসএলকমার্স গেটওয়ের মাধ্যমে নিরাপদে পেমেন্ট করুন" : "Pay securely with SSLCOMMERZ gateway"}
                     </span>
-                    <p className="text-xs font-semibold text-zinc-650 leading-relaxed">
-                      You will be redirected to the <span className="font-bold text-zinc-900">SSLCOMMERZ Sandbox Gateway</span> where you can complete your payment using bKash, Nagad, Rocket, Visa, Mastercard, or Net Banking.
+                    <p className="text-xs font-semibold text-zinc-650 dark:text-zinc-300 leading-relaxed">
+                      {lang === "bn"
+                        ? "এসএসএলকমার্স গেটওয়ের মাধ্যমে বিকাশ, নগদ, রকেট বা কার্ডে নিরাপদে পেমেন্ট সম্পন্ন করুন।"
+                        : "You will be redirected to the SSLCOMMERZ Sandbox Gateway where you can complete your payment using bKash, Nagad, Rocket, Visa, Mastercard, or Net Banking."}
                     </p>
                   </div>
                 )}
 
                 {paymentMethod === "cod" && (
-                  <div className="bg-linear-to-r from-amber-50/60 to-orange-50/30 border border-amber-100 p-4 rounded-xl flex items-start gap-3 animate-in fade-in slide-in-from-top-2 duration-200">
-                    <div className="w-7 h-7 rounded-lg bg-amber-100 flex items-center justify-center shrink-0 mt-0.5">
-                      <BanknotesIcon className="w-3.5 h-3.5 text-amber-600" />
+                  <div className="bg-linear-to-r from-amber-50/60 to-orange-50/30 dark:from-amber-950/40 dark:to-orange-950/30 border border-amber-100 dark:border-amber-900/40 p-4 rounded-xl flex items-start gap-3 animate-in fade-in slide-in-from-top-2 duration-200">
+                    <div className="w-7 h-7 rounded-lg bg-amber-100 dark:bg-amber-900/60 flex items-center justify-center shrink-0 mt-0.5">
+                      <BanknotesIcon className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
                     </div>
-                    <p className="text-xs font-semibold text-amber-800/80 leading-relaxed">
-                      Pay the delivery agent in <span className="font-bold text-amber-900">cash upon delivery</span>. Your order will be processed immediately after placement.
+                    <p className="text-xs font-semibold text-amber-800/80 dark:text-amber-300 leading-relaxed">
+                      {lang === "bn"
+                        ? "অর্ডার হাতে পাওয়ার পর ডেলিভারিম্যানকে নগদ অর্থ পরিশোধ করুন। অর্ডার কনফার্ম হওয়ামাত্র প্রসেস করা হবে।"
+                        : "Pay the delivery agent in cash upon delivery. Your order will be processed immediately after placement."}
                     </p>
                   </div>
                 )}
@@ -638,25 +691,29 @@ export default function CheckoutPage() {
 
           {/* ─── Right Column: Order Summary ─── */}
           <div className="lg:col-span-5">
-            <div className="bg-white border border-zinc-200/80 rounded-2xl shadow-sm shadow-zinc-200/50 overflow-hidden lg:sticky lg:top-36">
+            <div className="bg-white dark:bg-zinc-900 border border-zinc-200/80 dark:border-zinc-800 rounded-2xl shadow-sm shadow-zinc-200/50 dark:shadow-none overflow-hidden lg:sticky lg:top-36">
 
               {/* Summary header */}
-              <div className="flex items-center gap-3 px-6 pt-5 pb-4 border-b border-zinc-100">
-                <div className="w-9 h-9 rounded-xl bg-emerald-50 flex items-center justify-center shrink-0">
-                  <CartBagIcon className="w-[18px] h-[18px] text-emerald-600" />
+              <div className="flex items-center gap-3 px-6 pt-5 pb-4 border-b border-zinc-100 dark:border-zinc-800">
+                <div className="w-9 h-9 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 flex items-center justify-center shrink-0">
+                  <CartBagIcon className="w-[18px] h-[18px] text-emerald-600 dark:text-emerald-400" />
                 </div>
                 <div>
-                  <h2 className="text-[13px] font-extrabold text-zinc-900">Order Summary</h2>
-                  <p className="text-[10px] font-medium text-zinc-400 mt-0.5">{cartItems.length} {cartItems.length === 1 ? "item" : "items"} in your order</p>
+                  <h2 className="text-[13px] font-extrabold text-zinc-900 dark:text-zinc-50">
+                    {lang === "bn" ? "অর্ডার সামারি" : "Order Summary"}
+                  </h2>
+                  <p className="text-[10px] font-medium text-zinc-400 dark:text-zinc-500 mt-0.5">
+                    {cartItems.length} {lang === "bn" ? "টি আইটেম অর্ডারে আছে" : cartItems.length === 1 ? "item in your order" : "items in your order"}
+                  </p>
                 </div>
               </div>
 
               <div className="p-6 space-y-5">
                 {/* Cart Items List with thumbnails */}
-                <div className="divide-y divide-zinc-100 max-h-60 overflow-y-auto pr-1 space-y-0">
+                <div className="divide-y divide-zinc-100 dark:divide-zinc-800 max-h-60 overflow-y-auto pr-1 space-y-0">
                   {cartItems.map((item) => (
                     <div key={item.product_id} className="py-3 first:pt-0 last:pb-0 flex items-center gap-3 text-xs group">
-                      <div className="w-12 h-12 rounded-lg bg-zinc-50 border border-zinc-150 overflow-hidden shrink-0 flex items-center justify-center relative">
+                      <div className="w-12 h-12 rounded-lg bg-zinc-50 dark:bg-zinc-950 border border-zinc-150 dark:border-zinc-800 overflow-hidden shrink-0 flex items-center justify-center relative">
                         {(item as any).image ? (
                           <Image
                             src={(item as any).image}
@@ -666,16 +723,18 @@ export default function CheckoutPage() {
                             className="object-cover"
                           />
                         ) : (
-                          <PackageIcon className="w-5 h-5 text-zinc-300" />
+                          <PackageIcon className="w-5 h-5 text-zinc-300 dark:text-zinc-700" />
                         )}
                       </div>
                       <div className="min-w-0 flex-1">
-                        <h4 className="font-bold text-zinc-800 truncate text-[11px]">{item.name}</h4>
-                        <p className="text-[10px] text-zinc-400 font-medium mt-0.5">
-                          Qty: {item.quantity} × ${parseFloat(item.price).toFixed(2)}
+                        <h4 className="font-bold text-zinc-800 dark:text-zinc-200 truncate text-[11px]">
+                          {translateProductName(item)}
+                        </h4>
+                        <p className="text-[10px] text-zinc-400 dark:text-zinc-500 font-medium mt-0.5">
+                          {lang === "bn" ? "পরিমাণ:" : "Qty:"} {item.quantity} × ${parseFloat(item.price).toFixed(2)}
                         </p>
                       </div>
-                      <span className="font-extrabold text-zinc-900 shrink-0 text-xs">
+                      <span className="font-extrabold text-zinc-900 dark:text-zinc-100 shrink-0 text-xs">
                         ${(parseFloat(item.price) * item.quantity).toFixed(2)}
                       </span>
                     </div>
@@ -684,9 +743,9 @@ export default function CheckoutPage() {
 
                 {/* Available Coupons for Checkout */}
                 {applicableCoupons.length > 0 && (
-                  <div className="border-t border-zinc-100 pt-4 space-y-2">
-                    <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider block">
-                      Available Coupons for your items
+                  <div className="border-t border-zinc-100 dark:border-zinc-800 pt-4 space-y-2">
+                    <span className="text-[10px] font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider block">
+                      {lang === "bn" ? "আপনার পণ্যের জন্য সচল কুপনসমূহ" : "Available Coupons for your items"}
                     </span>
                     <div className="flex flex-col gap-2 max-h-40 overflow-y-auto pr-1">
                       {applicableCoupons.map((coupon) => {
@@ -705,8 +764,8 @@ export default function CheckoutPage() {
                             }}
                             className={`flex items-center justify-between p-2.5 rounded-xl border text-left transition-all cursor-pointer ${
                               isApplied
-                                ? "bg-emerald-50 border-emerald-500 text-emerald-800"
-                                : "bg-zinc-50 hover:bg-zinc-100 border-zinc-200 text-zinc-700"
+                                ? "bg-emerald-50 dark:bg-emerald-950/40 border-emerald-500 text-emerald-800 dark:text-emerald-300"
+                                : "bg-zinc-50 dark:bg-zinc-950 hover:bg-zinc-100 dark:hover:bg-zinc-850 border-zinc-200 dark:border-zinc-800 text-zinc-700 dark:text-zinc-300"
                             }`}
                           >
                             <div className="space-y-0.5 min-w-0 flex-1">
@@ -714,21 +773,22 @@ export default function CheckoutPage() {
                                 <span className="font-mono text-xs font-bold uppercase truncate">
                                   {coupon.code}
                                 </span>
-                                <span className="text-[8px] font-extrabold px-1 py-0.5 rounded bg-white border border-zinc-200 text-zinc-500 uppercase truncate">
+                                <span className="text-[8px] font-extrabold px-1 py-0.5 rounded bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-500 uppercase truncate">
                                   {coupon.seller_shop}
                                 </span>
                               </div>
-                              <p className="text-[9px] font-semibold text-zinc-500 truncate">
-                                Save {isPercent ? `${parseFloat(coupon.discount_value).toFixed(0)}%` : `$${parseFloat(coupon.discount_value).toFixed(2)}`}
-                                {parseFloat(coupon.min_purchase) > 0 && ` on min. buy $${parseFloat(coupon.min_purchase).toFixed(2)}`}
+                              <p className="text-[9px] font-semibold text-zinc-500 dark:text-zinc-400 truncate">
+                                {lang === "bn" ? "ছাড় " : "Save "}
+                                {isPercent ? `${parseFloat(coupon.discount_value).toFixed(0)}%` : `$${parseFloat(coupon.discount_value).toFixed(2)}`}
+                                {parseFloat(coupon.min_purchase) > 0 && (lang === "bn" ? ` সর্বনিম্ন $${parseFloat(coupon.min_purchase).toFixed(2)} কেনাকাটায়` : ` on min. buy $${parseFloat(coupon.min_purchase).toFixed(2)}`)}
                               </p>
                             </div>
                             <span className={`text-[10px] font-extrabold px-2.5 py-1 rounded-full shrink-0 ${
                               isApplied
                                 ? "bg-emerald-600 text-white"
-                                : "bg-white border border-zinc-350 text-zinc-650 hover:bg-zinc-50"
+                                : "bg-white dark:bg-zinc-900 border border-zinc-350 dark:border-zinc-700 text-zinc-650 dark:text-zinc-300 hover:bg-zinc-50"
                             }`}>
-                              {isApplied ? "✓ Applied" : "Apply"}
+                              {isApplied ? (lang === "bn" ? "✓ এপ্লাই করা হয়েছে" : "✓ Applied") : (lang === "bn" ? "এপ্লাই করুন" : "Apply")}
                             </span>
                           </button>
                         );
@@ -738,37 +798,37 @@ export default function CheckoutPage() {
                 )}
 
                 {/* Calculations Breakdown */}
-                <div className="border-t border-zinc-100 pt-4 space-y-2.5">
-                  <div className="flex items-center justify-between text-zinc-500 text-xs font-medium">
-                    <span>Subtotal</span>
-                    <span className="font-semibold text-zinc-700">${subtotal.toFixed(2)}</span>
+                <div className="border-t border-zinc-100 dark:border-zinc-800 pt-4 space-y-2.5">
+                  <div className="flex items-center justify-between text-zinc-500 dark:text-zinc-400 text-xs font-medium">
+                    <span>{lang === "bn" ? "সাবটোটাল" : "Subtotal"}</span>
+                    <span className="font-semibold text-zinc-700 dark:text-zinc-300">${subtotal.toFixed(2)}</span>
                   </div>
 
-                  <div className="flex items-center justify-between text-zinc-500 text-xs font-medium">
-                    <span>Shipping</span>
-                    <span className="font-semibold text-emerald-600">Free</span>
+                  <div className="flex items-center justify-between text-zinc-500 dark:text-zinc-400 text-xs font-medium">
+                    <span>{lang === "bn" ? "শিপিং" : "Shipping"}</span>
+                    <span className="font-semibold text-emerald-600 dark:text-emerald-400">{lang === "bn" ? "ফ্রি" : "Free"}</span>
                   </div>
 
                   {isLoadingTotals ? (
-                    <div className="h-4 bg-zinc-100 rounded-lg animate-pulse" />
+                    <div className="h-4 bg-zinc-100 dark:bg-zinc-800 rounded-lg animate-pulse" />
                   ) : (
                     validationResult && parseFloat(validationResult.total_discount) > 0 && (
                       <div className="flex items-center justify-between text-xs font-semibold">
-                        <span className="text-emerald-600 flex items-center gap-1">
+                        <span className="text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
                           <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                             <path strokeLinecap="round" strokeLinejoin="round" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
                           </svg>
-                          Coupon Discount
+                          {lang === "bn" ? "কুপন ডিসকাউন্ট" : "Coupon Discount"}
                         </span>
-                        <span className="text-emerald-600">-${parseFloat(validationResult.total_discount).toFixed(2)}</span>
+                        <span className="text-emerald-600 dark:text-emerald-400">-${parseFloat(validationResult.total_discount).toFixed(2)}</span>
                       </div>
                     )
                   )}
 
                   {/* Final Total */}
-                  <div className="flex items-center justify-between pt-3 border-t border-dashed border-zinc-200">
-                    <span className="text-xs font-extrabold text-zinc-900">Total</span>
-                    <span className="text-xl font-black bg-linear-to-r from-indigo-700 to-violet-600 bg-clip-text text-transparent">
+                  <div className="flex items-center justify-between pt-3 border-t border-dashed border-zinc-200 dark:border-zinc-800">
+                    <span className="text-xs font-extrabold text-zinc-900 dark:text-zinc-50">{lang === "bn" ? "সর্বমোট টাকা" : "Total"}</span>
+                    <span className="text-xl font-black bg-linear-to-r from-indigo-700 to-violet-600 dark:from-indigo-400 dark:to-violet-400 bg-clip-text text-transparent">
                       ${finalAmount.toFixed(2)}
                     </span>
                   </div>
@@ -776,11 +836,15 @@ export default function CheckoutPage() {
 
                 {/* Maintenance Mode Alert */}
                 {maintenanceMode && (
-                  <div className="bg-amber-50 border border-amber-200 p-4 rounded-xl text-left flex items-start gap-2.5 animate-in fade-in slide-in-from-top-3 duration-250 mb-4">
+                  <div className="bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900/50 p-4 rounded-xl text-left flex items-start gap-2.5 animate-in fade-in slide-in-from-top-3 duration-250 mb-4">
                     <span className="text-sm shrink-0">⚠️</span>
-                    <div className="text-xs font-semibold text-amber-800">
-                      <div className="font-extrabold text-amber-900 mb-0.5">Purchases Temporarily Paused</div>
-                      The platform is currently undergoing scheduled maintenance. Checkout and payments are temporarily disabled. Please try again later.
+                    <div className="text-xs font-semibold text-amber-800 dark:text-amber-300">
+                      <div className="font-extrabold text-amber-900 dark:text-amber-200 mb-0.5">
+                        {lang === "bn" ? "সাময়িকভাবে কেনাকাটা স্থগিত আছে" : "Purchases Temporarily Paused"}
+                      </div>
+                      {lang === "bn"
+                        ? "প্ল্যাটফর্মে রক্ষণাবেক্ষণের কাজ চলছে। সাময়িকভাবে পেমেন্ট সার্ভিস স্থগিত আছে।"
+                        : "The platform is currently undergoing scheduled maintenance. Checkout and payments are temporarily disabled. Please try again later."}
                     </div>
                   </div>
                 )}
@@ -798,15 +862,15 @@ export default function CheckoutPage() {
                   {isSubmitting ? (
                     <span className="flex items-center gap-2 relative z-10">
                       <SpinnerIcon className="w-4 h-4 text-white" />
-                      Processing Order...
+                      {lang === "bn" ? "অর্ডার প্রসেস হচ্ছে..." : "Processing Order..."}
                     </span>
                   ) : (
                     <span className="flex items-center gap-2 relative z-10">
                       <LockIcon className="w-3.5 h-3.5" />
                       <span>
                         {paymentMethod === "cod" 
-                          ? "Place your order" 
-                          : `Pay $${finalAmount.toFixed(2)}`}
+                          ? (lang === "bn" ? "অর্ডার কনফার্ম করুন" : "Place your order")
+                          : (lang === "bn" ? `পেমেন্ট করুন $${finalAmount.toFixed(2)}` : `Pay $${finalAmount.toFixed(2)}`)}
                       </span>
                       <svg className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -817,25 +881,33 @@ export default function CheckoutPage() {
 
                 {/* Trust Badges */}
                 <div className="grid grid-cols-3 gap-2 pt-1">
-                  <div className="flex flex-col items-center gap-1.5 py-2.5 px-2 bg-zinc-50/80 rounded-lg border border-zinc-100">
+                  <div className="flex flex-col items-center gap-1.5 py-2.5 px-2 bg-zinc-50/80 dark:bg-zinc-950/80 rounded-lg border border-zinc-100 dark:border-zinc-800">
                     <ShieldCheckIcon className="w-4 h-4 text-emerald-500" />
-                    <span className="text-[8px] font-bold text-zinc-500 text-center leading-tight">SSL Secure<br />Payment</span>
+                    <span className="text-[8px] font-bold text-zinc-500 dark:text-zinc-400 text-center leading-tight">
+                      {lang === "bn" ? "এসএসএল সিকিউর" : "SSL Secure"}<br />{lang === "bn" ? "পেমেন্ট" : "Payment"}
+                    </span>
                   </div>
-                  <div className="flex flex-col items-center gap-1.5 py-2.5 px-2 bg-zinc-50/80 rounded-lg border border-zinc-100">
+                  <div className="flex flex-col items-center gap-1.5 py-2.5 px-2 bg-zinc-50/80 dark:bg-zinc-950/80 rounded-lg border border-zinc-100 dark:border-zinc-800">
                     <CheckCircleIcon className="w-4 h-4 text-indigo-500" />
-                    <span className="text-[8px] font-bold text-zinc-500 text-center leading-tight">Money-Back<br />Guarantee</span>
+                    <span className="text-[8px] font-bold text-zinc-500 dark:text-zinc-400 text-center leading-tight">
+                      {lang === "bn" ? "মানি-ব্যাক" : "Money-Back"}<br />{lang === "bn" ? "গ্যারান্টি" : "Guarantee"}
+                    </span>
                   </div>
-                  <div className="flex flex-col items-center gap-1.5 py-2.5 px-2 bg-zinc-50/80 rounded-lg border border-zinc-100">
+                  <div className="flex flex-col items-center gap-1.5 py-2.5 px-2 bg-zinc-50/80 dark:bg-zinc-950/80 rounded-lg border border-zinc-100 dark:border-zinc-800">
                     <PackageIcon className="w-4 h-4 text-violet-500" />
-                    <span className="text-[8px] font-bold text-zinc-500 text-center leading-tight">Free<br />Shipping</span>
+                    <span className="text-[8px] font-bold text-zinc-500 dark:text-zinc-400 text-center leading-tight">
+                      {lang === "bn" ? "ফ্রি" : "Free"}<br />{lang === "bn" ? "শিপিং" : "Shipping"}
+                    </span>
                   </div>
                 </div>
 
                 {/* Security footer */}
                 <div className="flex items-center justify-center gap-1.5 pt-1">
                   <LockIcon className="w-3 h-3 text-zinc-400" />
-                  <p className="text-[9px] font-medium text-zinc-400 text-center">
-                    Your payment information is encrypted and secure
+                  <p className="text-[9px] font-medium text-zinc-400 dark:text-zinc-500 text-center">
+                    {lang === "bn"
+                      ? "আপনার পেমেন্ট সংক্রান্ত তথ্য ১০০% সুরক্ষিত ও এনক্রিপ্টেড"
+                      : "Your payment information is encrypted and secure"}
                   </p>
                 </div>
               </div>

@@ -8,8 +8,10 @@ import Swal from "sweetalert2";
 import GoogleLoginButton from "@/components/buttons/GoogleLoginButton";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
+import { useLanguage } from "@/lib/LanguageContext";
 
 export default function LoginForm() {
+  const { lang } = useLanguage();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -87,20 +89,20 @@ export default function LoginForm() {
   useEffect(() => {
     if (errorParam === "unauthorized_admin") {
       Swal.fire({
-        title: "Access Denied",
-        text: "You must be an administrator to access that page.",
+        title: lang === "bn" ? "অ্যাক্সেস প্রত্যাখ্যান করা হয়েছে" : "Access Denied",
+        text: lang === "bn" ? "এই পেজে প্রবেশের জন্য আপনাকে অ্যাডমিন হতে হবে।" : "You must be an administrator to access that page.",
         icon: "error",
         confirmButtonColor: "#4f46e5",
       });
     } else if (errorParam === "unauthorized_seller") {
       Swal.fire({
-        title: "Access Denied",
-        text: "Only registered sellers can access the seller dashboard.",
+        title: lang === "bn" ? "অ্যাক্সেস প্রত্যাখ্যান করা হয়েছে" : "Access Denied",
+        text: lang === "bn" ? "শুধুমাত্র নিবন্ধিত বিক্রেতারা সেলার ড্যাশবোর্ডে প্রবেশ করতে পারবেন।" : "Only registered sellers can access the seller dashboard.",
         icon: "error",
         confirmButtonColor: "#4f46e5",
       });
     }
-  }, [errorParam]);
+  }, [errorParam, lang]);
 
   // Handle resend countdown timer
   useEffect(() => {
@@ -114,7 +116,7 @@ export default function LoginForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !password) {
-      setError("Please fill in all fields.");
+      setError(lang === "bn" ? "অনুগ্রহ করে সকল ঘর পূরণ করুন।" : "Please fill in all fields.");
       return;
     }
     setError("");
@@ -141,8 +143,10 @@ export default function LoginForm() {
       }
 
       Swal.fire({
-        title: "Login Successful!",
-        text: `Welcome back, ${result.full_name || (result.role === 'admin' ? 'Admin' : (result.role === 'seller' ? 'Seller' : 'User'))}!`,
+        title: lang === "bn" ? "লগইন সফল হয়েছে!" : "Login Successful!",
+        text: lang === "bn" 
+          ? `স্বাগতম, ${result.full_name || (result.role === 'admin' ? 'অ্যাডমিন' : (result.role === 'seller' ? 'বিক্রেতা' : 'গ্রাহক'))}!`
+          : `Welcome back, ${result.full_name || (result.role === 'admin' ? 'Admin' : (result.role === 'seller' ? 'Seller' : 'User'))}!`,
         icon: "success",
         timer: 1500,
         showConfirmButton: false,
@@ -157,19 +161,21 @@ export default function LoginForm() {
       });
     } catch (err: any) {
       setIsLoading(false);
-      let msg = "Login failed. Please check your network connection.";
+      let msg = lang === "bn" ? "লগইন ব্যর্থ হয়েছে। ইন্টারনেট সংযোগ পরীক্ষা করুন।" : "Login failed. Please check your network connection.";
 
-      // Handle Axios network connection errors (e.g. ERR_CONNECTION_CLOSED, server offline or spinning up)
+      // Handle Axios network connection errors
       if (err?.code === "ERR_NETWORK" || err?.message === "Network Error" || (err?.isAxiosError && !err.response)) {
-        msg = "Unable to connect to the server. If using Render free tier, the backend may be spinning up from sleep. Please wait 15-30 seconds and try again.";
+        msg = lang === "bn"
+          ? "সার্ভারের সাথে সংযোগ স্থাপন করা যাচ্ছে না। অনুগ্রহ করে কিছুক্ষণ পর আবার চেষ্টা করুন।"
+          : "Unable to connect to the server. If using Render free tier, the backend may be spinning up from sleep. Please wait 15-30 seconds and try again.";
       } else if (typeof err === "object" && err !== null) {
         if (err.detail === "email_not_verified") {
           Swal.fire({
-            title: "Email Not Verified",
-            text: "Your email address is not verified yet. Would you like to receive a new verification link?",
+            title: lang === "bn" ? "ইমেইল ভেরিফাইড নয়" : "Email Not Verified",
+            text: lang === "bn" ? "আপনার ইমেইল এখনও ভেরিফাই করা হয়নি। আপনি কি নতুন ভেরিফিকেশন লিঙ্ক পেতে চান?" : "Your email address is not verified yet. Would you like to receive a new verification link?",
             icon: "warning",
             showCancelButton: true,
-            confirmButtonText: "Resend Verification Link",
+            confirmButtonText: lang === "bn" ? "পুনরায় ইমেইল পাঠান" : "Resend Verification Link",
             confirmButtonColor: "#4f46e5",
             cancelButtonColor: "#6b7280",
             showLoaderOnConfirm: true,
@@ -180,7 +186,7 @@ export default function LoginForm() {
                 return response.data;
               } catch (error: any) {
                 Swal.showValidationMessage(
-                  error.response?.data?.error || "Failed to resend email. Please try again."
+                  error.response?.data?.error || (lang === "bn" ? "ইমেইল পাঠাতে সমস্যা হয়েছে।" : "Failed to resend email. Please try again.")
                 );
               }
             },
@@ -188,8 +194,8 @@ export default function LoginForm() {
           }).then((result) => {
             if (result.isConfirmed) {
               Swal.fire({
-                title: "Email Sent!",
-                text: result.value?.message || "A new verification link has been sent to your email.",
+                title: lang === "bn" ? "ইমেইল পাঠানো হয়েছে!" : "Email Sent!",
+                text: result.value?.message || (lang === "bn" ? "আপনার ইমেইলে নতুন লিঙ্ক পাঠানো হয়েছে।" : "A new verification link has been sent to your email."),
                 icon: "success",
                 confirmButtonColor: "#4f46e5",
               });
@@ -211,17 +217,17 @@ export default function LoginForm() {
             const [field, value] = fieldErrors[0];
             msg = `${field}: ${Array.isArray(value) ? value[0] : value}`;
           } else {
-            msg = "Invalid credentials. Please try again.";
+            msg = lang === "bn" ? "ভুল ইমেইল বা পাসওয়ার্ড দেওয়া হয়েছে।" : "Invalid credentials. Please try again.";
           }
         } else {
-          msg = "Invalid credentials. Please try again.";
+          msg = lang === "bn" ? "ভুল ইমেইল বা পাসওয়ার্ড দেওয়া হয়েছে।" : "Invalid credentials. Please try again.";
         }
       } else {
         msg = String(err);
       }
       setError(msg);
       Swal.fire({
-        title: "Authentication Failed",
+        title: lang === "bn" ? "লগইন ব্যর্থ হয়েছে" : "Authentication Failed",
         text: msg,
         icon: "error",
         confirmButtonColor: "#4f46e5",
@@ -232,7 +238,7 @@ export default function LoginForm() {
   const handleOtpSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!otp || otp.length !== 6) {
-      setOtpError("Please enter a valid 6-digit verification code.");
+      setOtpError(lang === "bn" ? "সঠিক ৬ ডিজিটের কোড লিখুন।" : "Please enter a valid 6-digit verification code.");
       return;
     }
     setOtpError("");
@@ -243,8 +249,8 @@ export default function LoginForm() {
       setIsOtpVerifying(false);
       
       Swal.fire({
-        title: "Verification Successful!",
-        text: `Welcome back, ${result.full_name || 'Admin'}!`,
+        title: lang === "bn" ? "ভেরিফিকেশন সফল!" : "Verification Successful!",
+        text: lang === "bn" ? `স্বাগতম, ${result.full_name || 'অ্যাডমিন'}!` : `Welcome back, ${result.full_name || 'Admin'}!`,
         icon: "success",
         timer: 1500,
         showConfirmButton: false,
@@ -253,10 +259,10 @@ export default function LoginForm() {
       });
     } catch (err: any) {
       setIsOtpVerifying(false);
-      const errMsg = err.error || err.detail || "Verification failed. Please try again.";
+      const errMsg = err.error || err.detail || (lang === "bn" ? "ভেরিফিকেশন ব্যর্থ হয়েছে।" : "Verification failed. Please try again.");
       setOtpError(errMsg);
       Swal.fire({
-        title: "Verification Failed",
+        title: lang === "bn" ? "ভেরিফিকেশন ব্যর্থ" : "Verification Failed",
         text: errMsg,
         icon: "error",
         confirmButtonColor: "#4f46e5",
@@ -283,14 +289,14 @@ export default function LoginForm() {
       }, 50);
 
       Swal.fire({
-        title: "OTP Resent!",
-        text: response.data.message || "A new 2FA code has been sent to your email.",
+        title: lang === "bn" ? "ওটিপি পাঠানো হয়েছে!" : "OTP Resent!",
+        text: response.data.message || (lang === "bn" ? "নতুন ৬ ডিজিটের কোড পাঠানো হয়েছে।" : "A new 2FA code has been sent to your email."),
         icon: "success",
         confirmButtonColor: "#4f46e5",
       });
       setResendCountdown(60); // 60 seconds countdown
     } catch (err: any) {
-      const errMsg = err.response?.data?.error || "Failed to resend code. Please try again.";
+      const errMsg = err.response?.data?.error || (lang === "bn" ? "কোড পাঠাতে ব্যর্থ হয়েছে।" : "Failed to resend code. Please try again.");
       setOtpError(errMsg);
     } finally {
       setIsResendingOtp(false);
@@ -308,10 +314,11 @@ export default function LoginForm() {
             </svg>
           </div>
           <h2 className="text-2xl font-black tracking-tight text-zinc-900">
-            Enter Your OTP
+            {lang === "bn" ? "আপনার ওটিপি কোডটি লিখুন" : "Enter Your OTP"}
           </h2>
           <p className="text-xs font-semibold text-zinc-500 leading-relaxed max-w-[270px] mx-auto mt-2">
-            Enter the 6 digit code that we sent to <span className="text-zinc-800 font-bold">{maskedEmail}</span>.
+            {lang === "bn" ? "আমরা যে ৬ ডিজিটের কোডটি পাঠিয়েছি তা লিখুন: " : "Enter the 6 digit code that we sent to "}
+            <span className="text-zinc-800 font-bold">{maskedEmail}</span>.
           </p>
         </div>
 
@@ -324,7 +331,7 @@ export default function LoginForm() {
 
           <div className="space-y-2">
             <label className="block text-[10px] font-extrabold text-zinc-400 uppercase tracking-wider text-left">
-              Verification Code
+              {lang === "bn" ? "যাচাইকরণ কোড" : "Verification Code"}
             </label>
             <div className="flex items-center justify-between gap-1.5 sm:gap-2.5 py-1">
               {otpValues.map((digit, index) => (
@@ -354,15 +361,15 @@ export default function LoginForm() {
             isLoading={isOtpVerifying}
             disabled={otp.length !== 6 || isOtpVerifying}
           >
-            Verify
+            {lang === "bn" ? "ভেরিফাই করুন" : "Verify"}
           </Button>
 
           <div className="text-center pt-2 space-y-4">
             <div className="text-xs font-semibold text-zinc-500">
-              Didn't receive a code?{" "}
+              {lang === "bn" ? "কোড পাননি? " : "Didn't receive a code? "}
               {resendCountdown > 0 ? (
                 <span className="text-indigo-600 font-bold">
-                  Resend OTP in {resendCountdown}s
+                  {lang === "bn" ? `${resendCountdown} সেকেন্ড পর পুনরায় চেষ্টা করুন` : `Resend OTP in ${resendCountdown}s`}
                 </span>
               ) : (
                 <button
@@ -371,7 +378,7 @@ export default function LoginForm() {
                   disabled={isResendingOtp}
                   className="text-indigo-600 hover:text-indigo-500 font-bold hover:underline cursor-pointer disabled:opacity-50"
                 >
-                  {isResendingOtp ? "Resending..." : "Resend OTP"}
+                  {isResendingOtp ? (lang === "bn" ? "পাঠানো হচ্ছে..." : "Resending...") : (lang === "bn" ? "পুনরায় পাঠান" : "Resend OTP")}
                 </button>
               )}
             </div>
@@ -389,7 +396,7 @@ export default function LoginForm() {
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
                 </svg>
-                Back to Sign In
+                {lang === "bn" ? "লগইন পৃষ্ঠায় ফিরুন" : "Back to Sign In"}
               </button>
             </div>
           </div>
@@ -402,15 +409,15 @@ export default function LoginForm() {
     <div className="space-y-6">
       <div className="text-center space-y-1.5">
         <h2 className="text-xl font-bold tracking-tight text-zinc-900">
-          Sign in to your account
+          {lang === "bn" ? "আপনার অ্যাকাউন্টে লগইন করুন" : "Sign in to your account"}
         </h2>
         <p className="text-xs font-medium text-zinc-400">
-          Or{" "}
+          {lang === "bn" ? "অথবা " : "Or "}
           <Link 
             href="/register" 
             className={`text-indigo-600 hover:text-indigo-500 font-bold ${isAnyLoading ? "pointer-events-none opacity-50" : ""}`}
           >
-            create a new account
+            {lang === "bn" ? "নতুন অ্যাকাউন্ট তৈরি করুন" : "create a new account"}
           </Link>
         </p>
       </div>
@@ -423,7 +430,7 @@ export default function LoginForm() {
         )}
 
         <Input
-          label="Email address"
+          label={lang === "bn" ? "ইমেইল অ্যাড্রেস" : "Email address"}
           type="email"
           placeholder="name@example.com"
           value={email}
@@ -434,7 +441,7 @@ export default function LoginForm() {
 
         <div className="space-y-1">
           <Input
-            label="Password"
+            label={lang === "bn" ? "পাসওয়ার্ড" : "Password"}
             type="password"
             placeholder="••••••••"
             value={password}
@@ -447,7 +454,7 @@ export default function LoginForm() {
               href="/forgot-password"
               className={`text-xs font-bold text-indigo-600 hover:text-indigo-500 ${isAnyLoading ? "pointer-events-none opacity-50" : ""}`}
             >
-              Forgot password?
+              {lang === "bn" ? "পাসওয়ার্ড ভুলে গেছেন?" : "Forgot password?"}
             </Link>
           </div>
         </div>
@@ -460,12 +467,12 @@ export default function LoginForm() {
             disabled={isAnyLoading}
           />
           <label htmlFor="remember-me" className="text-xs font-semibold text-zinc-500">
-            Remember me for 30 days
+            {lang === "bn" ? "৩০ দিনের জন্য মনে রাখুন" : "Remember me for 30 days"}
           </label>
         </div>
 
         <Button type="submit" className="w-full" isLoading={isLoading} disabled={isAnyLoading}>
-          Sign In
+          {lang === "bn" ? "লগইন করুন" : "Sign In"}
         </Button>
       </form>
 
@@ -474,7 +481,7 @@ export default function LoginForm() {
           <div className="w-full border-t border-zinc-200"></div>
         </div>
         <span className="relative px-3 text-xs font-semibold text-zinc-400 bg-white">
-          Or continue with
+          {lang === "bn" ? "অথবা দিয়ে চালিয়ে যান" : "Or continue with"}
         </span>
       </div>
 

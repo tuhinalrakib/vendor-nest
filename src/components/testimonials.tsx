@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { useLanguage } from "@/lib/LanguageContext";
 
 interface Testimonial {
   id: string;
@@ -15,38 +16,39 @@ interface Testimonial {
 }
 
 export default function Testimonials() {
+  const { lang } = useLanguage();
   const testimonials: Testimonial[] = [
     {
       id: "test-1",
-      name: "Sarah Connor",
-      role: "Lead Electronics Engineer",
-      storeName: "AuraLink Official",
-      quote: "Migrating our electronics shop to VendorNest was the best decision. The automated AI review summaries helped us identify critical feature requests instantly, increasing our sales conversion by 35% in three months.",
+      name: "Tanzim Hasan",
+      role: "Founder & Creative Director",
+      storeName: "UrbanStyle Storefront",
+      quote: "VendorNest's AI Review Summaries help us identify buyer preferences instantly. Sales grew by 40% in just two months!",
       banglaQuote: "এআই রিভিউ সামারি ব্যবহার করে আমরা ক্রেতাদের ভালোলাগা ও সমস্যাগুলো সহজেই বুঝতে পারছি, যা আমাদের সেলস বাড়াতে দারুণ সাহায্য করেছে!",
       rating: 5,
       avatarGradient: "from-indigo-500 to-purple-600",
-      avatarChar: "S",
+      avatarChar: "T",
     },
     {
       id: "test-2",
-      name: "Mark Jenkins",
-      role: "Founder & Creative Designer",
-      storeName: "Apex Apparel",
-      quote: "The seamless AI catalog listing generator lets me publish new seasonal fashion designs to our storefront in seconds. Payment payouts are incredibly fast, transparent, and completely worry-free.",
+      name: "Nusrat Jahan",
+      role: "E-Commerce Manager",
+      storeName: "GlowBeauty Boutique",
+      quote: "Generating dynamic AI product descriptions saves our team hours of work every week. Payouts are super fast!",
       banglaQuote: "এআই দিয়ে খুব সহজেই ডেসক্রিপশনসহ প্রোডাক্ট লিস্টিং তৈরি করা যায়। এছাড়া পেমেন্ট উইথড্রয়াল প্রসেস অনেক ফাস্ট এবং নিরাপদ!",
       rating: 5,
-      avatarGradient: "from-pink-500 to-rose-600",
-      avatarChar: "M",
+      avatarGradient: "from-rose-500 to-pink-600",
+      avatarChar: "N",
     },
     {
       id: "test-3",
-      name: "Arthur Morgan",
-      role: "Master Leather Artisan",
-      storeName: "SaddleCraft Leather Co.",
-      quote: "Our customized branding has stayed 100% pure under our storefront domain. Shoppers love the personalized smart AI product recommendations. It feels like our own premium standalone app.",
+      name: "Ariful Islam",
+      role: "Tech Entrepreneur",
+      storeName: "TechGadgets Hub",
+      quote: "The personalized AI recommendation Engine boosted our returning customer rate significantly. Feels like owning an enterprise app!",
       banglaQuote: "এআই রিকমেন্ডেশনের কারণে আমাদের স্টোরের রিটার্নিং কাস্টমার অনেক বেড়েছে। মনে হয় আমাদের নিজস্ব প্রিমিয়াম অ্যাপ চালাচ্ছি!",
       rating: 5,
-      avatarGradient: "from-amber-600 to-amber-800",
+      avatarGradient: "from-blue-500 to-indigo-600",
       avatarChar: "A",
     },
   ];
@@ -58,16 +60,21 @@ export default function Testimonials() {
         {/* Title */}
         <div className="text-center max-w-3xl mx-auto space-y-4 mb-16">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-100 dark:border-indigo-900/40 text-xs font-bold text-indigo-700 dark:text-indigo-400 select-none">
-            💬 Success Stories
+            {lang === "bn" ? "💬 মার্চেন্ট রিভিউ" : "💬 Success Stories"}
           </div>
           <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-zinc-950 dark:text-zinc-50">
-            Loved by Merchants Worldwide <br />
-            <span className="bg-linear-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
-              বিক্রেতা ও ক্রেতাদের রিভিউ
-            </span>
+            {lang === "bn" ? (
+              <span className="bg-linear-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+                বিক্রেতা ও ক্রেতাদের রিভিউ
+              </span>
+            ) : (
+              "Loved by Merchants Worldwide"
+            )}
           </h2>
           <p className="text-sm sm:text-base text-zinc-500 dark:text-zinc-400 max-w-xl mx-auto font-medium">
-            Hear from certified business owners using our AI-driven ecommerce hosting platforms.
+            {lang === "bn"
+              ? "আমাদের এআই-চালিত ই-কমার্স প্ল্যাটফর্ম ব্যবহারকারী সফল ভেন্ডরদের প্রতিক্রিয়া শুনে নিন।"
+              : "Hear from certified business owners using our AI-driven ecommerce hosting platforms."}
           </p>
         </div>
 
@@ -98,10 +105,7 @@ export default function Testimonials() {
                 {/* Quote Content */}
                 <div className="space-y-3">
                   <p className="text-xs sm:text-[13px] font-semibold text-zinc-700 dark:text-zinc-300 leading-relaxed italic">
-                    "{test.quote}"
-                  </p>
-                  <p className="text-xs font-bold text-indigo-650 dark:text-indigo-400 bg-indigo-50/50 dark:bg-indigo-950/20 border border-indigo-100/50 dark:border-indigo-900/30 rounded-2xl p-3 leading-relaxed">
-                    🌟 {test.banglaQuote}
+                    "{lang === "bn" ? test.banglaQuote : test.quote}"
                   </p>
                 </div>
               </div>

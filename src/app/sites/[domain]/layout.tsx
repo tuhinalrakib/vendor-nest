@@ -16,7 +16,7 @@ export default async function TenantLayout({ children, params }: LayoutProps) {
     .join(" ");
 
   return (
-    <div className="min-h-screen bg-white dark:bg-[#09090b] text-zinc-800 dark:text-zinc-150 font-sans selection:bg-indigo-500 selection:text-white transition-colors duration-300">
+    <div className="min-h-screen bg-white dark:bg-[#09090b] text-zinc-800 dark:text-zinc-150 font-sans selection:bg-indigo-500 selection:text-white transition-colors duration-300 pt-16">
       {/* Decorative gradient header bg */}
       <div className="absolute top-0 inset-x-0 h-80 bg-gradient-to-b from-indigo-50/50 via-transparent to-transparent dark:from-indigo-950/20 dark:via-transparent dark:to-transparent pointer-events-none" />
 

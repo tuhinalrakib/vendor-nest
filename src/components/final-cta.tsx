@@ -2,8 +2,11 @@
 
 import React from "react";
 import Link from "next/link";
+import { useLanguage } from "@/lib/LanguageContext";
 
 export default function FinalCTA() {
+  const { lang } = useLanguage();
+
   return (
     <section className="relative py-24 bg-zinc-950 overflow-hidden font-sans select-none">
       {/* Dynamic Background Mesh Grids & Ambient Glows */}
@@ -18,16 +21,21 @@ export default function FinalCTA() {
         {/* Main CTA Block */}
         <div className="space-y-4 max-w-3xl mx-auto">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-xs font-bold text-indigo-400">
-            🚀 Accelerate Growth
+            {lang === "bn" ? "🚀 ব্যবসা প্রসারিত করুন" : "🚀 Accelerate Growth"}
           </div>
           <h2 className="text-3xl sm:text-5xl font-black tracking-tight text-white leading-tight">
-            Ready to Launch Your Digital Store? <br />
-            <span className="bg-linear-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
-              আজই ব্যবসা প্রসার করুন
-            </span>
+            {lang === "bn" ? (
+              <span className="bg-linear-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+                আজই আপনার ডিজিটাল স্টোর শুরু করুন!
+              </span>
+            ) : (
+              "Ready to Launch Your Digital Store?"
+            )}
           </h2>
           <p className="text-sm sm:text-base text-zinc-400 max-w-xl mx-auto leading-relaxed font-semibold">
-            Join thousands of independent merchants growing their businesses online. Create your storefront, automate catalog uploads, and accept secure payments instantly.
+            {lang === "bn"
+              ? "হাজার হাজার স্বাধীন বিক্রেতার সাথে যোগ দিন এবং অনলাইনে আপনার ব্যবসা বড় করুন। নিজস্ব স্টোর তৈরি করুন, প্রোডাক্ট আপলোড করুন এবং নিরাপদে পেমেন্ট গ্রহণ করুন।"
+              : "Join thousands of independent merchants growing their businesses online. Create your storefront, automate catalog uploads, and accept secure payments instantly."}
           </p>
         </div>
 
@@ -37,13 +45,13 @@ export default function FinalCTA() {
             href="/register"
             className="w-full sm:w-auto h-13 px-8 rounded-2xl bg-indigo-650 hover:bg-indigo-750 text-white font-bold text-sm flex items-center justify-center transition-all cursor-pointer shadow-lg shadow-indigo-650/20 hover:shadow-indigo-650/30 hover:-translate-y-0.5 active:scale-95"
           >
-            Open Store Free
+            {lang === "bn" ? "ফ্রি স্টোর খুলুন" : "Open Store Free"}
           </Link>
           <Link
             href="/products"
             className="w-full sm:w-auto h-13 px-8 rounded-2xl bg-zinc-900 border border-zinc-800 hover:bg-zinc-850 hover:border-zinc-700 text-zinc-200 font-bold text-sm flex items-center justify-center transition-all cursor-pointer shadow-sm hover:-translate-y-0.5 active:scale-95"
           >
-            Start Shopping
+            {lang === "bn" ? "শপিং শুরু করুন" : "Start Shopping"}
           </Link>
         </div>
 

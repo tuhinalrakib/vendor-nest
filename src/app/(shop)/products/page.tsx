@@ -8,6 +8,7 @@ import { useAuth } from "@/lib/AuthContext";
 import { useCart } from "@/lib/CartContext";
 import { useRouter } from "next/navigation";
 import { ProductCard } from "@/components/cards";
+import { useLanguage } from "@/lib/LanguageContext";
 
 interface Category {
   id: string;
@@ -35,6 +36,7 @@ interface Product {
 export default function ProductsCatalog() {
   const { isAuthenticated } = useAuth();
   const { addToCart } = useCart();
+  const { lang, tp, t } = useLanguage();
   const router = useRouter();
 
   const [products, setProducts] = useState<Product[]>([]);
@@ -98,8 +100,8 @@ export default function ProductsCatalog() {
     } catch (err: any) {
       console.error("Failed to load catalog data:", err);
       Swal.fire({
-        title: "Load Failed",
-        text: "Could not load marketplace catalog from server.",
+        title: lang === "bn" ? "লোড ব্যর্থ হয়েছে" : "Load Failed",
+        text: lang === "bn" ? "সার্ভার থেকে প্রোডাক্ট ক্যাটালগ লোড করা যায়নি।" : "Could not load marketplace catalog from server.",
         icon: "error",
         confirmButtonColor: "#4f46e5",
       });
@@ -188,20 +190,30 @@ export default function ProductsCatalog() {
       });
       Toast.fire({
         icon: 'success',
-        title: `"${product.name}" added to cart`
+        title: lang === "bn" ? `"${tp(product, "name")}" কার্টে যুক্ত হয়েছে` : `"${product.name}" added to cart`
       });
     } catch (err) {
       Swal.fire({
-        title: "Error",
-        text: "Failed to add product to cart. Please try again.",
+        title: lang === "bn" ? "ত্রুটি" : "Error",
+        text: lang === "bn" ? "কার্টে পণ্য যুক্ত করতে সমস্যা হয়েছে।" : "Failed to add product to cart. Please try again.",
         icon: "error",
         confirmButtonColor: "#4f46e5",
       });
     }
   };
 
+  const translateCategory = (catName: string) => {
+    if (lang !== "bn") return catName;
+    const lower = catName.toLowerCase();
+    if (lower === "electronics") return "ইলেকট্রনিক্স";
+    if (lower === "fashion" || lower === "clothing") return "ফ্যাশন";
+    if (lower === "home & living" || lower === "home") return "হোম ও লিভিং";
+    if (lower === "smart tech" || lower === "gadgets") return "স্মার্ট টেকনোলজি";
+    return catName;
+  };
+
   return (
-    <div className="bg-zinc-50 dark:bg-zinc-950 min-h-screen font-sans pb-20 transition-colors duration-300">
+    <div className="bg-zinc-50 dark:bg-zinc-950 min-h-screen font-sans pb-20 transition-colors duration-300 relative overflow-x-clip">
       {/* Decorative backdrop gradients */}
       <div className="absolute top-0 right-1/4 w-[400px] h-[400px] rounded-full bg-indigo-500/5 blur-[120px] pointer-events-none" />
       <div className="absolute top-1/2 left-1/4 w-[500px] h-[500px] rounded-full bg-purple-500/5 blur-[130px] pointer-events-none" />
@@ -209,9 +221,13 @@ export default function ProductsCatalog() {
       {/* Hero Banner Header */}
       <div className="bg-white dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-800 py-12 text-left relative overflow-hidden">
         <div className="max-w-7xl mx-auto px-6 sm:px-8">
-          <h1 className="text-3xl font-extrabold text-zinc-950 dark:text-zinc-50 tracking-tight">Marketplace Catalog</h1>
+          <h1 className="text-3xl font-extrabold text-zinc-950 dark:text-zinc-50 tracking-tight">
+            {lang === "bn" ? "মার্কেটপ্লেস ক্যাটালগ" : "Marketplace Catalog"}
+          </h1>
           <p className="text-sm font-semibold text-zinc-400 dark:text-zinc-500 mt-1 max-w-xl">
-            Browse high-quality products listed by verified independent vendors. Find unique items and support direct creators.
+            {lang === "bn"
+              ? "ভেরিফায়েড মার্চেন্টদের মানসম্মত পণ্যসামগ্রী ব্রাউজ করুন। ইউনিক পণ্য খুঁজুন এবং স্বাধীন বিক্রেতাদের পাশে থাকুন।"
+              : "Browse high-quality products listed by verified independent vendors. Find unique items and support direct creators."}
           </p>
         </div>
       </div>
@@ -230,7 +246,7 @@ export default function ProductsCatalog() {
             </span>
             <input
               type="text"
-              placeholder="Search products, SKUs, tags or shops..."
+              placeholder={lang === "bn" ? "পণ্য, এসকেইউ, ট্যাগ বা দোকান দিয়ে খুঁজুন..." : "Search products, SKUs, tags or shops..."}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full h-11 pl-11 pr-4 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 focus:border-indigo-650 focus:bg-white dark:focus:bg-zinc-900 text-zinc-900 dark:text-zinc-550 rounded-2xl text-sm font-semibold outline-none transition-all"
@@ -239,16 +255,18 @@ export default function ProductsCatalog() {
 
           {/* Sort By Dropdown */}
           <div className="flex items-center gap-3 w-full md:w-auto justify-end">
-            <span className="text-xs font-bold text-zinc-550 dark:text-zinc-400 whitespace-nowrap">Sort By</span>
+            <span className="text-xs font-bold text-zinc-550 dark:text-zinc-400 whitespace-nowrap">
+              {lang === "bn" ? "সর্ট করুন" : "Sort By"}
+            </span>
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value)}
               className="h-11 px-4 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 focus:border-indigo-650 text-zinc-900 dark:text-zinc-350 rounded-2xl text-xs font-bold outline-none cursor-pointer"
             >
-              <option value="default">Newest Additions</option>
-              <option value="price-low">Price: Low to High</option>
-              <option value="price-high">Price: High to Low</option>
-              <option value="name">Alphabetical (A-Z)</option>
+              <option value="default">{lang === "bn" ? "নতুন প্রোডাক্টসমূহ" : "Newest Additions"}</option>
+              <option value="price-low">{lang === "bn" ? "দাম: কম থেকে বেশি" : "Price: Low to High"}</option>
+              <option value="price-high">{lang === "bn" ? "দাম: বেশি থেকে কম" : "Price: High to Low"}</option>
+              <option value="name">{lang === "bn" ? "বর্ণানুক্রমিক (A-Z)" : "Alphabetical (A-Z)"}</option>
             </select>
           </div>
         </div>
@@ -295,7 +313,7 @@ export default function ProductsCatalog() {
                   : "bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-650 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 hover:text-zinc-900 dark:hover:text-zinc-200 hover:border-zinc-300 dark:hover:border-zinc-700"
               }`}
             >
-              All Categories
+              {lang === "bn" ? "সকল ক্যাটাগরি" : "All Categories"}
             </button>
             {categories.map((cat) => (
               <button
@@ -307,7 +325,7 @@ export default function ProductsCatalog() {
                     : "bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-650 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 hover:text-zinc-900 dark:hover:text-zinc-200 hover:border-zinc-300 dark:hover:border-zinc-700"
                 }`}
               >
-                {cat.name}
+                {translateCategory(cat.name)}
               </button>
             ))}
           </div>
@@ -337,9 +355,13 @@ export default function ProductsCatalog() {
               </svg>
             </div>
             <div className="space-y-1">
-              <h3 className="text-base font-extrabold text-zinc-950">No products found</h3>
+              <h3 className="text-base font-extrabold text-zinc-950">
+                {lang === "bn" ? "কোনো পণ্য পাওয়া যায়নি" : "No products found"}
+              </h3>
               <p className="text-xs font-semibold text-zinc-400">
-                We couldn't find any products matching your current category selection or search keywords.
+                {lang === "bn"
+                  ? "আপনার ক্যাটাগরি বা অনুসন্ধানের সাথে মেলে এমন কোনো প্রোডাক্ট পাওয়া যায়নি।"
+                  : "We couldn't find any products matching your current category selection or search keywords."}
               </p>
             </div>
             <button
@@ -349,7 +371,7 @@ export default function ProductsCatalog() {
               }}
               className="px-5 py-2.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-xl text-xs font-bold transition-colors cursor-pointer"
             >
-              Clear Filters
+              {lang === "bn" ? "ফিল্টার ক্লিয়ার করুন" : "Clear Filters"}
             </button>
           </div>
         ) : (

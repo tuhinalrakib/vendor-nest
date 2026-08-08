@@ -99,6 +99,28 @@ const dictionary: Record<string, Record<Language, string>> = {
   "banner.payouts": { en: "Automated Weekly Payouts", bn: "অটোমেটেড পে-আউট সুবিধা" },
   "banner.registerBtn": { en: "Register as Verified Seller →", bn: "মার্চেন্ট হিসেবে রেজিস্টার করুন →" },
   "banner.pricingBtn": { en: "Explore Merchant Plans", bn: "মার্চেন্ট প্ল্যানগুলো দেখুন" },
+
+  // Coupons Banner Section
+  "couponsBanner.badge": { en: "🏷️ Hot Discount Offers", bn: "🏷️ বিশেষ ডিসকাউন্ট অফার" },
+  "couponsBanner.title": { en: "Clip Coupons & Save Instantly!", bn: "কুপন ব্যবহার করুন এবং তাত্ক্ষণিক ছাড় পান!" },
+  "couponsBanner.subtitle": { en: "Browse our marketplace deals, clip seller coupons, and receive instant subtractions when checking out. Save up to 50% on selected merchant storefronts today.", bn: "আমাদের মার্কেটপ্লেসের বিশেষ অফারগুলো দেখুন, সেলার কুপন সংগ্রহ করুন এবং চেকআউটে ৫০% পর্যন্ত তাত্ক্ষণিক ছাড় উপভোগ করুন।" },
+  "couponsBanner.btn": { en: "Browse Active Coupons", bn: "একটিভ কুপনসমূহ দেখুন" },
+
+  // Category Grid Showcase
+  "categoryGrid.badge": { en: "🏷️ Curated Collections", bn: "🏷️ নির্বাচিত কালেকশন" },
+  "categoryGrid.title": { en: "Explore Popular Marketplace Categories", bn: "জনপ্রিয় মার্কেটপ্লেস ক্যাটাগরি" },
+  "categoryGrid.subtitle": { en: "Find top-selling products, seasonal trends, and verified vendor storefront deals.", bn: "টপ-সেলিং পণ্য, সিজনাল ট্রেন্ড ও ভেরিফায়েড মার্চেন্টদের বিশেষ অফার খুঁজুন।" },
+  "categoryGrid.allCategories": { en: "All Categories", bn: "সকল ক্যাটাগরি" },
+  "categoryGrid.exploreCollection": { en: "Explore Collection", bn: "কালেকশন দেখুন" },
+
+  // Flash Sale Section
+  "flashSale.badge": { en: "⚡ Limited Time Flash Sale", bn: "⚡ সীমিত সময়ের ফ্ল্যাশ সেল" },
+  "flashSale.title": { en: "Today's Hot Deals & Mega Savings", bn: "আজকের হট ডিল ও মেগা সেভিংস" },
+  "flashSale.subtitle": { en: "Hurry! Claim up to 55% OFF on selected verified merchant stock. Deals refresh daily.", bn: "দ্রুত করুন! ভেরিফায়েড মার্চেন্ট পণ্যে ৫৫% পর্যন্ত ডিসকাউন্ট পান। অফারসমূহ প্রতিদিন আপডেট হয়।" },
+  "flashSale.endsIn": { en: "Ends In:", bn: "সময় বাকি:" },
+  "flashSale.hours": { en: "Hours", bn: "ঘণ্টা" },
+  "flashSale.mins": { en: "Mins", bn: "মিনিট" },
+  "flashSale.secs": { en: "Secs", bn: "সেকেন্ড" },
 };
 
 export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {

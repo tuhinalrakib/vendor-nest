@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import api from "@/lib/api";
+import { useLanguage } from "@/lib/LanguageContext";
 
 const getCategoryIcon = (catName: string) => {
   const nameLower = catName.toLowerCase();
@@ -36,6 +37,7 @@ interface CollectionCard {
 }
 
 export default function CategoryGridShowcase() {
+  const { t, tp, lang } = useLanguage();
   const [activeTab, setActiveTab] = useState<string>("all");
   const [dbCategories, setDbCategories] = useState<{ id: string; label: string; icon: string }[]>([]);
 
@@ -47,7 +49,7 @@ export default function CategoryGridShowcase() {
         if (Array.isArray(data) && data.length > 0) {
           const mapped = data.map((cat: any) => ({
             id: cat.slug || cat.id,
-            label: cat.name,
+            label: tp(cat, "name"),
             icon: getCategoryIcon(cat.name),
           }));
           setDbCategories(mapped);
@@ -57,10 +59,10 @@ export default function CategoryGridShowcase() {
       }
     };
     fetchCategories();
-  }, []);
+  }, [lang]);
 
   const categories = [
-    { id: "all", label: "All Categories", icon: "🌐" },
+    { id: "all", label: t("categoryGrid.allCategories"), icon: "🌐" },
     ...dbCategories,
   ];
 
@@ -68,61 +70,61 @@ export default function CategoryGridShowcase() {
     {
       id: "electronics-grid",
       categorySlug: "electronics",
-      title: "Best Sellers in Electronics",
-      subtitle: "Top-rated tech & smart audio devices",
-      badge: "HOT DEALS",
+      title: lang === "bn" ? "ইলেকট্রনিক্সে সেরা পণ্যসমূহ" : "Best Sellers in Electronics",
+      subtitle: lang === "bn" ? "সেরা টেক ও স্মার্ট ডিভাইস" : "Top-rated tech & smart audio devices",
+      badge: lang === "bn" ? "হট ডিলস" : "HOT DEALS",
       badgeBg: "bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 border-indigo-200 dark:border-indigo-800",
       exploreLink: "/products?category=electronics",
       items: [
-        { id: "e1", name: "Smart Watches", price: "From $89", badge: "-25%", icon: "⌚", bgGradient: "from-blue-500/10 to-indigo-500/10", link: "/products?category=electronics" },
-        { id: "e2", name: "ANC Headphones", price: "From $129", badge: "Best", icon: "🎧", bgGradient: "from-purple-500/10 to-indigo-500/10", link: "/products?category=electronics" },
-        { id: "e3", name: "Surround Speakers", price: "From $79", icon: "🔊", bgGradient: "from-indigo-500/10 to-cyan-500/10", link: "/products?category=electronics" },
-        { id: "e4", name: "Fast Chargers", price: "From $19", badge: "Hot", icon: "🔌", bgGradient: "from-sky-500/10 to-blue-500/10", link: "/products?category=electronics" },
+        { id: "e1", name: lang === "bn" ? "স্মার্ট ওয়াচ" : "Smart Watches", price: lang === "bn" ? "মাত্র ৳৮৯" : "From $89", badge: "-25%", icon: "⌚", bgGradient: "from-blue-500/10 to-indigo-500/10", link: "/products?category=electronics" },
+        { id: "e2", name: lang === "bn" ? "হেডফোন" : "ANC Headphones", price: lang === "bn" ? "মাত্র ৳১২৯" : "From $129", badge: lang === "bn" ? "সেরা" : "Best", icon: "🎧", bgGradient: "from-purple-500/10 to-indigo-500/10", link: "/products?category=electronics" },
+        { id: "e3", name: lang === "bn" ? "স্পিকার" : "Surround Speakers", price: lang === "bn" ? "মাত্র ৳৭৯" : "From $79", icon: "🔊", bgGradient: "from-indigo-500/10 to-cyan-500/10", link: "/products?category=electronics" },
+        { id: "e4", name: lang === "bn" ? "ফাস্ট চার্জার" : "Fast Chargers", price: lang === "bn" ? "মাত্র ৳১৯" : "From $19", badge: lang === "bn" ? "হট" : "Hot", icon: "🔌", bgGradient: "from-sky-500/10 to-blue-500/10", link: "/products?category=electronics" },
       ],
     },
     {
       id: "fashion-grid",
       categorySlug: "fashion",
-      title: "Trending Fashion & Apparel",
-      subtitle: "Curated seasonal apparel & boutique wear",
-      badge: "NEW ARRIVALS",
+      title: lang === "bn" ? "ট্রেন্ডিং ফ্যাশন ও পোশাক" : "Trending Fashion & Apparel",
+      subtitle: lang === "bn" ? "সিজনাল পোশাক ও বুটিক কালেকশন" : "Curated seasonal apparel & boutique wear",
+      badge: lang === "bn" ? "নতুন কালেকশন" : "NEW ARRIVALS",
       badgeBg: "bg-rose-50 dark:bg-rose-950/50 text-rose-600 dark:text-rose-400 border-rose-200 dark:border-rose-800",
       exploreLink: "/products?category=clothing",
       items: [
-        { id: "f1", name: "Summer Dresses", price: "Under $45", badge: "New", icon: "👗", bgGradient: "from-rose-500/10 to-pink-500/10", link: "/products?category=clothing" },
-        { id: "f2", name: "Casual Sneakers", price: "From $59", badge: "Top", icon: "👟", bgGradient: "from-pink-500/10 to-purple-500/10", link: "/products?category=clothing" },
-        { id: "f3", name: "Leather Handbags", price: "Under $89", icon: "👜", bgGradient: "from-amber-500/10 to-rose-500/10", link: "/products?category=clothing" },
-        { id: "f4", name: "Designer Eyewear", price: "From $29", badge: "Trending", icon: "🕶️", bgGradient: "from-violet-500/10 to-pink-500/10", link: "/products?category=clothing" },
+        { id: "f1", name: lang === "bn" ? "সামার ড্রেস" : "Summer Dresses", price: lang === "bn" ? "৳৪৫ এর মধ্যে" : "Under $45", badge: lang === "bn" ? "নতুন" : "New", icon: "👗", bgGradient: "from-rose-500/10 to-pink-500/10", link: "/products?category=clothing" },
+        { id: "f2", name: lang === "bn" ? "স্নির্কার্স" : "Casual Sneakers", price: lang === "bn" ? "মাত্র ৳৫৯" : "From $59", badge: lang === "bn" ? "টপ" : "Top", icon: "👟", bgGradient: "from-pink-500/10 to-purple-500/10", link: "/products?category=clothing" },
+        { id: "f3", name: lang === "bn" ? "লেদার ব্যাগ" : "Leather Handbags", price: lang === "bn" ? "৳৮৯ এর মধ্যে" : "Under $89", icon: "👜", bgGradient: "from-amber-500/10 to-rose-500/10", link: "/products?category=clothing" },
+        { id: "f4", name: lang === "bn" ? "ডিজাইনার গ্লাস" : "Designer Eyewear", price: lang === "bn" ? "মাত্র ৳২৯" : "From $29", badge: lang === "bn" ? "ট্রেন্ডিং" : "Trending", icon: "🕶️", bgGradient: "from-violet-500/10 to-pink-500/10", link: "/products?category=clothing" },
       ],
     },
     {
       id: "home-grid",
       categorySlug: "home",
-      title: "Home & Kitchen Comforts",
-      subtitle: "Essentials to elevate your daily living space",
-      badge: "UP TO 35% OFF",
+      title: lang === "bn" ? "হোম ও কিচেন আইটেম" : "Home & Kitchen Comforts",
+      subtitle: lang === "bn" ? "ঘরের নিত্যপ্রয়োজনীয় চমৎকার উপাদান" : "Essentials to elevate your daily living space",
+      badge: lang === "bn" ? "৩৫% পর্যন্ত ছাড়" : "UP TO 35% OFF",
       badgeBg: "bg-amber-50 dark:bg-amber-950/50 text-amber-600 dark:text-amber-400 border-amber-200 dark:border-amber-800",
       exploreLink: "/products?category=home",
       items: [
-        { id: "h1", name: "Smart Air Fryers", price: "From $69", badge: "Save 30%", icon: "🍳", bgGradient: "from-amber-500/10 to-orange-500/10", link: "/products?category=home" },
-        { id: "h2", name: "RGB Ambient Lights", price: "Under $35", icon: "💡", bgGradient: "from-yellow-500/10 to-amber-500/10", link: "/products?category=home" },
-        { id: "h3", name: "Ergonomic Chairs", price: "From $149", badge: "Popular", icon: "🪑", bgGradient: "from-emerald-500/10 to-teal-500/10", link: "/products?category=home" },
-        { id: "h4", name: "Velvet Cushions", price: "Under $25", icon: "🛋️", bgGradient: "from-teal-500/10 to-cyan-500/10", link: "/products?category=home" },
+        { id: "h1", name: lang === "bn" ? "স্মার্ট এয়ার ফ্রায়ার" : "Smart Air Fryers", price: lang === "bn" ? "মাত্র ৳৬৯" : "From $69", badge: lang === "bn" ? "৩০% ছাড়" : "Save 30%", icon: "🍳", bgGradient: "from-amber-500/10 to-orange-500/10", link: "/products?category=home" },
+        { id: "h2", name: lang === "bn" ? "RGB লাইট" : "RGB Ambient Lights", price: lang === "bn" ? "৳৩৫ এর নিচে" : "Under $35", icon: "💡", bgGradient: "from-yellow-500/10 to-amber-500/10", link: "/products?category=home" },
+        { id: "h3", name: lang === "bn" ? "চেয়ার" : "Ergonomic Chairs", price: lang === "bn" ? "মাত্র ৳১৪৯" : "From $149", badge: lang === "bn" ? "জনপ্রিয়" : "Popular", icon: "🪑", bgGradient: "from-emerald-500/10 to-teal-500/10", link: "/products?category=home" },
+        { id: "h4", name: lang === "bn" ? "কুশন" : "Velvet Cushions", price: lang === "bn" ? "৳২৫ এর নিচে" : "Under $25", icon: "🛋️", bgGradient: "from-teal-500/10 to-cyan-500/10", link: "/products?category=home" },
       ],
     },
     {
       id: "savers-grid",
       categorySlug: "gadgets",
-      title: "Super Savers Under $50",
-      subtitle: "High-value deals & budget-friendly picks",
-      badge: "FLASH OFFERS",
+      title: lang === "bn" ? "৫০ ডলারের নিচে সেরা অফার" : "Super Savers Under $50",
+      subtitle: lang === "bn" ? "বাজেট ফ্রেন্ডলি ডিলস" : "High-value deals & budget-friendly picks",
+      badge: lang === "bn" ? "ফ্ল্যাশ অফার" : "FLASH OFFERS",
       badgeBg: "bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800",
       exploreLink: "/coupons",
       items: [
-        { id: "s1", name: "Fitness Bands", price: "Only $29", badge: "Under $30", icon: "⌚", bgGradient: "from-emerald-500/10 to-green-500/10", link: "/coupons" },
-        { id: "s2", name: "Mini Bluetooth Speaker", price: "Only $24", icon: "📻", bgGradient: "from-teal-500/10 to-emerald-500/10", link: "/coupons" },
-        { id: "s3", name: "Desk Power Strip", price: "Only $18", badge: "Bestseller", icon: "⚡", bgGradient: "from-cyan-500/10 to-blue-500/10", link: "/coupons" },
-        { id: "s4", name: "Portable Neck Fan", price: "Only $15", icon: "🌀", bgGradient: "from-blue-500/10 to-indigo-500/10", link: "/coupons" },
+        { id: "s1", name: lang === "bn" ? "ফিটনেস ব্যান্ড" : "Fitness Bands", price: lang === "bn" ? "মাত্র ৳২৯" : "Only $29", badge: lang === "bn" ? "৳৩০ নিচে" : "Under $30", icon: "⌚", bgGradient: "from-emerald-500/10 to-green-500/10", link: "/coupons" },
+        { id: "s2", name: lang === "bn" ? "ব্লুটুথ স্পিকার" : "Mini Bluetooth Speaker", price: lang === "bn" ? "মাত্র ৳২৪" : "Only $24", icon: "📻", bgGradient: "from-teal-500/10 to-emerald-500/10", link: "/coupons" },
+        { id: "s3", name: lang === "bn" ? "পাওয়ার স্ট্রিপ" : "Desk Power Strip", price: lang === "bn" ? "মাত্র ৳১৮" : "Only $18", badge: lang === "bn" ? "বেস্টসেলার" : "Bestseller", icon: "⚡", bgGradient: "from-cyan-500/10 to-blue-500/10", link: "/coupons" },
+        { id: "s4", name: lang === "bn" ? "নেক ফ্যান" : "Portable Neck Fan", price: lang === "bn" ? "মাত্র ৳১৫" : "Only $15", icon: "🌀", bgGradient: "from-blue-500/10 to-indigo-500/10", link: "/coupons" },
       ],
     },
   ];
@@ -139,13 +141,13 @@ export default function CategoryGridShowcase() {
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border-b border-zinc-200/80 dark:border-zinc-800 pb-6">
           <div>
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 dark:bg-indigo-950/40 text-xs font-bold text-indigo-600 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-900/40 mb-2">
-              🏷️ Curated Collections
+              {t("categoryGrid.badge")}
             </div>
             <h2 className="text-2xl sm:text-3xl font-black text-zinc-950 dark:text-zinc-50 tracking-tight">
-              Explore Popular Marketplace Categories
+              {t("categoryGrid.title")}
             </h2>
             <p className="text-xs sm:text-sm text-zinc-500 dark:text-zinc-400 font-medium mt-1">
-              Find top-selling products, seasonal trends, and verified vendor storefront deals.
+              {t("categoryGrid.subtitle")}
             </p>
           </div>
 
@@ -229,7 +231,7 @@ export default function CategoryGridShowcase() {
                   href={col.exploreLink}
                   className="text-xs font-extrabold text-indigo-600 dark:text-indigo-400 hover:underline flex items-center justify-between group/link"
                 >
-                  <span>Explore Collection</span>
+                  <span>{t("categoryGrid.exploreCollection")}</span>
                   <span className="group-hover/link:translate-x-1 transition-transform">→</span>
                 </Link>
               </div>

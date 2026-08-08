@@ -6,6 +6,7 @@ import Link from "next/link";
 import Image from "next/image";
 import Swal from "sweetalert2";
 import DynamicLoading from "@/components/dynamicLoading/DynamicLoading";
+import { useLanguage } from "@/lib/LanguageContext";
 
 interface Storefront {
   id: string;
@@ -21,6 +22,7 @@ interface Storefront {
 }
 
 export default function ShopsCatalog() {
+  const { lang } = useLanguage();
   const [stores, setStores] = useState<Storefront[]>([]);
   const [categories, setCategories] = useState<string[]>([]);
   const [filteredStores, setFilteredStores] = useState<Storefront[]>([]);
@@ -139,64 +141,39 @@ export default function ShopsCatalog() {
           api.get("/api/categories/")
         ]);
 
-        const categoriesMap: { [id: string]: string } = {};
-        const catNames: string[] = [];
-        if (catRes.data) {
-          catRes.data.forEach((c: any) => {
-            categoriesMap[c.id] = c.name;
-            if (!catNames.includes(c.name)) {
-              catNames.push(c.name);
-            }
-          });
+        if (catRes.data && Array.isArray(catRes.data)) {
+          setCategories(catRes.data.map((c: any) => c.name));
         }
-        setCategories(catNames);
 
-        if (prodRes.data && prodRes.data.length > 0) {
-          const shopTally: {
-            [name: string]: {
-              category: string;
-              products: { id: string; name: string; price: string; image: string | null }[]
-            }
-          } = {};
-
+        if (prodRes.data && Array.isArray(prodRes.data)) {
+          const shopTally: Record<string, { category: string; count: number; products: any[] }> = {};
           prodRes.data.forEach((p: any) => {
-            if (p.seller_shop) {
-              const shopName = p.seller_shop.trim();
-              const catName = categoriesMap[p.category] || "General Goods";
-              if (!shopTally[shopName]) {
-                shopTally[shopName] = {
-                  category: catName,
-                  products: []
-                };
-              }
-              // Add product details for featured showcase inside card
-              if (shopTally[shopName].products.length < 3) {
-                shopTally[shopName].products.push({
-                  id: p.id,
-                  name: p.name,
-                  price: p.price,
-                  image: p.image
-                });
-              }
+            const sName = p.shop_name || "Official Merchant";
+            const cName = p.category?.name || "General";
+            if (!shopTally[sName]) {
+              shopTally[sName] = { category: cName, count: 0, products: [] };
+            }
+            shopTally[sName].count += 1;
+            if (shopTally[sName].products.length < 3) {
+              shopTally[sName].products.push({ id: p.id, name: p.name, price: p.price, image: p.image });
             }
           });
+
+          const gradients = [
+            "from-indigo-500 to-purple-600",
+            "from-rose-500 to-pink-600",
+            "from-amber-600 to-amber-800",
+            "from-emerald-500 to-teal-600",
+            "from-blue-500 to-indigo-600"
+          ];
 
           const extractedStores: Storefront[] = Object.keys(shopTally).map((shopName, idx) => {
-            const gradients = [
-              "from-indigo-500 to-purple-600",
-              "from-pink-500 to-rose-600",
-              "from-amber-600 to-amber-800",
-              "from-emerald-500 to-teal-600",
-              "from-blue-500 to-cyan-600",
-            ];
+            const count = shopTally[shopName].count;
             const selectGradient = gradients[idx % gradients.length];
-            const cleanName = shopName || "Verified Vendor";
-
-            // Count total products belonging to this shop from main product array
-            const count = prodRes.data.filter((p: any) => p.seller_shop?.trim() === shopName).length;
+            const cleanName = shopName.replace(/-/g, " ").replace(/\b\w/g, l => l.toUpperCase());
 
             return {
-              id: `shop-db-${idx}`,
+              id: `shop-${idx}`,
               name: cleanName,
               sellerName: "Certified Merchant",
               category: shopTally[shopName].category,
@@ -256,7 +233,17 @@ export default function ShopsCatalog() {
     setFilteredStores(result);
   }, [selectedCategory, searchQuery, stores]);
 
-  if(isLoading) return <DynamicLoading loadingText="Querying storefront network..." />;
+  const translateCategory = (catName: string) => {
+    if (lang !== "bn") return catName;
+    const lower = catName.toLowerCase();
+    if (lower === "electronics") return "ইলেকট্রনিক্স";
+    if (lower === "fashion" || lower === "clothing") return "ফ্যাশন";
+    if (lower === "home & living" || lower === "home") return "হোম ও লিভিং";
+    if (lower === "smart tech" || lower === "gadgets") return "স্মার্ট টেকনোলজি";
+    return catName;
+  };
+
+  if(isLoading) return <DynamicLoading loadingText={lang === "bn" ? "দোকানসমূহ লোড হচ্ছে..." : "Querying storefront network..."} />;
 
   return (
     <div className="bg-zinc-50 dark:bg-zinc-950 min-h-screen font-sans pb-20 transition-colors duration-300">
@@ -267,9 +254,13 @@ export default function ShopsCatalog() {
       {/* Hero Banner Header */}
       <div className="bg-white dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-800 py-12 text-left relative overflow-hidden">
         <div className="max-w-7xl mx-auto px-6 sm:px-8">
-          <h1 className="text-3xl font-extrabold text-zinc-950 dark:text-zinc-50 tracking-tight">Verified Storefronts</h1>
+          <h1 className="text-3xl font-extrabold text-zinc-950 dark:text-zinc-50 tracking-tight">
+            {lang === "bn" ? "ভেরিফায়েড দোকানসমূহ" : "Verified Storefronts"}
+          </h1>
           <p className="text-sm font-semibold text-zinc-400 dark:text-zinc-500 mt-1 max-w-xl">
-            Explore and connect directly with independent global merchants. Enjoy unique product lines and direct customer support.
+            {lang === "bn"
+              ? "স্বাধীন গ্লোবাল মার্চেন্টদের দোকান দেখুন এবং সরাসরি তাদের সাথে যুক্ত হন। ইউনিক প্রোডাক্ট কালেকশন উপভোগ করুন।"
+              : "Explore and connect directly with independent global merchants. Enjoy unique product lines and direct customer support."}
           </p>
         </div>
       </div>
@@ -288,7 +279,7 @@ export default function ShopsCatalog() {
             </span>
             <input
               type="text"
-              placeholder="Search shops by name, brand, tag..."
+              placeholder={lang === "bn" ? "নাম, ব্র্যান্ড বা ট্যাগ দিয়ে দোকান খুঁজুন..." : "Search shops by name, brand, tag..."}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full h-11 pl-11 pr-4 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 focus:border-indigo-650 focus:bg-white dark:focus:bg-zinc-900 text-zinc-900 dark:text-zinc-50 rounded-2xl text-sm font-semibold outline-none transition-all"
@@ -337,7 +328,7 @@ export default function ShopsCatalog() {
                   : "bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-650 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 hover:text-zinc-900 dark:hover:text-zinc-200"
                 }`}
             >
-              All Categories
+              {lang === "bn" ? "সকল ক্যাটাগরি" : "All Categories"}
             </button>
             {categories.map((cat) => (
               <button
@@ -348,7 +339,7 @@ export default function ShopsCatalog() {
                     : "bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-650 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 hover:text-zinc-900 dark:hover:text-zinc-200"
                   }`}
               >
-                {cat}
+                {translateCategory(cat)}
               </button>
             ))}
           </div>
@@ -363,9 +354,13 @@ export default function ShopsCatalog() {
               </svg>
             </div>
             <div className="space-y-1">
-              <h3 className="text-base font-extrabold text-zinc-950 dark:text-zinc-550">No shops found</h3>
+              <h3 className="text-base font-extrabold text-zinc-950 dark:text-zinc-550">
+                {lang === "bn" ? "কোনো দোকান পাওয়া যায়নি" : "No shops found"}
+              </h3>
               <p className="text-xs font-semibold text-zinc-400">
-                We couldn't find any merchant matching your search filters.
+                {lang === "bn"
+                  ? "আপনার সার্চের সাথে মিলে এমন কোনো দোকান খুঁজে পাওয়া যায়নি।"
+                  : "We couldn't find any merchant matching your search filters."}
               </p>
             </div>
           </div>
@@ -399,11 +394,11 @@ export default function ShopsCatalog() {
                           {store.name}
                         </h3>
                         <span className="shrink-0 inline-block text-[9px] font-bold text-indigo-650 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/50 border border-indigo-100 dark:border-indigo-900/40 px-2 py-0.5 rounded-full uppercase tracking-wider">
-                          {store.category}
+                          {translateCategory(store.category)}
                         </span>
                       </div>
                       <p className="text-[10px] font-bold text-zinc-400 dark:text-zinc-550 uppercase tracking-wider">
-                        Seller: {store.sellerName}
+                        {lang === "bn" ? `বিক্রেতা: ${store.sellerName}` : `Seller: ${store.sellerName}`}
                       </p>
                       <p className="text-xs text-zinc-450 dark:text-zinc-400 line-clamp-2 leading-relaxed h-8 font-semibold">
                         {store.description}
@@ -416,10 +411,10 @@ export default function ShopsCatalog() {
                         <svg className="w-4 h-4 text-amber-500 fill-amber-500" viewBox="0 0 20 20">
                           <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                         </svg>
-                        <span>{store.rating} ({20 + Math.floor(store.rating * 8)} reviews)</span>
+                        <span>{store.rating} ({20 + Math.floor(store.rating * 8)} {lang === "bn" ? "রিভিউ" : "reviews"})</span>
                       </div>
                       <div>
-                        <span className="text-zinc-950 dark:text-zinc-200 font-extrabold">{store.productCount}</span> active items
+                        <span className="text-zinc-950 dark:text-zinc-200 font-extrabold">{store.productCount}</span> {lang === "bn" ? "টি প্রোডাক্ট" : "active items"}
                       </div>
                     </div>
                   </div>
@@ -427,7 +422,9 @@ export default function ShopsCatalog() {
                   {/* Featured mini-thumbnails gallery */}
                   {store.featuredProducts.length > 0 && (
                     <div className="px-6 pb-6 pt-2 text-left">
-                      <p className="text-[10px] font-bold text-zinc-400 dark:text-zinc-550 uppercase tracking-widest mb-2.5">Featured Catalog</p>
+                      <p className="text-[10px] font-bold text-zinc-400 dark:text-zinc-550 uppercase tracking-widest mb-2.5">
+                        {lang === "bn" ? "ফিচার্ড ক্যাটালগ" : "Featured Catalog"}
+                      </p>
                       <div className="flex gap-3">
                         {store.featuredProducts.map((prod) => {
                           const imgUrl = prod.image
@@ -469,7 +466,7 @@ export default function ShopsCatalog() {
                     href={`/products?search=${encodeURIComponent(store.name)}`}
                     className="w-full h-11 rounded-2xl bg-zinc-50 dark:bg-zinc-950 hover:bg-indigo-650 hover:text-white dark:hover:bg-indigo-600 text-zinc-800 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-800 hover:border-transparent dark:hover:border-transparent font-bold text-xs flex items-center justify-center transition-all cursor-pointer shadow-sm hover:shadow-md active:scale-[0.98]"
                   >
-                    View Catalog
+                    {lang === "bn" ? "ক্যাটালগ দেখুন" : "View Catalog"}
                   </Link>
                 </div>
               </div>

@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState, useEffect } from "react";
 import CouponCard from "@/components/coupons/CouponCard";
 import api from "@/lib/api";
@@ -68,7 +70,7 @@ export function ProductCard({
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [availableCoupons, setAvailableCoupons] = useState<any[]>([]);
   const [isAdding, setIsAdding] = useState(false);
-  const { lang, tp, t } = useLanguage();
+  const { lang, setLang, tp, t } = useLanguage();
   const { isLoading: isCartLoading } = useCart();
 
   const displayTitle = tp({ name: title, name_bn }, "name") || title;

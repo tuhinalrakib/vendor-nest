@@ -28,7 +28,7 @@ export default async function TenantPage({ params }: PageProps) {
       <div className="absolute top-0 inset-x-0 h-80 bg-linaer-to-b from-indigo-950/20 via-violet-950/10 to-transparent pointer-events-none" />
 
       {/* Header / Navbar */}
-      <header className="relative border-b border-zinc-800 bg-[#09090b]/80 backdrop-blur-md">
+      <header className="sticky top-0 z-50 border-b border-zinc-800/80 bg-[#09090b]/80 backdrop-blur-xl backdrop-saturate-150 shadow-xs">
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-lg bg-linear-to-tr from-indigo-500 to-violet-500 flex items-center justify-center font-bold text-white shadow-md shadow-indigo-500/20">

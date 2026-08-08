@@ -1,7 +1,10 @@
+"use client";
+
 import React, { useState, useEffect } from "react";
 import { useAuth } from "@/lib/AuthContext";
 import api from "@/lib/api";
 import Swal from "sweetalert2";
+import { useLanguage } from "@/lib/LanguageContext";
 
 interface CouponCardProps {
   code: string;
@@ -23,6 +26,7 @@ export default function CouponCard({
   isUsed = false,
 }: CouponCardProps) {
   const { isAuthenticated } = useAuth();
+  const { lang } = useLanguage();
   const [isClipped, setIsClipped] = useState(false);
   const isPercent = type.toLowerCase() === "percentage";
 
@@ -40,11 +44,11 @@ export default function CouponCard({
 
     if (!isAuthenticated) {
       Swal.fire({
-        title: "Login Required",
-        text: "You must be logged in to save/clip coupons.",
+        title: lang === "bn" ? "লগইন প্রয়োজন" : "Login Required",
+        text: lang === "bn" ? "কুপন সেভ করার জন্য আপনাকে লগইন করতে হবে।" : "You must be logged in to save/clip coupons.",
         icon: "warning",
         showCancelButton: true,
-        confirmButtonText: "Login Now",
+        confirmButtonText: lang === "bn" ? "এখনই লগইন করুন" : "Login Now",
         confirmButtonColor: "#4f46e5",
         cancelButtonColor: "#d4d4d8",
       }).then((result) => {
@@ -82,8 +86,8 @@ export default function CouponCard({
     } catch (err: any) {
       console.error("Failed to update coupon status:", err);
       Swal.fire({
-        title: "Action Failed",
-        text: err.response?.data?.error || "Could not update the coupon state. Please try again.",
+        title: lang === "bn" ? "অ্যাকশন ব্যর্থ হয়েছে" : "Action Failed",
+        text: err.response?.data?.error || (lang === "bn" ? "কুপনের স্টেট আপডেট করা সম্ভব হয়নি।" : "Could not update the coupon state. Please try again."),
         icon: "error",
         confirmButtonColor: "#4f46e5",
       });
@@ -104,15 +108,19 @@ export default function CouponCard({
               ? "text-zinc-500 bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-400" 
               : "text-emerald-700 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-950/50"
           }`}>
-            Coupon
+            {lang === "bn" ? "কুপন" : "Coupon"}
           </span>
           <span className="text-[10px] font-mono text-zinc-400 dark:text-zinc-500 font-bold uppercase">{code}</span>
         </div>
         <h4 className={`text-xs font-black leading-snug ${isUsed ? "text-zinc-500 dark:text-zinc-400" : "text-emerald-800 dark:text-emerald-400"}`}>
-          Save {isPercent ? `${value}%` : `$${value.toFixed(2)}`}
+          {lang === "bn"
+            ? `ছাড় ${isPercent ? `%${value}` : `৳${value}`}`
+            : `Save ${isPercent ? `${value}%` : `$${value.toFixed(2)}`}`}
         </h4>
         <p className="text-[9px] text-zinc-500 dark:text-zinc-400 leading-relaxed font-semibold">
-          {minPurchase > 0 ? `Min purchase of $${minPurchase.toFixed(2)} from ${sellerShop} required` : "No minimum purchase required"}
+          {minPurchase > 0 
+            ? (lang === "bn" ? `${sellerShop} থেকে সর্বনিম্ন ৳${minPurchase} কেনাকাটায় প্রযোজ্য` : `Min purchase of $${minPurchase.toFixed(2)} from ${sellerShop} required`) 
+            : (lang === "bn" ? "সর্বনিম্ন কেনাকাটার কোনো শর্ত নেই" : "No minimum purchase required")}
         </p>
       </div>
 
@@ -127,7 +135,11 @@ export default function CouponCard({
             : "bg-white dark:bg-zinc-950 border border-emerald-500 dark:border-emerald-700 hover:bg-emerald-50 dark:hover:bg-emerald-950/30 text-emerald-700 dark:text-emerald-450 cursor-pointer"
         }`}
       >
-        {isUsed ? "✓ Used" : isClipped ? "✓ Clipped" : "Clip Coupon"}
+        {isUsed 
+          ? (lang === "bn" ? "✓ ব্যবহৃত" : "✓ Used") 
+          : isClipped 
+          ? (lang === "bn" ? "✓ সেভ করা হয়েছে" : "✓ Clipped") 
+          : (lang === "bn" ? "কুপন সেভ করুন" : "Clip Coupon")}
       </button>
     </div>
   );

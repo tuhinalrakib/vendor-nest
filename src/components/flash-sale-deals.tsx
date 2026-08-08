@@ -265,20 +265,20 @@ export default function FlashSaleDeals() {
           <div className="space-y-2 text-center md:text-left relative z-10">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/20 text-xs font-black uppercase tracking-wider">
               <span className="w-2.5 h-2.5 rounded-full bg-amber-400 animate-ping" />
-              ⚡ Limited Time Flash Sale
+              {t("flashSale.badge")}
             </div>
             <h2 className="text-2xl sm:text-3xl font-black tracking-tight">
-              Today's Hot Deals & Mega Savings
+              {t("flashSale.title")}
             </h2>
             <p className="text-xs sm:text-sm text-white/80 font-medium max-w-md">
-              Hurry! Claim up to 55% OFF on selected verified merchant stock. Deals refresh daily.
+              {t("flashSale.subtitle")}
             </p>
           </div>
 
           {/* Right Live Ticking Timer Boxes */}
           <div className="flex items-center gap-2 sm:gap-3 relative z-10 shrink-0 select-none">
             <span className="text-xs font-bold uppercase tracking-wider text-white/90 mr-1 hidden sm:inline">
-              Ends In:
+              {t("flashSale.endsIn")}
             </span>
 
             {/* Hours Box */}
@@ -286,7 +286,7 @@ export default function FlashSaleDeals() {
               <span className="text-xl sm:text-2xl font-black leading-none">
                 {formatNumber(timeLeft.hours)}
               </span>
-              <span className="text-[9px] font-extrabold uppercase tracking-wider text-white/70 mt-1">Hours</span>
+              <span className="text-[9px] font-extrabold uppercase tracking-wider text-white/70 mt-1">{t("flashSale.hours")}</span>
             </div>
             <span className="text-xl font-black text-white/80">:</span>
 
@@ -295,7 +295,7 @@ export default function FlashSaleDeals() {
               <span className="text-xl sm:text-2xl font-black leading-none">
                 {formatNumber(timeLeft.minutes)}
               </span>
-              <span className="text-[9px] font-extrabold uppercase tracking-wider text-white/70 mt-1">Mins</span>
+              <span className="text-[9px] font-extrabold uppercase tracking-wider text-white/70 mt-1">{t("flashSale.mins")}</span>
             </div>
             <span className="text-xl font-black text-white/80">:</span>
 
@@ -304,7 +304,7 @@ export default function FlashSaleDeals() {
               <span className="text-xl sm:text-2xl font-black leading-none">
                 {formatNumber(timeLeft.seconds)}
               </span>
-              <span className="text-[9px] font-extrabold uppercase tracking-wider text-rose-100 mt-1">Secs</span>
+              <span className="text-[9px] font-extrabold uppercase tracking-wider text-rose-100 mt-1">{t("flashSale.secs")}</span>
             </div>
           </div>
 

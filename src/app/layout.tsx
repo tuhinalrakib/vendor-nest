@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { AuthProvider } from "@/lib/AuthContext";
 import { CartProvider } from "@/lib/CartContext";
@@ -7,6 +7,12 @@ import { LanguageProvider } from "@/lib/LanguageContext";
 import CartDrawer from "@/components/navbar/CartDrawer";
 import { AIChatSupport } from "@/components/ai-storefront";
 import Script from "next/script";
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+};
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://vendor-nest.vercel.app"),
@@ -60,9 +66,9 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className="h-full antialiased"
+      className="h-full antialiased overflow-x-clip max-w-full"
     >
-      <body className="min-h-full flex flex-col">
+      <body className="min-h-full flex flex-col overflow-x-clip max-w-full relative">
         <LanguageProvider>
           <ThemeProvider>
             <AuthProvider>
